@@ -102,10 +102,35 @@ function LoginCard() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const checkExists = useServerFn(adminExists);
+  const bootstrap = useServerFn(bootstrapAdmin);
+
+  const { data: exists, refetch } = useQuery({
+    queryKey: ["admin-exists"],
+    queryFn: () => checkExists(),
+  });
 
   const signIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setBusy(false);
+    if (error) toast.error(error.message);
+  };
+
+  const createFirst = async () => {
+    if (password.length < 8) {
+      toast.error("8+");
+      return;
+    }
+    setBusy(true);
+    const result = await bootstrap({ data: { email, password } });
+    if (!result.ok) {
+      setBusy(false);
+      toast.error(String(result.reason));
+      await refetch();
+      return;
+    }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
     if (error) toast.error(error.message);
@@ -145,6 +170,21 @@ function LoginCard() {
       >
         {t("admin.signIn")}
       </button>
+      {exists === false ? (
+        <div className="border-t border-border pt-4">
+          <p className="text-xs text-muted-foreground">
+            Aucun compte administrateur n'existe encore. Créez-le maintenant (une seule fois).
+          </p>
+          <button
+            type="button"
+            onClick={createFirst}
+            disabled={busy || !email || password.length < 8}
+            className="mt-3 w-full border border-primary px-4 py-2.5 text-sm text-primary disabled:opacity-50"
+          >
+            Créer le compte administrateur
+          </button>
+        </div>
+      ) : null}
     </form>
   );
 }
