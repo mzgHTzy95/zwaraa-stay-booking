@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BookSlugRouteImport } from './routes/book.$slug'
 import { Route as CabinsSlugRouteImport } from './routes/cabins.$slug'
 import { Route as ReceiptReferenceRouteImport } from './routes/receipt.$reference'
@@ -17,6 +18,11 @@ import { Route as ReceiptReferenceRouteImport } from './routes/receipt.$referenc
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookSlugRoute = BookSlugRouteImport.update({
@@ -37,12 +43,14 @@ const ReceiptReferenceRoute = ReceiptReferenceRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/book/$slug': typeof BookSlugRoute
   '/cabins/$slug': typeof CabinsSlugRoute
   '/receipt/$reference': typeof ReceiptReferenceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/book/$slug': typeof BookSlugRoute
   '/cabins/$slug': typeof CabinsSlugRoute
   '/receipt/$reference': typeof ReceiptReferenceRoute
@@ -50,20 +58,29 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/book/$slug': typeof BookSlugRoute
   '/cabins/$slug': typeof CabinsSlugRoute
   '/receipt/$reference': typeof ReceiptReferenceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/book/$slug' | '/cabins/$slug' | '/receipt/$reference'
+  fullPaths:
+    '/' | '/admin' | '/book/$slug' | '/cabins/$slug' | '/receipt/$reference'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/book/$slug' | '/cabins/$slug' | '/receipt/$reference'
-  id: '__root__' | '/' | '/book/$slug' | '/cabins/$slug' | '/receipt/$reference'
+  to: '/' | '/admin' | '/book/$slug' | '/cabins/$slug' | '/receipt/$reference'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/book/$slug'
+    | '/cabins/$slug'
+    | '/receipt/$reference'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   BookSlugRoute: typeof BookSlugRoute
   CabinsSlugRoute: typeof CabinsSlugRoute
   ReceiptReferenceRoute: typeof ReceiptReferenceRoute
@@ -76,6 +93,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/book/$slug': {
@@ -104,6 +128,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   BookSlugRoute: BookSlugRoute,
   CabinsSlugRoute: CabinsSlugRoute,
   ReceiptReferenceRoute: ReceiptReferenceRoute,
