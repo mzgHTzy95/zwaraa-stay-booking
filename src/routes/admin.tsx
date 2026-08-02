@@ -3,7 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { Session } from "@supabase/supabase-js";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { adminExists, bootstrapAdmin } from "@/lib/admin-setup.functions";
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { LanguageSwitch } from "@/components/site/chrome";
 
