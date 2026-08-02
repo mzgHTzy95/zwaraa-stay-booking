@@ -10,11 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BookSlugRouteImport } from './routes/book.$slug'
 import { Route as CabinsSlugRouteImport } from './routes/cabins.$slug'
+import { Route as ReceiptReferenceRouteImport } from './routes/receipt.$reference'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookSlugRoute = BookSlugRouteImport.update({
+  id: '/book/$slug',
+  path: '/book/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CabinsSlugRoute = CabinsSlugRouteImport.update({
@@ -22,31 +29,44 @@ const CabinsSlugRoute = CabinsSlugRouteImport.update({
   path: '/cabins/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReceiptReferenceRoute = ReceiptReferenceRouteImport.update({
+  id: '/receipt/$reference',
+  path: '/receipt/$reference',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/book/$slug': typeof BookSlugRoute
   '/cabins/$slug': typeof CabinsSlugRoute
+  '/receipt/$reference': typeof ReceiptReferenceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/book/$slug': typeof BookSlugRoute
   '/cabins/$slug': typeof CabinsSlugRoute
+  '/receipt/$reference': typeof ReceiptReferenceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/book/$slug': typeof BookSlugRoute
   '/cabins/$slug': typeof CabinsSlugRoute
+  '/receipt/$reference': typeof ReceiptReferenceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/cabins/$slug'
+  fullPaths: '/' | '/book/$slug' | '/cabins/$slug' | '/receipt/$reference'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cabins/$slug'
-  id: '__root__' | '/' | '/cabins/$slug'
+  to: '/' | '/book/$slug' | '/cabins/$slug' | '/receipt/$reference'
+  id: '__root__' | '/' | '/book/$slug' | '/cabins/$slug' | '/receipt/$reference'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BookSlugRoute: typeof BookSlugRoute
   CabinsSlugRoute: typeof CabinsSlugRoute
+  ReceiptReferenceRoute: typeof ReceiptReferenceRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,6 +78,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/book/$slug': {
+      id: '/book/$slug'
+      path: '/book/$slug'
+      fullPath: '/book/$slug'
+      preLoaderRoute: typeof BookSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cabins/$slug': {
       id: '/cabins/$slug'
       path: '/cabins/$slug'
@@ -65,12 +92,21 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CabinsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/receipt/$reference': {
+      id: '/receipt/$reference'
+      path: '/receipt/$reference'
+      fullPath: '/receipt/$reference'
+      preLoaderRoute: typeof ReceiptReferenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BookSlugRoute: BookSlugRoute,
   CabinsSlugRoute: CabinsSlugRoute,
+  ReceiptReferenceRoute: ReceiptReferenceRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
