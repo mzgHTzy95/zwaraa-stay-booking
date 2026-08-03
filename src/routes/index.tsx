@@ -47,6 +47,20 @@ function useCabins() {
 function Home() {
   const { t, lang } = useI18n();
   const { data: cabins, isLoading } = useCabins();
+  const cardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [expanded, setExpanded] = useState<{ cabin: ExpandCabin; origin: OriginRect } | null>(null);
+
+  const openCabin = (cabin: ExpandCabin) => {
+    const el = cardRefs.current[cabin.id];
+    const r = el?.getBoundingClientRect();
+    setExpanded({
+      cabin,
+      origin: r
+        ? { top: r.top, left: r.left, width: r.width, height: r.height }
+        : { top: window.innerHeight / 2, left: window.innerWidth / 2, width: 0, height: 0 },
+    });
+  };
+
 
   return (
     <div className="min-h-screen">
