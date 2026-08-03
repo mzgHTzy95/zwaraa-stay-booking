@@ -154,7 +154,16 @@ function Home() {
         )}
       </section>
 
+      {expanded ? (
+        <CabinExpand
+          cabin={expanded.cabin}
+          origin={expanded.origin}
+          onClose={() => setExpanded(null)}
+        />
+      ) : null}
+
       <SiteFooter />
+
     </div>
   );
 }
