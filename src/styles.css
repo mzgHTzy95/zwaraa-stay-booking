@@ -187,18 +187,18 @@
   background: var(--coral);
   color: #fff;
   box-shadow: 0 6px 16px rgba(238, 123, 109, 0.35);
-}
-@utility btn-coral:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 22px rgba(238, 123, 109, 0.45);
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(238, 123, 109, 0.45);
+  }
 }
 
 @utility btn-ink {
   background: var(--foreground);
   color: #fff;
-}
-@utility btn-ink:hover {
-  background: var(--primary);
+  &:hover {
+    background: var(--primary);
+  }
 }
 
 @utility btn-outline-pill {
@@ -210,9 +210,9 @@
   font-size: 0.84rem;
   padding: 0.55rem 1.2rem;
   transition: border-color 0.2s ease;
-}
-@utility btn-outline-pill:hover {
-  border-color: var(--primary);
+  &:hover {
+    border-color: var(--primary);
+  }
 }
 
 /* Plank frame (keep for compatibility) */
@@ -315,6 +315,19 @@ nav.links a{color:#F3EEE1;font-size:14px;font-weight:500;}
 .search-field .txt .val{font-size:13.5px;font-weight:600;color:var(--foreground);margin-top:2px;}
 .search-pill .btn-cta{margin-left:6px;padding:0 28px;}
 
+/* ---------- common containers ---------- */
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+/* ---------- story section ---------- */
+.story { padding: 120px 0 80px; background: var(--color-background); }
+.story-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+.story h2 { font-size: clamp(32px, 4vw, 46px); line-height: 1.1; margin-bottom: 30px; }
+.story-stats { display: flex; gap: 40px; margin-top: 30px; }
+.stat-num { font-size: 48px; font-family: var(--font-display); color: var(--coral); line-height: 1; margin-bottom: 8px; }
+.stat-label { font-size: 13px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted-foreground); }
+.story-body p { font-size: 17px; line-height: 1.7; color: var(--muted-foreground); margin-bottom: 20px; }
+.story-body p:last-child { margin-bottom: 0; }
+
 /* ---------- cabins ---------- */
 .cabins{padding:20px 0 100px;background:var(--sand);}
 .section-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;gap:20px;flex-wrap:wrap;}
@@ -387,6 +400,7 @@ footer.site-footer ul a:hover{color:var(--coral);}
   nav.links{display:none;}
   .menu-toggle{display:block;}
   .foot-top{grid-template-columns:1fr;gap:30px;}
+  .story-inner { grid-template-columns: 1fr; gap: 40px; }
 }
 @media (max-width:640px){
   .hero-card{height:auto;padding-bottom:120px;}
