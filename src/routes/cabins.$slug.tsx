@@ -9,6 +9,8 @@ import { useI18n, formatPrice } from "@/lib/i18n";
 import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { PlankPhoto, WaveDivider } from "@/components/site/ornaments";
 import { cabinGallery } from "@/lib/images";
+import { PackList } from "@/components/site/pack";
+
 import { Calendar } from "@/components/ui/calendar";
 
 export const Route = createFileRoute("/cabins/$slug")({
@@ -139,17 +141,21 @@ function CabinDetail() {
 
         <WaveDivider />
 
-        <section>
-          <h2 className="text-2xl text-primary">{t("cabin.included")}</h2>
-          <ul className="mt-5 grid gap-3 sm:grid-cols-2">
-            {included.map((item) => (
-              <li key={item} className="flex items-start gap-3 text-sm">
-                <span className="mt-[6px] block h-[6px] w-[6px] shrink-0 bg-amber" />
-                {item}
-              </li>
-            ))}
-          </ul>
+        <section className="grid gap-8 sm:grid-cols-2">
+          <div>
+            <h2 className="text-2xl text-primary">{t("cabin.included")}</h2>
+            <ul className="mt-5 space-y-3">
+              {included.map((item) => (
+                <li key={item} className="flex items-start gap-3 text-sm">
+                  <span className="mt-[6px] block h-[6px] w-[6px] shrink-0 bg-amber" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <PackList />
         </section>
+
 
         <WaveDivider />
 
@@ -178,6 +184,10 @@ function CabinDetail() {
                     <h3 className="text-lg text-primary">{t(`slot.${slot}`)}</h3>
                     <span className="num text-lg">{formatPrice(price, lang)}</span>
                   </div>
+                  {slot === "24h" ? (
+                    <p className="mt-1 text-[11px] text-muted-foreground">{t("cabin.perPerson")}</p>
+                  ) : null}
+
                   {dateKey ? (
                     <p
                       className={

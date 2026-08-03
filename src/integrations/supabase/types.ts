@@ -77,9 +77,11 @@ export type Database = {
           cin: string
           created_at: string
           date_of_birth: string
+          end_date: string | null
           full_name: string
           guests_count: number
           id: string
+          nights: number
           payment_status: Database["public"]["Enums"]["payment_status"]
           phone: string
           reference: string
@@ -94,9 +96,11 @@ export type Database = {
           cin: string
           created_at?: string
           date_of_birth: string
+          end_date?: string | null
           full_name: string
           guests_count?: number
           id?: string
+          nights?: number
           payment_status?: Database["public"]["Enums"]["payment_status"]
           phone: string
           reference?: string
@@ -111,9 +115,11 @@ export type Database = {
           cin?: string
           created_at?: string
           date_of_birth?: string
+          end_date?: string | null
           full_name?: string
           guests_count?: number
           id?: string
+          nights?: number
           payment_status?: Database["public"]["Enums"]["payment_status"]
           phone?: string
           reference?: string

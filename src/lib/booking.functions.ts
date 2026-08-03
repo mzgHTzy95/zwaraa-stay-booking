@@ -13,19 +13,31 @@ export const getBookedSlots = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("reservations")
-      .select("reservation_date, slot")
+      .select("reservation_date, nights, slot")
       .eq("cabin_id", data.cabinId)
       .neq("status", "cancelled")
       .gte("reservation_date", data.from)
       .lte("reservation_date", data.to);
     if (error) throw new Error(error.message);
-    return (rows ?? []).map((r) => ({ date: r.reservation_date, slot: r.slot }));
+
+    const out: { date: string; slot: "half_day" | "24h" }[] = [];
+    for (const r of rows ?? []) {
+      const nights = Math.max(1, Number(r.nights ?? 1));
+      const start = new Date(`${r.reservation_date}T00:00:00Z`);
+      for (let i = 0; i < nights; i += 1) {
+        const d = new Date(start.getTime() + i * 86400000);
+        out.push({ date: d.toISOString().slice(0, 10), slot: r.slot });
+        if (r.slot === "24h") out.push({ date: d.toISOString().slice(0, 10), slot: "half_day" });
+      }
+    }
+    return out;
   });
 
 const reservationInput = z.object({
   cabinId: z.string().uuid(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   slot: z.enum(["half_day", "24h"]),
+  nights: z.number().int().min(1).max(30).default(1),
   cin: z.string().trim().min(4).max(20),
   fullName: z.string().trim().min(3).max(120),
   phone: z.string().trim().min(6).max(25),
@@ -48,7 +60,11 @@ export const createReservation = createServerFn({ method: "POST" })
     if (data.guestsCount > cabin.capacity)
       return { ok: false as const, reason: "capacity" as const };
 
-    const total = Number(data.slot === "half_day" ? cabin.price_half_day : cabin.price_24h);
+    const nights = data.slot === "24h" ? data.nights : 1;
+    const total =
+      data.slot === "half_day"
+        ? Number(cabin.price_half_day)
+        : Number(cabin.price_24h) * data.guestsCount * nights;
 
     const { data: inserted, error } = await supabaseAdmin
       .from("reservations")
@@ -56,6 +72,7 @@ export const createReservation = createServerFn({ method: "POST" })
         cabin_id: data.cabinId,
         reservation_date: data.date,
         slot: data.slot,
+        nights,
         cin: data.cin,
         full_name: data.fullName,
         phone: data.phone,
@@ -67,7 +84,8 @@ export const createReservation = createServerFn({ method: "POST" })
       .single();
 
     if (error) {
-      if (error.code === "23505") return { ok: false as const, reason: "taken" as const };
+      if (error.code === "23505" || error.code === "23P01")
+        return { ok: false as const, reason: "taken" as const };
       throw new Error(error.message);
     }
 
@@ -78,6 +96,7 @@ export const createReservation = createServerFn({ method: "POST" })
       total: Number(inserted.total_price),
     };
   });
+
 
 const payInput = z.object({
   reservationId: z.string().uuid(),
@@ -123,7 +142,7 @@ export const getReceipt = createServerFn({ method: "POST" })
     const { data: row, error } = await supabaseAdmin
       .from("reservations")
       .select(
-        "reference, reservation_date, slot, full_name, guests_count, total_price, status, payment_status, created_at, cabins(name, name_ar, slug, included_package, included_package_ar)",
+        "reference, reservation_date, nights, slot, full_name, guests_count, total_price, status, payment_status, created_at, cabins(name, name_ar, slug, included_package, included_package_ar)",
       )
       .eq("reference", data.reference.toUpperCase())
       .maybeSingle();

@@ -1,10 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { PlankPhoto, WaveDivider, SectionTitle } from "@/components/site/ornaments";
+import { CabinExpand } from "@/components/site/cabin-expand";
+import type { ExpandCabin, OriginRect } from "@/components/site/cabin-expand";
 import { cabinCover, heroLagoon } from "@/lib/images";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -43,6 +47,20 @@ function useCabins() {
 function Home() {
   const { t, lang } = useI18n();
   const { data: cabins, isLoading } = useCabins();
+  const cardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [expanded, setExpanded] = useState<{ cabin: ExpandCabin; origin: OriginRect } | null>(null);
+
+  const openCabin = (cabin: ExpandCabin) => {
+    const el = cardRefs.current[cabin.id];
+    const r = el?.getBoundingClientRect();
+    setExpanded({
+      cabin,
+      origin: r
+        ? { top: r.top, left: r.left, width: r.width, height: r.height }
+        : { top: window.innerHeight / 2, left: window.innerWidth / 2, width: 0, height: 0 },
+    });
+  };
+
 
   return (
     <div className="min-h-screen">
@@ -87,16 +105,19 @@ function Home() {
         ) : (
           <div className="mt-10 grid gap-10 sm:grid-cols-2">
             {(cabins ?? []).map((cabin) => (
-              <Link
+              <button
                 key={cabin.id}
-                to="/cabins/$slug"
-                params={{ slug: cabin.slug }}
-                className="group block"
+                type="button"
+                ref={(el) => {
+                  cardRefs.current[cabin.id] = el;
+                }}
+                onClick={() => openCabin(cabin as unknown as ExpandCabin)}
+                className="group block w-full text-start transition-transform duration-300 hover:-translate-y-1"
               >
                 <PlankPhoto
                   src={cabinCover(cabin.slug, cabin.photos)}
                   alt={cabin.name}
-                  imgClassName="aspect-[3/2] transition-transform duration-500 group-hover:scale-[1.02]"
+                  imgClassName="aspect-[3/2] transition-transform duration-500 group-hover:scale-[1.03]"
                 />
                 <h3 className="mt-4 text-xl text-primary">
                   {lang === "ar" ? cabin.name_ar : cabin.name}
@@ -120,18 +141,29 @@ function Home() {
                     <dd className="num mt-1 text-base text-foreground">
                       {formatPrice(cabin.price_24h, lang)}
                     </dd>
+                    <dd className="text-[10px] text-muted-foreground">{t("cabin.perPerson")}</dd>
                   </div>
                 </dl>
                 <span className="mt-3 inline-block text-xs text-coral underline underline-offset-4">
                   {t("cabin.view")}
                 </span>
-              </Link>
+              </button>
             ))}
+
           </div>
         )}
       </section>
 
+      {expanded ? (
+        <CabinExpand
+          cabin={expanded.cabin}
+          origin={expanded.origin}
+          onClose={() => setExpanded(null)}
+        />
+      ) : null}
+
       <SiteFooter />
+
     </div>
   );
 }

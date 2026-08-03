@@ -90,6 +90,14 @@ function Receipt() {
                 />
                 <Row label={t("book.date")} value={data.reservation_date} mono />
                 <Row label={t("book.slot")} value={t(`slot.${data.slot}`)} />
+                {data.slot === "24h" ? (
+                  <Row
+                    label={t("book.nights")}
+                    value={t("book.nightsValue", { n: data.nights ?? 1 })}
+                    mono
+                  />
+                ) : null}
+
                 <Row label={t("book.guest")} value={data.full_name} />
                 <Row label={t("book.guests")} value={String(data.guests_count)} mono />
                 <Row label={t("admin.status")} value={t(`status.${data.status}`)} />

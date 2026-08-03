@@ -10,6 +10,8 @@ import { createReservation, getBookedSlots, payReservation } from "@/lib/booking
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { Calendar } from "@/components/ui/calendar";
+import { PackList } from "@/components/site/pack";
+
 
 const searchSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -72,6 +74,8 @@ function BookingFlow() {
     search.date ? new Date(`${search.date}T00:00:00`) : undefined,
   );
   const [slot, setSlot] = useState<"half_day" | "24h">(search.slot ?? "half_day");
+  const [nights, setNights] = useState(1);
+
   const [guest, setGuest] = useState<Guest>({
     cin: "",
     fullName: "",
@@ -126,11 +130,25 @@ function BookingFlow() {
   }
 
   const dateKey = date ? format(date, "yyyy-MM-dd") : null;
-  const price = Number(slot === "half_day" ? cabin.price_half_day : cabin.price_24h);
-  const taken =
-    !!dateKey && (booked ?? []).some((b) => b.date === dateKey && b.slot === slot);
+  const effectiveNights = slot === "24h" ? nights : 1;
+  const unitPrice = Number(slot === "half_day" ? cabin.price_half_day : cabin.price_24h);
+  const price =
+    slot === "half_day" ? unitPrice : unitPrice * guest.guestsCount * effectiveNights;
+
+  const stayDays = (start: string, count: number) => {
+    const base = new Date(`${start}T00:00:00Z`).getTime();
+    return Array.from({ length: count }, (_, i) =>
+      new Date(base + i * 86400000).toISOString().slice(0, 10),
+    );
+  };
+  const isRangeTaken = (start: string | null, s: "half_day" | "24h", count: number) =>
+    !!start &&
+    stayDays(start, count).some((d) => (booked ?? []).some((b) => b.date === d && b.slot === s));
+
+  const taken = isRangeTaken(dateKey, slot, effectiveNights);
   const cabinName = lang === "ar" ? cabin.name_ar : cabin.name;
   const included = lang === "ar" ? cabin.included_package_ar : cabin.included_package;
+
 
   const submitGuest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,8 +167,9 @@ function BookingFlow() {
   const confirm = async () => {
     if (!dateKey) return;
     const result = await create({
-      data: { cabinId: cabin.id, date: dateKey, slot, ...guest },
+      data: { cabinId: cabin.id, date: dateKey, slot, nights: effectiveNights, ...guest },
     });
+
     if (!result.ok) {
       toast.error(result.reason === "taken" ? t("book.taken") : t("common.error"));
       if (result.reason === "taken") setStep(1);
@@ -215,7 +234,7 @@ function BookingFlow() {
               {(["half_day", "24h"] as const).map((s) => {
                 const active = slot === s;
                 const p = Number(s === "half_day" ? cabin.price_half_day : cabin.price_24h);
-                const busy = !!dateKey && (booked ?? []).some((b) => b.date === dateKey && b.slot === s);
+                const busy = isRangeTaken(dateKey, s, s === "24h" ? nights : 1);
                 return (
                   <button
                     key={s}
@@ -229,6 +248,11 @@ function BookingFlow() {
                   >
                     <span className="block text-sm text-primary">{t(`slot.${s}`)}</span>
                     <span className="num mt-1 block text-base">{formatPrice(p, lang)}</span>
+                    {s === "24h" ? (
+                      <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                        {t("cabin.perPerson")}
+                      </span>
+                    ) : null}
                     {busy ? (
                       <span className="mt-1 block text-[11px] text-destructive">
                         {t("cabin.unavailable")}
@@ -238,6 +262,25 @@ function BookingFlow() {
                 );
               })}
             </div>
+
+            {slot === "24h" ? (
+              <div className="mt-5 border border-border bg-card p-4">
+                <Field label={t("book.nights")}>
+                  <input
+                    type="number"
+                    min={1}
+                    max={30}
+                    className={`${inputClass} num`}
+                    value={nights}
+                    onChange={(e) =>
+                      setNights(Math.min(30, Math.max(1, Number(e.target.value) || 1)))
+                    }
+                  />
+                </Field>
+                <p className="mt-2 text-[11px] text-muted-foreground">{t("book.nightsNote")}</p>
+              </div>
+            ) : null}
+
             <button
               type="button"
               disabled={!dateKey || taken}
@@ -323,30 +366,46 @@ function BookingFlow() {
               <Row label={t("book.cabin")} value={cabinName} />
               <Row label={t("book.date")} value={dateKey ?? ""} mono />
               <Row label={t("book.slot")} value={t(`slot.${slot}`)} />
+              {slot === "24h" ? (
+                <Row label={t("book.nights")} value={t("book.nightsValue", { n: nights })} mono />
+              ) : null}
               <Row label={t("book.guest")} value={guest.fullName} />
               <Row label="CIN" value={guest.cin} mono />
               <Row label={t("book.phone")} value={guest.phone} mono />
               <Row label={t("book.guests")} value={String(guest.guestsCount)} mono />
             </dl>
-            <div className="mt-5 border border-border bg-card p-4">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                {t("cabin.included")}
-              </p>
-              <ul className="mt-2 space-y-1 text-sm">
-                {included.map((i) => (
-                  <li key={i} className="flex gap-2">
-                    <span className="mt-[7px] block h-[5px] w-[5px] shrink-0 bg-amber" />
-                    {i}
-                  </li>
-                ))}
-              </ul>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <div className="border border-border bg-card p-4">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                  {t("cabin.included")}
+                </p>
+                <ul className="mt-2 space-y-1 text-sm">
+                  {included.map((i) => (
+                    <li key={i} className="flex gap-2">
+                      <span className="mt-[7px] block h-[5px] w-[5px] shrink-0 bg-amber" />
+                      {i}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {slot === "24h" ? <PackList /> : null}
             </div>
             <div className="mt-5 flex items-baseline justify-between border-t-2 border-primary pt-3">
               <span className="text-sm uppercase tracking-wider text-muted-foreground">
                 {t("book.total")}
+                {slot === "24h" ? (
+                  <span className="num mt-1 block text-[11px] normal-case tracking-normal">
+                    {t("book.priceDetail", {
+                      price: formatPrice(unitPrice, lang),
+                      guests: guest.guestsCount,
+                      nights: effectiveNights,
+                    })}
+                  </span>
+                ) : null}
               </span>
               <span className="num text-2xl text-primary">{formatPrice(price, lang)}</span>
             </div>
+
             <div className="mt-6 flex gap-3">
               <button
                 type="button"

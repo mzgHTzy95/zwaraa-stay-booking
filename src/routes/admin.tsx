@@ -196,6 +196,8 @@ type ReservationRow = {
   reference: string;
   reservation_date: string;
   slot: "half_day" | "24h";
+  nights: number | null;
+
   cin: string;
   full_name: string;
   phone: string;
@@ -358,7 +360,15 @@ function Dashboard() {
                       <Td mono>{r.reference}</Td>
                       <Td>{cabinName(r.cabin_id)}</Td>
                       <Td mono>{r.reservation_date}</Td>
-                      <Td>{t(`slot.${r.slot}`)}</Td>
+                      <Td>
+                        {t(`slot.${r.slot}`)}
+                        {r.slot === "24h" ? (
+                          <span className="num block text-[11px] text-muted-foreground">
+                            {t("admin.nights")}: {r.nights ?? 1}
+                          </span>
+                        ) : null}
+                      </Td>
+
                       <Td>
                         {r.full_name}
                         <span className="num block text-[11px] text-muted-foreground">
@@ -419,12 +429,16 @@ function Dashboard() {
           </div>
         </section>
       ) : (
-        <section className="mt-10 grid gap-5 sm:grid-cols-2">
-          {(cabins ?? []).map((c) => (
-            <CabinPriceCard key={c.id} cabin={c} onSaved={refresh} />
-          ))}
+        <section className="mt-10 space-y-8">
+          <AddCabinCard onSaved={refresh} />
+          <div className="grid gap-5 sm:grid-cols-2">
+            {(cabins ?? []).map((c) => (
+              <CabinPriceCard key={c.id} cabin={c} onSaved={refresh} />
+            ))}
+          </div>
         </section>
       )}
+
 
       {editing ? (
         <EditReservation
@@ -457,13 +471,138 @@ function Td({ children, mono }: { children: React.ReactNode; mono?: boolean }) {
   return <td className={`px-3 py-3 align-top ${mono ? "num" : ""}`}>{children}</td>;
 }
 
+function AddCabinCard({ onSaved }: { onSaved: () => void }) {
+  const { t } = useI18n();
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [nameAr, setNameAr] = useState("");
+  const [capacity, setCapacity] = useState("2");
+  const [half, setHalf] = useState("0");
+  const [full, setFull] = useState("0");
+  const [busy, setBusy] = useState(false);
+
+  const create = async () => {
+    if (!name.trim() || !nameAr.trim()) return;
+    setBusy(true);
+    const slug =
+      name
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "") || `bungalow-${Date.now()}`;
+    const { error } = await supabase.from("cabins").insert({
+      slug,
+      name: name.trim(),
+      name_ar: nameAr.trim(),
+      capacity: Number(capacity) || 2,
+      price_half_day: Number(half) || 0,
+      price_24h: Number(full) || 0,
+    });
+    setBusy(false);
+    if (error) toast.error(error.message);
+    else {
+      toast.success("OK");
+      setName("");
+      setNameAr("");
+      setOpen(false);
+      onSaved();
+    }
+  };
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="border border-dashed border-primary px-4 py-3 text-sm text-primary hover:bg-primary/5"
+      >
+        + {t("admin.addCabin")}
+      </button>
+    );
+  }
+
+  return (
+    <div className="border border-border bg-card p-5">
+      <h3 className="text-lg text-primary">{t("admin.addCabin")}</h3>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Labeled label={t("admin.name")}>
+          <input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
+        </Labeled>
+        <Labeled label={t("admin.nameAr")}>
+          <input className={inputClass} value={nameAr} onChange={(e) => setNameAr(e.target.value)} dir="rtl" />
+        </Labeled>
+        <Labeled label={t("admin.capacity")}>
+          <input
+            type="number"
+            min={1}
+            className={`${inputClass} num`}
+            value={capacity}
+            onChange={(e) => setCapacity(e.target.value)}
+          />
+        </Labeled>
+        <Labeled label={t("admin.priceHalf")}>
+          <input
+            type="number"
+            className={`${inputClass} num`}
+            value={half}
+            onChange={(e) => setHalf(e.target.value)}
+          />
+        </Labeled>
+        <Labeled label={t("admin.price24")}>
+          <input
+            type="number"
+            className={`${inputClass} num`}
+            value={full}
+            onChange={(e) => setFull(e.target.value)}
+          />
+        </Labeled>
+      </div>
+      <div className="mt-4 flex gap-3">
+        <button
+          type="button"
+          onClick={create}
+          disabled={busy}
+          className="bg-coral px-4 py-2.5 text-sm font-medium text-coral-foreground disabled:opacity-60"
+        >
+          {t("admin.create")}
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="px-4 py-2.5 text-sm text-muted-foreground underline underline-offset-4"
+        >
+          {t("admin.cancel")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Labeled({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</span>
+      <div className="mt-1.5">{children}</div>
+    </label>
+  );
+}
+
 function CabinPriceCard({
   cabin,
   onSaved,
 }: {
-  cabin: { id: string; name: string; name_ar: string; price_half_day: number; price_24h: number };
+  cabin: {
+    id: string;
+    name: string;
+    name_ar: string;
+    price_half_day: number;
+    price_24h: number;
+    is_active: boolean;
+  };
   onSaved: () => void;
 }) {
+
   const { t, lang } = useI18n();
   const [half, setHalf] = useState(String(cabin.price_half_day));
   const [full, setFull] = useState(String(cabin.price_24h));
@@ -483,10 +622,31 @@ function CabinPriceCard({
     }
   };
 
+  const toggleActive = async () => {
+    setBusy(true);
+    const { error } = await supabase
+      .from("cabins")
+      .update({ is_active: !cabin.is_active })
+      .eq("id", cabin.id);
+    setBusy(false);
+    if (error) toast.error(error.message);
+    else onSaved();
+  };
+
   return (
     <div className="border border-border bg-card p-5">
-      <h3 className="text-lg text-primary">{lang === "ar" ? cabin.name_ar : cabin.name}</h3>
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="text-lg text-primary">{lang === "ar" ? cabin.name_ar : cabin.name}</h3>
+        <span
+          className={`px-2 py-1 text-[11px] ${
+            cabin.is_active ? "bg-forest/10 text-forest" : "bg-destructive/10 text-destructive"
+          }`}
+        >
+          {cabin.is_active ? t("admin.available") : t("admin.unavailable")}
+        </span>
+      </div>
       <div className="mt-4 grid grid-cols-2 gap-4">
+
         <label className="block">
           <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
             {t("admin.priceHalf")}
@@ -510,14 +670,25 @@ function CabinPriceCard({
           />
         </label>
       </div>
-      <button
-        type="button"
-        onClick={save}
-        disabled={busy}
-        className="mt-4 bg-coral px-4 py-2.5 text-sm font-medium text-coral-foreground disabled:opacity-60"
-      >
-        {t("admin.save")}
-      </button>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={save}
+          disabled={busy}
+          className="bg-coral px-4 py-2.5 text-sm font-medium text-coral-foreground disabled:opacity-60"
+        >
+          {t("admin.save")}
+        </button>
+        <button
+          type="button"
+          onClick={toggleActive}
+          disabled={busy}
+          className="border border-border px-4 py-2.5 text-sm text-foreground hover:border-primary disabled:opacity-60"
+        >
+          {cabin.is_active ? t("admin.makeUnavailable") : t("admin.makeAvailable")}
+        </button>
+      </div>
+
     </div>
   );
 }
