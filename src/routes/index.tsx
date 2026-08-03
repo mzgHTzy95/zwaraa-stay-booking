@@ -91,16 +91,19 @@ function Home() {
         ) : (
           <div className="mt-10 grid gap-10 sm:grid-cols-2">
             {(cabins ?? []).map((cabin) => (
-              <Link
+              <button
                 key={cabin.id}
-                to="/cabins/$slug"
-                params={{ slug: cabin.slug }}
-                className="group block"
+                type="button"
+                ref={(el) => {
+                  cardRefs.current[cabin.id] = el;
+                }}
+                onClick={() => openCabin(cabin as unknown as ExpandCabin)}
+                className="group block w-full text-start transition-transform duration-300 hover:-translate-y-1"
               >
                 <PlankPhoto
                   src={cabinCover(cabin.slug, cabin.photos)}
                   alt={cabin.name}
-                  imgClassName="aspect-[3/2] transition-transform duration-500 group-hover:scale-[1.02]"
+                  imgClassName="aspect-[3/2] transition-transform duration-500 group-hover:scale-[1.03]"
                 />
                 <h3 className="mt-4 text-xl text-primary">
                   {lang === "ar" ? cabin.name_ar : cabin.name}
@@ -124,13 +127,15 @@ function Home() {
                     <dd className="num mt-1 text-base text-foreground">
                       {formatPrice(cabin.price_24h, lang)}
                     </dd>
+                    <dd className="text-[10px] text-muted-foreground">{t("cabin.perPerson")}</dd>
                   </div>
                 </dl>
                 <span className="mt-3 inline-block text-xs text-coral underline underline-offset-4">
                   {t("cabin.view")}
                 </span>
-              </Link>
+              </button>
             ))}
+
           </div>
         )}
       </section>
