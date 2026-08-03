@@ -358,7 +358,15 @@ function Dashboard() {
                       <Td mono>{r.reference}</Td>
                       <Td>{cabinName(r.cabin_id)}</Td>
                       <Td mono>{r.reservation_date}</Td>
-                      <Td>{t(`slot.${r.slot}`)}</Td>
+                      <Td>
+                        {t(`slot.${r.slot}`)}
+                        {r.slot === "24h" ? (
+                          <span className="num block text-[11px] text-muted-foreground">
+                            {t("admin.nights")}: {r.nights ?? 1}
+                          </span>
+                        ) : null}
+                      </Td>
+
                       <Td>
                         {r.full_name}
                         <span className="num block text-[11px] text-muted-foreground">
