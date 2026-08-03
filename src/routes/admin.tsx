@@ -196,6 +196,8 @@ type ReservationRow = {
   reference: string;
   reservation_date: string;
   slot: "half_day" | "24h";
+  nights: number | null;
+
   cin: string;
   full_name: string;
   phone: string;
