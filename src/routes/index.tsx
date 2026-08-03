@@ -1,10 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { PlankPhoto, WaveDivider, SectionTitle } from "@/components/site/ornaments";
+import { CabinExpand } from "@/components/site/cabin-expand";
+import type { ExpandCabin, OriginRect } from "@/components/site/cabin-expand";
 import { cabinCover, heroLagoon } from "@/lib/images";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
