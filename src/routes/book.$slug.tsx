@@ -364,30 +364,46 @@ function BookingFlow() {
               <Row label={t("book.cabin")} value={cabinName} />
               <Row label={t("book.date")} value={dateKey ?? ""} mono />
               <Row label={t("book.slot")} value={t(`slot.${slot}`)} />
+              {slot === "24h" ? (
+                <Row label={t("book.nights")} value={t("book.nightsValue", { n: nights })} mono />
+              ) : null}
               <Row label={t("book.guest")} value={guest.fullName} />
               <Row label="CIN" value={guest.cin} mono />
               <Row label={t("book.phone")} value={guest.phone} mono />
               <Row label={t("book.guests")} value={String(guest.guestsCount)} mono />
             </dl>
-            <div className="mt-5 border border-border bg-card p-4">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                {t("cabin.included")}
-              </p>
-              <ul className="mt-2 space-y-1 text-sm">
-                {included.map((i) => (
-                  <li key={i} className="flex gap-2">
-                    <span className="mt-[7px] block h-[5px] w-[5px] shrink-0 bg-amber" />
-                    {i}
-                  </li>
-                ))}
-              </ul>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <div className="border border-border bg-card p-4">
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                  {t("cabin.included")}
+                </p>
+                <ul className="mt-2 space-y-1 text-sm">
+                  {included.map((i) => (
+                    <li key={i} className="flex gap-2">
+                      <span className="mt-[7px] block h-[5px] w-[5px] shrink-0 bg-amber" />
+                      {i}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {slot === "24h" ? <PackList /> : null}
             </div>
             <div className="mt-5 flex items-baseline justify-between border-t-2 border-primary pt-3">
               <span className="text-sm uppercase tracking-wider text-muted-foreground">
                 {t("book.total")}
+                {slot === "24h" ? (
+                  <span className="num mt-1 block text-[11px] normal-case tracking-normal">
+                    {t("book.priceDetail", {
+                      price: formatPrice(unitPrice, lang),
+                      guests: guest.guestsCount,
+                      nights: effectiveNights,
+                    })}
+                  </span>
+                ) : null}
               </span>
               <span className="num text-2xl text-primary">{formatPrice(price, lang)}</span>
             </div>
+
             <div className="mt-6 flex gap-3">
               <button
                 type="button"
