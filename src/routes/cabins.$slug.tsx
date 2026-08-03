@@ -9,6 +9,8 @@ import { useI18n, formatPrice } from "@/lib/i18n";
 import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { PlankPhoto, WaveDivider } from "@/components/site/ornaments";
 import { cabinGallery } from "@/lib/images";
+import { PackList } from "@/components/site/pack";
+
 import { Calendar } from "@/components/ui/calendar";
 
 export const Route = createFileRoute("/cabins/$slug")({
