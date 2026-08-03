@@ -10,6 +10,8 @@ import { createReservation, getBookedSlots, payReservation } from "@/lib/booking
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { Calendar } from "@/components/ui/calendar";
+import { PackList } from "@/components/site/pack";
+
 
 const searchSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
