@@ -1,15 +1,35 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+function isMissingTableError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    message.includes("does not exist") ||
+    message.includes("relation") ||
+    message.includes("not found")
+  );
+}
+
 /** True once at least one admin account exists — bootstrap is then closed. */
 export const adminExists = createServerFn({ method: "GET" }).handler(async () => {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { count, error } = await supabaseAdmin
-    .from("user_roles")
-    .select("id", { count: "exact", head: true })
-    .eq("role", "admin");
-  if (error) throw new Error(error.message);
-  return (count ?? 0) > 0;
+
+  try {
+    const { count, error } = await supabaseAdmin
+      .from("user_roles")
+      .select("id", { count: "exact", head: true })
+      .eq("role", "admin");
+
+    if (error) {
+      if (isMissingTableError(error)) return false;
+      throw new Error(error.message);
+    }
+
+    return (count ?? 0) > 0;
+  } catch (error) {
+    if (isMissingTableError(error)) return false;
+    throw error;
+  }
 });
 
 const bootstrapInput = z.object({
@@ -27,7 +47,15 @@ export const bootstrapAdmin = createServerFn({ method: "POST" })
       .from("user_roles")
       .select("id", { count: "exact", head: true })
       .eq("role", "admin");
-    if (countError) throw new Error(countError.message);
+    if (countError) {
+      if (isMissingTableError(countError)) {
+        return {
+          ok: false as const,
+          reason: "The 'user_roles' table is missing. Apply the Supabase migration first.",
+        };
+      }
+      throw new Error(countError.message);
+    }
     if ((count ?? 0) > 0) return { ok: false as const, reason: "closed" as const };
 
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
@@ -40,7 +68,15 @@ export const bootstrapAdmin = createServerFn({ method: "POST" })
     const { error: roleError } = await supabaseAdmin
       .from("user_roles")
       .insert({ user_id: created.user.id, role: "admin" });
-    if (roleError) return { ok: false as const, reason: roleError.message };
+    if (roleError) {
+      if (isMissingTableError(roleError)) {
+        return {
+          ok: false as const,
+          reason: "The 'user_roles' table is missing. Apply the Supabase migration first.",
+        };
+      }
+      return { ok: false as const, reason: roleError.message };
+    }
 
     return { ok: true as const };
   });

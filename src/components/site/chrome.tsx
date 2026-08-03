@@ -10,20 +10,19 @@ export function LanguageSwitch() {
         onClick={() => setLang("fr")}
         className={
           lang === "fr"
-            ? "rounded-sm bg-coral px-2 py-1 font-medium text-coral-foreground"
-            : "rounded-sm px-2 py-1 text-muted-foreground hover:text-primary"
+            ? "rounded-full bg-coral px-3 py-1 font-medium text-coral-foreground"
+            : "rounded-full px-3 py-1 text-muted-foreground hover:text-primary hover:bg-muted transition-colors"
         }
       >
         FR
       </button>
-      <span className="text-border">/</span>
       <button
         type="button"
         onClick={() => setLang("ar")}
         className={
           lang === "ar"
-            ? "rounded-sm bg-coral px-2 py-1 font-medium text-coral-foreground"
-            : "rounded-sm px-2 py-1 text-muted-foreground hover:text-primary"
+            ? "rounded-full bg-coral px-3 py-1 font-medium text-coral-foreground"
+            : "rounded-full px-3 py-1 text-muted-foreground hover:text-primary hover:bg-muted transition-colors"
         }
       >
         عربي
@@ -35,8 +34,8 @@ export function LanguageSwitch() {
 export function SiteHeader() {
   const { t } = useI18n();
   return (
-    <header className="border-b border-border/70 bg-background/95">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-4">
+    <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-3.5">
         <Link to="/" className="leading-tight">
           <span className="block font-[family-name:var(--font-display)] text-lg text-primary">
             {t("brand.name")}
@@ -45,10 +44,10 @@ export function SiteHeader() {
             {t("brand.tagline")}
           </span>
         </Link>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <Link
             to="/admin"
-            className="hidden text-xs text-muted-foreground hover:text-primary sm:block"
+            className="hidden rounded-full border border-border px-4 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-primary transition-colors sm:block"
           >
             {t("nav.admin")}
           </Link>
@@ -64,7 +63,7 @@ export function SiteFooter() {
   return (
     <footer className="mt-20 border-t border-border/70">
       <div className="mx-auto flex max-w-5xl flex-col gap-1 px-5 py-8 text-xs text-muted-foreground">
-        <span className="text-primary">{t("brand.tagline")}</span>
+        <span className="text-primary font-medium">{t("brand.tagline")}</span>
         <span>{t("brand.location")}</span>
         <span className="mt-2">
           © {new Date().getFullYear()} {t("brand.name")}. {t("footer.rights")}

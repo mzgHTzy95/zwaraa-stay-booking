@@ -1,0 +1,17 @@
+{
+  "name": "Zwaraa Admin",
+  "short_name": "Zwaraa Admin",
+  "description": "Espace d'administration des réservations Zwaraa.",
+  "start_url": "/admin",
+  "scope": "/admin",
+  "display": "standalone",
+  "background_color": "#FFF9EF",
+  "theme_color": "#0E8CA8",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}

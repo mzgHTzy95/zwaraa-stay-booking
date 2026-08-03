@@ -64,7 +64,7 @@ export function CabinExpand({
         type="button"
         aria-label={t("cabin.close")}
         onClick={close}
-        className={`absolute inset-0 bg-foreground/50 transition-opacity duration-300 ${
+        className={`absolute inset-0 bg-foreground/50 backdrop-blur-sm transition-opacity duration-300 ${
           open ? "opacity-100" : "opacity-0"
         }`}
       />
@@ -77,7 +77,7 @@ export function CabinExpand({
           left: open ? 0 : origin.left,
           width: open ? "100%" : origin.width,
           height: open ? "100%" : origin.height,
-          borderRadius: open ? 0 : 2,
+          borderRadius: open ? 0 : 16,
           transition:
             "top 420ms cubic-bezier(0.22,1,0.36,1), left 420ms cubic-bezier(0.22,1,0.36,1), width 420ms cubic-bezier(0.22,1,0.36,1), height 420ms cubic-bezier(0.22,1,0.36,1)",
         }}
@@ -99,7 +99,7 @@ export function CabinExpand({
             <button
               type="button"
               onClick={close}
-              className="shrink-0 border border-input px-3 py-1.5 text-xs uppercase tracking-wider text-muted-foreground hover:border-primary hover:text-primary"
+              className="shrink-0 rounded-full border border-input px-4 py-1.5 text-xs uppercase tracking-wider text-muted-foreground hover:border-primary hover:text-primary transition-colors"
             >
               {t("cabin.close")}
             </button>
@@ -108,13 +108,19 @@ export function CabinExpand({
           <PlankPhoto
             src={photos[0]!}
             alt={cabin.name}
-            className="mt-7"
+            className="mt-7 rounded-2xl overflow-hidden"
             imgClassName="aspect-[16/9]"
             priority
           />
           <div className="mt-4 grid grid-cols-3 gap-4">
             {photos.slice(1, 4).map((p, i) => (
-              <PlankPhoto key={i} src={p} alt={`${cabin.name} — ${i + 2}`} imgClassName="aspect-[4/3]" />
+              <PlankPhoto
+                key={i}
+                src={p}
+                alt={`${cabin.name} — ${i + 2}`}
+                className="rounded-xl overflow-hidden"
+                imgClassName="aspect-[4/3]"
+              />
             ))}
           </div>
 
@@ -122,13 +128,13 @@ export function CabinExpand({
             {lang === "ar" ? cabin.description_ar : cabin.description}
           </p>
 
-          <div className="mt-9 grid gap-8 sm:grid-cols-2">
-            <section>
-              <h3 className="text-xl text-primary">{t("cabin.included")}</h3>
+          <div className="mt-9 grid gap-6 sm:grid-cols-2">
+            <section className="rounded-2xl border border-amber/25 bg-amber/5 p-5">
+              <h3 className="text-lg text-primary">{t("cabin.included")}</h3>
               <ul className="mt-4 space-y-2.5 text-sm">
                 {included.map((item) => (
                   <li key={item} className="flex items-start gap-3">
-                    <span className="mt-[6px] block h-[6px] w-[6px] shrink-0 bg-amber" />
+                    <span className="mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full bg-amber" />
                     {item}
                   </li>
                 ))}
@@ -137,19 +143,21 @@ export function CabinExpand({
             <PackList />
           </div>
 
-          <div className="mt-10 flex flex-wrap items-end justify-between gap-6 border-t-2 border-primary pt-5">
+          {/* Pricing + CTA */}
+          <div className="mt-10 flex flex-wrap items-end justify-between gap-6 rounded-2xl border border-primary/20 bg-primary/5 px-6 py-5">
             <dl className="flex gap-10">
               <div>
                 <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">
                   {t("slot.half_day")}
                 </dt>
-                <dd className="num mt-1 text-xl">{formatPrice(cabin.price_half_day, lang)}</dd>
+                <dd className="num mt-1 text-xl font-semibold">{formatPrice(cabin.price_half_day, lang)}</dd>
+                <dd className="text-[10px] text-muted-foreground">forfait</dd>
               </div>
               <div>
                 <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">
                   {t("slot.24h")}
                 </dt>
-                <dd className="num mt-1 text-xl">{formatPrice(cabin.price_24h, lang)}</dd>
+                <dd className="num mt-1 text-xl font-semibold">{formatPrice(cabin.price_24h, lang)}</dd>
                 <dd className="mt-0.5 text-[11px] text-muted-foreground">{t("cabin.perPerson")}</dd>
               </div>
             </dl>
@@ -157,7 +165,7 @@ export function CabinExpand({
               <Link
                 to="/cabins/$slug"
                 params={{ slug: cabin.slug }}
-                className="border border-input px-5 py-3 text-sm text-primary"
+                className="rounded-xl border border-input px-5 py-3 text-sm text-primary hover:border-primary transition-colors"
               >
                 {t("cabin.checkAvailability")}
               </Link>
@@ -165,7 +173,7 @@ export function CabinExpand({
                 to="/book/$slug"
                 params={{ slug: cabin.slug }}
                 search={{ date: undefined, slot: "24h" as const }}
-                className="bg-coral px-6 py-3 text-sm font-medium text-coral-foreground hover:bg-coral/90"
+                className="rounded-xl bg-coral px-6 py-3 text-sm font-medium text-coral-foreground hover:bg-coral/90 transition-all"
               >
                 {t("cabin.reserve")}
               </Link>

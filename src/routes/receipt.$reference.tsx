@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useRef } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getReceipt } from "@/lib/booking.functions";
 import { useI18n, formatPrice } from "@/lib/i18n";
@@ -23,18 +24,40 @@ function Receipt() {
   const { reference } = Route.useParams();
   const { t, lang } = useI18n();
   const fetchReceipt = useServerFn(getReceipt);
+  const receiptRef = useRef<HTMLDivElement>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["receipt", reference],
     queryFn: () => fetchReceipt({ data: { reference } }),
   });
 
+  const downloadReceipt = async () => {
+    if (!receiptRef.current || !data) return;
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const canvas = await html2canvas(receiptRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#FFF9EF",
+        logging: false,
+      });
+      const link = document.createElement("a");
+      link.download = `recu-${data.reference}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (err) {
+      console.error("Download failed:", err);
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <SiteHeader />
-      <div className="mx-auto max-w-xl px-5 pt-12">
+      <div className="mx-auto max-w-xl px-5 pt-12 pb-20">
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
+          <div className="flex min-h-[40vh] items-center justify-center">
+            <span className="block h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
+          </div>
         ) : !data ? (
           <p className="text-sm text-muted-foreground">404</p>
         ) : (
@@ -68,20 +91,30 @@ function Receipt() {
 
             <WaveDivider />
 
-            <div className="border border-border bg-card p-6">
-              <div className="flex items-start justify-between">
+            {/* Receipt card — this div is captured for the image download */}
+            <div
+              ref={receiptRef}
+              className="rounded-2xl border border-border bg-card p-6 card-shadow"
+              style={{ background: "#FFFFFF" }}
+            >
+              {/* Receipt header */}
+              <div className="flex items-start justify-between border-b border-border pb-4 mb-4">
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                    {t("receipt.ref")}
-                  </p>
-                  <p className="num mt-1 text-lg text-primary">{data.reference}</p>
+                  <p className="font-[family-name:var(--font-display)] text-xl text-primary">Zwaraa</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">Halq El Oued Ezzouaraa · Nefza</p>
                 </div>
-                <span className="bg-forest px-3 py-1 text-xs font-medium text-forest-foreground">
+                <span className="rounded-full bg-forest/15 px-3 py-1.5 text-xs font-medium text-forest">
                   {t("receipt.paid")}
                 </span>
               </div>
 
-              <dl className="mt-6 divide-y divide-border border-y border-border text-sm">
+              {/* Reference */}
+              <div className="mb-5 rounded-xl bg-secondary p-3">
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("receipt.ref")}</p>
+                <p className="num mt-1 text-xl font-semibold text-primary">{data.reference}</p>
+              </div>
+
+              <dl className="divide-y divide-border text-sm">
                 <Row
                   label={t("book.cabin")}
                   value={
@@ -103,27 +136,42 @@ function Receipt() {
                 <Row label={t("admin.status")} value={t(`status.${data.status}`)} />
               </dl>
 
-              <div className="mt-5 flex items-baseline justify-between border-t-2 border-primary pt-3">
+              {/* Total */}
+              <div className="mt-5 flex items-baseline justify-between rounded-xl bg-primary/5 border border-primary/15 px-4 py-3">
                 <span className="text-sm uppercase tracking-wider text-muted-foreground">
                   {t("receipt.amount")}
                 </span>
-                <span className="num text-2xl text-primary">
+                <span className="num text-2xl font-semibold text-primary">
                   {formatPrice(data.total_price, lang)}
                 </span>
               </div>
+
+              {/* Footer watermark */}
+              <p className="mt-5 text-center text-[10px] text-muted-foreground/60">
+                zwaraa.tn · Bungalows sur pilotis, lagune de Nefza
+              </p>
             </div>
 
+            {/* Action buttons */}
             <div className="mt-6 flex gap-3 print:hidden">
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="border border-input px-4 py-3 text-sm"
+                className="rounded-xl border border-input px-4 py-3 text-sm hover:border-primary transition-colors"
               >
                 {t("receipt.print")}
               </button>
+              <button
+                type="button"
+                onClick={downloadReceipt}
+                className="rounded-xl border border-forest/40 bg-forest/8 px-4 py-3 text-sm text-forest font-medium hover:bg-forest/15 transition-colors flex items-center gap-2"
+              >
+                <span>⬇</span>
+                {t("receipt.download")}
+              </button>
               <Link
                 to="/"
-                className="flex-1 bg-coral px-4 py-3 text-center text-sm font-medium text-coral-foreground"
+                className="flex-1 rounded-xl bg-coral px-4 py-3 text-center text-sm font-medium text-coral-foreground hover:bg-coral/90 transition-all"
               >
                 {t("receipt.home")}
               </Link>
