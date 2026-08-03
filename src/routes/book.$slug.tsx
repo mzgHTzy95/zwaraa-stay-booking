@@ -128,11 +128,25 @@ function BookingFlow() {
   }
 
   const dateKey = date ? format(date, "yyyy-MM-dd") : null;
-  const price = Number(slot === "half_day" ? cabin.price_half_day : cabin.price_24h);
-  const taken =
-    !!dateKey && (booked ?? []).some((b) => b.date === dateKey && b.slot === slot);
+  const effectiveNights = slot === "24h" ? nights : 1;
+  const unitPrice = Number(slot === "half_day" ? cabin.price_half_day : cabin.price_24h);
+  const price =
+    slot === "half_day" ? unitPrice : unitPrice * guest.guestsCount * effectiveNights;
+
+  const stayDays = (start: string, count: number) => {
+    const base = new Date(`${start}T00:00:00Z`).getTime();
+    return Array.from({ length: count }, (_, i) =>
+      new Date(base + i * 86400000).toISOString().slice(0, 10),
+    );
+  };
+  const isRangeTaken = (start: string | null, s: "half_day" | "24h", count: number) =>
+    !!start &&
+    stayDays(start, count).some((d) => (booked ?? []).some((b) => b.date === d && b.slot === s));
+
+  const taken = isRangeTaken(dateKey, slot, effectiveNights);
   const cabinName = lang === "ar" ? cabin.name_ar : cabin.name;
   const included = lang === "ar" ? cabin.included_package_ar : cabin.included_package;
+
 
   const submitGuest = async (e: React.FormEvent) => {
     e.preventDefault();
