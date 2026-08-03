@@ -231,7 +231,7 @@ function BookingFlow() {
               {(["half_day", "24h"] as const).map((s) => {
                 const active = slot === s;
                 const p = Number(s === "half_day" ? cabin.price_half_day : cabin.price_24h);
-                const busy = !!dateKey && (booked ?? []).some((b) => b.date === dateKey && b.slot === s);
+                const busy = isRangeTaken(dateKey, s, s === "24h" ? nights : 1);
                 return (
                   <button
                     key={s}
@@ -245,6 +245,11 @@ function BookingFlow() {
                   >
                     <span className="block text-sm text-primary">{t(`slot.${s}`)}</span>
                     <span className="num mt-1 block text-base">{formatPrice(p, lang)}</span>
+                    {s === "24h" ? (
+                      <span className="mt-0.5 block text-[11px] text-muted-foreground">
+                        {t("cabin.perPerson")}
+                      </span>
+                    ) : null}
                     {busy ? (
                       <span className="mt-1 block text-[11px] text-destructive">
                         {t("cabin.unavailable")}
@@ -254,6 +259,25 @@ function BookingFlow() {
                 );
               })}
             </div>
+
+            {slot === "24h" ? (
+              <div className="mt-5 border border-border bg-card p-4">
+                <Field label={t("book.nights")}>
+                  <input
+                    type="number"
+                    min={1}
+                    max={30}
+                    className={`${inputClass} num`}
+                    value={nights}
+                    onChange={(e) =>
+                      setNights(Math.min(30, Math.max(1, Number(e.target.value) || 1)))
+                    }
+                  />
+                </Field>
+                <p className="mt-2 text-[11px] text-muted-foreground">{t("book.nightsNote")}</p>
+              </div>
+            ) : null}
+
             <button
               type="button"
               disabled={!dateKey || taken}
