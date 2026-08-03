@@ -622,10 +622,31 @@ function CabinPriceCard({
     }
   };
 
+  const toggleActive = async () => {
+    setBusy(true);
+    const { error } = await supabase
+      .from("cabins")
+      .update({ is_active: !cabin.is_active })
+      .eq("id", cabin.id);
+    setBusy(false);
+    if (error) toast.error(error.message);
+    else onSaved();
+  };
+
   return (
     <div className="border border-border bg-card p-5">
-      <h3 className="text-lg text-primary">{lang === "ar" ? cabin.name_ar : cabin.name}</h3>
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="text-lg text-primary">{lang === "ar" ? cabin.name_ar : cabin.name}</h3>
+        <span
+          className={`px-2 py-1 text-[11px] ${
+            cabin.is_active ? "bg-forest/10 text-forest" : "bg-destructive/10 text-destructive"
+          }`}
+        >
+          {cabin.is_active ? t("admin.available") : t("admin.unavailable")}
+        </span>
+      </div>
       <div className="mt-4 grid grid-cols-2 gap-4">
+
         <label className="block">
           <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
             {t("admin.priceHalf")}
