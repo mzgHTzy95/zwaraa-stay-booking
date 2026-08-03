@@ -72,6 +72,8 @@ function BookingFlow() {
     search.date ? new Date(`${search.date}T00:00:00`) : undefined,
   );
   const [slot, setSlot] = useState<"half_day" | "24h">(search.slot ?? "half_day");
+  const [nights, setNights] = useState(1);
+
   const [guest, setGuest] = useState<Guest>({
     cin: "",
     fullName: "",
