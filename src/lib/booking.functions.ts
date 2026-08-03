@@ -142,7 +142,7 @@ export const getReceipt = createServerFn({ method: "POST" })
     const { data: row, error } = await supabaseAdmin
       .from("reservations")
       .select(
-        "reference, reservation_date, slot, full_name, guests_count, total_price, status, payment_status, created_at, cabins(name, name_ar, slug, included_package, included_package_ar)",
+        "reference, reservation_date, nights, slot, full_name, guests_count, total_price, status, payment_status, created_at, cabins(name, name_ar, slug, included_package, included_package_ar)",
       )
       .eq("reference", data.reference.toUpperCase())
       .maybeSingle();
