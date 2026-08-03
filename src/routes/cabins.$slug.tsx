@@ -139,17 +139,21 @@ function CabinDetail() {
 
         <WaveDivider />
 
-        <section>
-          <h2 className="text-2xl text-primary">{t("cabin.included")}</h2>
-          <ul className="mt-5 grid gap-3 sm:grid-cols-2">
-            {included.map((item) => (
-              <li key={item} className="flex items-start gap-3 text-sm">
-                <span className="mt-[6px] block h-[6px] w-[6px] shrink-0 bg-amber" />
-                {item}
-              </li>
-            ))}
-          </ul>
+        <section className="grid gap-8 sm:grid-cols-2">
+          <div>
+            <h2 className="text-2xl text-primary">{t("cabin.included")}</h2>
+            <ul className="mt-5 space-y-3">
+              {included.map((item) => (
+                <li key={item} className="flex items-start gap-3 text-sm">
+                  <span className="mt-[6px] block h-[6px] w-[6px] shrink-0 bg-amber" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <PackList />
         </section>
+
 
         <WaveDivider />
 
