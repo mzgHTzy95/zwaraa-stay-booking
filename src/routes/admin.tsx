@@ -429,12 +429,16 @@ function Dashboard() {
           </div>
         </section>
       ) : (
-        <section className="mt-10 grid gap-5 sm:grid-cols-2">
-          {(cabins ?? []).map((c) => (
-            <CabinPriceCard key={c.id} cabin={c} onSaved={refresh} />
-          ))}
+        <section className="mt-10 space-y-8">
+          <AddCabinCard onSaved={refresh} />
+          <div className="grid gap-5 sm:grid-cols-2">
+            {(cabins ?? []).map((c) => (
+              <CabinPriceCard key={c.id} cabin={c} onSaved={refresh} />
+            ))}
+          </div>
         </section>
       )}
+
 
       {editing ? (
         <EditReservation
