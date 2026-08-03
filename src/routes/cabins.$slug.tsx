@@ -184,6 +184,10 @@ function CabinDetail() {
                     <h3 className="text-lg text-primary">{t(`slot.${slot}`)}</h3>
                     <span className="num text-lg">{formatPrice(price, lang)}</span>
                   </div>
+                  {slot === "24h" ? (
+                    <p className="mt-1 text-[11px] text-muted-foreground">{t("cabin.perPerson")}</p>
+                  ) : null}
+
                   {dateKey ? (
                     <p
                       className={
