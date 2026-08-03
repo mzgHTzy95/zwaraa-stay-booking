@@ -5,7 +5,6 @@ import { format, addMonths } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { SiteHeader, SiteFooter } from "@/components/site/chrome";
-import { PlankPhoto, WaveDivider, SectionTitle } from "@/components/site/ornaments";
 import { CabinExpand } from "@/components/site/cabin-expand";
 import type { ExpandCabin, OriginRect } from "@/components/site/cabin-expand";
 import { cabinCover, heroLagoon } from "@/lib/images";
@@ -45,7 +44,6 @@ function useCabins() {
   });
 }
 
-/** Fetch today + next 14 days booked slots for all cabins */
 function useAllBooked(cabinIds: string[]) {
   return useQuery({
     queryKey: ["all-booked", cabinIds.join(",")],
@@ -75,7 +73,6 @@ function Home() {
   const cabinIds = useMemo(() => (cabins ?? []).map((c) => c.id), [cabins]);
   const { data: bookedRows } = useAllBooked(cabinIds);
 
-  // Build a set of cabin IDs that are currently reserved (today booked)
   const reservedCabinIds = useMemo(() => {
     const today = format(new Date(), "yyyy-MM-dd");
     const ids = new Set<string>();
@@ -101,128 +98,115 @@ function Home() {
     });
   };
 
-
   return (
     <div className="min-h-screen">
-      <SiteHeader />
+      <div className="page-frame">
+        <div className="hero-card">
+          <img src={heroLagoon} alt="Lagoon" className="hero-img" />
+          <div className="hero-overlay" />
+          
+          <SiteHeader variant="hero" />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <PlankPhoto
-          src={heroLagoon}
-          alt="Bungalows blancs à toit corail sur pilotis au-dessus de la lagune de Nefza"
-          className="w-full"
-          imgClassName="aspect-[21/9] min-h-[340px] object-cover"
-          priority
-          width={1920}
-          height={1080}
-        />
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-foreground/20 to-transparent" />
+          <div className="hero-content">
+            <div className="hero-badge">
+              <span className="dot" />
+              {t("brand.location")}
+            </div>
+            <h1>{t("hero.title")}</h1>
+            <p className="sub">{t("hero.text")}</p>
+          </div>
+          
+          {/* Quick jump pill */}
+          <div className="search-pill">
+             <div className="search-field">
+               <span className="ic">📍</span>
+               <div className="txt">
+                 <div className="lbl">Destination</div>
+                 <div className="val">{t("brand.name")}</div>
+               </div>
+             </div>
+             <a href="#cabins" className="btn-cta self-center">{t("hero.cta")}</a>
+          </div>
+        </div>
+      </div>
 
-        {/* Hero text + CTA */}
-        <div className="absolute inset-0 flex flex-col items-start justify-end p-6 sm:p-12 max-w-5xl mx-auto left-0 right-0">
-          <p className="num text-[11px] uppercase tracking-[0.22em] text-white/80 mb-2">
-            {t("brand.location")}
-          </p>
-          <h1 className="text-3xl sm:text-5xl text-white leading-tight max-w-xl">
-            {t("hero.title")}
-          </h1>
-          <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/80 hidden sm:block">
-            {t("hero.text")}
-          </p>
-          <a
-            href="#cabins"
-            className="mt-5 inline-flex items-center gap-2 rounded-full bg-coral px-6 py-3 text-sm font-medium text-coral-foreground transition-all hover:bg-coral/90 hover:shadow-lg"
-          >
-            {t("hero.cta")}
-            <span>→</span>
-          </a>
+      <section className="story">
+        <div className="wrap story-inner">
+           <div>
+             <h2>Une immersion totale dans la nature tunisienne</h2>
+             <div className="story-stats">
+                <div>
+                   <div className="stat-num">4</div>
+                   <div className="stat-label">Bungalows</div>
+                </div>
+                <div>
+                   <div className="stat-num">360°</div>
+                   <div className="stat-label">Vue lagune</div>
+                </div>
+             </div>
+           </div>
+           <div className="story-body">
+              <p>Situé à Nefza, au nord-ouest de la Tunisie, Zwaraa offre une expérience unique : dormir dans un bungalow sur pilotis, directement sur l'eau.</p>
+              <p>Que ce soit pour une demi-journée ou une nuit complète, chaque séjour inclut des repas locaux et des balades en barque pour découvrir la beauté sauvage de la région.</p>
+           </div>
         </div>
       </section>
 
-      <WaveDivider />
-
-      {/* Cabins Section */}
-      <section id="cabins" className="mx-auto max-w-5xl px-5 pb-12">
-        <SectionTitle kicker={t("nav.cabins")}>{t("cabins.title")}</SectionTitle>
-        <p className="mt-3 text-sm text-muted-foreground">{t("cabins.subtitle")}</p>
-
-        {isLoading ? (
-          <div className="mt-12 flex flex-col items-center gap-3 py-16">
-            <span className="block h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
-            <p className="text-sm text-muted-foreground">{t("common.loading")}</p>
+      <section id="cabins" className="cabins">
+        <div className="wrap">
+          <div className="section-head">
+            <h2>{t("cabins.title")}</h2>
+            <div className="see-all">{t("cabins.subtitle")}</div>
           </div>
-        ) : (
-          <div className="mt-10 grid gap-6 sm:grid-cols-2">
-            {(cabins ?? []).map((cabin) => {
-              const isReserved = reservedCabinIds.has(cabin.id);
-              return (
-                <button
-                  key={cabin.id}
-                  type="button"
-                  ref={(el) => {
-                    cardRefs.current[cabin.id] = el;
-                  }}
-                  onClick={() => openCabin(cabin as unknown as ExpandCabin)}
-                  className="group relative block w-full text-start rounded-2xl overflow-hidden bg-card card-shadow card-lift hover:card-lift-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-                >
-                  {/* Cover image */}
-                  <div className="relative overflow-hidden">
-                    <PlankPhoto
-                      src={cabinCover(cabin.slug, cabin.photos)}
-                      alt={cabin.name}
-                      imgClassName="aspect-[3/2] transition-transform duration-500 group-hover:scale-[1.04]"
-                    />
-                    {/* Reserved badge */}
-                    {isReserved && (
-                      <div className="absolute top-3 left-3 z-10 rounded-full bg-destructive px-3 py-1 text-[11px] font-medium text-destructive-foreground shadow">
-                        {t("cabin.reserved")}
-                      </div>
-                    )}
-                    {/* Capacity badge */}
-                    <div className="absolute top-3 right-3 z-10 rounded-full bg-background/80 backdrop-blur px-3 py-1 text-[11px] text-foreground/80">
-                      {t("cabin.capacity", { n: cabin.capacity })}
+          
+          {isLoading ? (
+            <div className="py-16 text-center text-sm text-muted-foreground">{t("common.loading")}</div>
+          ) : (
+            <div className="cabin-grid">
+              {(cabins ?? []).map((cabin) => {
+                const isReserved = reservedCabinIds.has(cabin.id);
+                return (
+                  <button
+                    key={cabin.id}
+                    type="button"
+                    ref={(el) => {
+                      cardRefs.current[cabin.id] = el;
+                    }}
+                    onClick={() => openCabin(cabin as unknown as ExpandCabin)}
+                    className="cabin-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                  >
+                    <div className="cabin-photo">
+                      <img src={cabinCover(cabin.slug, cabin.photos)} alt={cabin.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
+                      <div className="roof-chip" />
+                      {isReserved && (
+                        <div className="fav-btn text-destructive shadow" title={t("cabin.reserved")}>
+                          🔒
+                        </div>
+                      )}
                     </div>
-                  </div>
-
-                  {/* Card body */}
-                  <div className="p-4">
-                    <h3 className="text-lg text-primary">
-                      {lang === "ar" ? cabin.name_ar : cabin.name}
-                    </h3>
-
-                    {/* Pricing row */}
-                    <dl className="mt-3 flex gap-6 border-t border-border/60 pt-3">
-                      <div>
-                        <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                          {t("slot.half_day")}
-                        </dt>
-                        <dd className="num mt-0.5 text-base font-medium text-foreground">
-                          {formatPrice(cabin.price_half_day, lang)}
-                        </dd>
-                        <dd className="text-[10px] text-muted-foreground">forfait</dd>
+                    
+                    <div className="cabin-body">
+                      <h3>{lang === "ar" ? cabin.name_ar : cabin.name}</h3>
+                      <div className="cabin-meta">
+                         <span>👤 {t("cabin.capacity", { n: cabin.capacity })}</span>
+                         <span>✨ Vue sur l'eau</span>
                       </div>
-                      <div>
-                        <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                          {t("slot.24h")}
-                        </dt>
-                        <dd className="num mt-0.5 text-base font-medium text-foreground">
-                          {formatPrice(cabin.price_24h, lang)}
-                        </dd>
-                        <dd className="text-[10px] text-muted-foreground">{t("cabin.perPerson")}</dd>
+                      <div className="cabin-prices">
+                         <div className="price-block">
+                            <div className="price-label">{t("slot.24h")}</div>
+                            <div className="price-val num">{formatPrice(cabin.price_24h, lang)} <span>/pers.</span></div>
+                         </div>
+                         <div className="cabin-details-btn">
+                            {t("cabin.view")} →
+                         </div>
                       </div>
-                    </dl>
-
-                    <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-coral group-hover:gap-2 transition-all">
-                      {t("cabin.view")} →
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </section>
 
       {expanded ? (
@@ -234,7 +218,6 @@ function Home() {
       ) : null}
 
       <SiteFooter />
-
     </div>
   );
 }
