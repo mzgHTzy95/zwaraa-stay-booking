@@ -165,8 +165,9 @@ function BookingFlow() {
   const confirm = async () => {
     if (!dateKey) return;
     const result = await create({
-      data: { cabinId: cabin.id, date: dateKey, slot, ...guest },
+      data: { cabinId: cabin.id, date: dateKey, slot, nights: effectiveNights, ...guest },
     });
+
     if (!result.ok) {
       toast.error(result.reason === "taken" ? t("book.taken") : t("common.error"));
       if (result.reason === "taken") setStep(1);
