@@ -112,7 +112,9 @@ function Shell({ children }: { children: React.ReactNode }) {
           <LanguageSwitch />
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-5 py-10">{children}</main>
+      <div className="page-frame pb-24">
+         <main className="wrap pt-10">{children}</main>
+      </div>
     </div>
   );
 }
@@ -187,7 +189,7 @@ function LoginCard() {
         <button
           type="submit"
           disabled={busy}
-          className="w-full rounded-xl bg-coral px-4 py-3 text-sm font-medium text-coral-foreground disabled:opacity-60 hover:bg-coral/90 transition-all"
+          className="w-full btn-pill btn-coral disabled:opacity-60 py-4 text-base"
         >
           {t("admin.signIn")}
         </button>
@@ -200,7 +202,7 @@ function LoginCard() {
               type="button"
               onClick={createFirst}
               disabled={busy || !email || password.length < 8}
-              className="mt-3 w-full rounded-xl border border-primary px-4 py-2.5 text-sm text-primary disabled:opacity-50 hover:bg-primary/5 transition-colors"
+              className="mt-4 w-full btn-outline-pill disabled:opacity-50 text-[13px]"
             >
               Créer le compte administrateur
             </button>
@@ -342,7 +344,7 @@ function Dashboard() {
         <button
           type="button"
           onClick={() => supabase.auth.signOut()}
-          className="rounded-xl border border-input px-4 py-2 text-xs text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+          className="btn-outline-pill border-border/70 py-[7px]"
         >
           {t("admin.signOut")}
         </button>
@@ -649,7 +651,7 @@ function AddCabinCard({ onSaved }: { onSaved: () => void }) {
           type="button"
           onClick={create}
           disabled={busy}
-          className="rounded-xl bg-coral px-4 py-2.5 text-sm font-medium text-coral-foreground disabled:opacity-60 hover:bg-coral/90 transition-all"
+          className="btn-pill btn-coral disabled:opacity-60"
         >
           {t("admin.create")}
         </button>
@@ -763,7 +765,7 @@ function CabinPriceCard({
           type="button"
           onClick={save}
           disabled={busy}
-          className="rounded-xl bg-coral px-4 py-2.5 text-sm font-medium text-coral-foreground disabled:opacity-60 hover:bg-coral/90 transition-all"
+          className="btn-pill btn-coral disabled:opacity-60"
         >
           {t("admin.save")}
         </button>
@@ -771,7 +773,7 @@ function CabinPriceCard({
           type="button"
           onClick={toggleActive}
           disabled={busy}
-          className="rounded-xl border border-border px-4 py-2.5 text-sm text-foreground hover:border-primary disabled:opacity-60 transition-colors"
+          className="btn-outline-pill disabled:opacity-60"
         >
           {cabin.is_active ? t("admin.makeUnavailable") : t("admin.makeAvailable")}
         </button>

@@ -1,12 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n";
+import { Languages } from "lucide-react";
 
 export function LanguageSwitch({ variant = "solid" }: { variant?: "hero" | "solid" }) {
   const { lang, setLang } = useI18n();
   const isHero = variant === "hero";
   return (
     <div className={isHero ? "lang-pill" : "flex items-center gap-1 text-xs"}>
-      {isHero && <span className="ic">🌐</span>}
+      {isHero && <span className="ic"><Languages size={15}/></span>}
       <button
         type="button"
         onClick={() => setLang("fr")}
@@ -42,20 +43,16 @@ export function SiteHeader({ variant = "solid" }: { variant?: "hero" | "solid" }
     return (
       <div className="hero-nav">
         <Link to="/" className="brand">
-          <div className="brand-badge text-coral">Z</div>
+          <div className="brand-badge text-coral">🌊</div>
           <span className="brand-name">{t("brand.name")}</span>
         </Link>
         <nav className="links">
           <ul>
             <li><a href="#cabins">{t("nav.cabins")}</a></li>
-            <li><Link to="/admin">{t("nav.admin")}</Link></li>
           </ul>
         </nav>
         <div className="nav-right">
           <LanguageSwitch variant="hero" />
-          <Link to="/admin" className="login-pill hidden sm:block">
-            {t("nav.admin")}
-          </Link>
           <button className="menu-toggle">☰</button>
         </div>
       </div>
@@ -77,12 +74,6 @@ export function SiteHeader({ variant = "solid" }: { variant?: "hero" | "solid" }
           </div>
         </Link>
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="hidden rounded-full border border-border px-4 py-1.5 text-xs text-muted-foreground hover:border-primary hover:text-primary transition-colors sm:block"
-          >
-            {t("nav.admin")}
-          </Link>
           <LanguageSwitch />
         </div>
       </div>

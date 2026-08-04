@@ -251,6 +251,36 @@
   animation: fade-in 0.3s ease both;
 }
 
+
+/* ---------- feature ("Ce qui rend Zwaraa unique") ---------- */
+.feature{padding:80px 0;background:var(--sand-white);}
+.feature-inner{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;}
+.feature-list h2{font-size:clamp(24px,2.8vw,30px);margin-bottom:34px;max-width:380px;}
+.feature-item{border-top:1px solid var(--line);padding:20px 0;}
+.feature-item:last-child{border-bottom:1px solid var(--line);}
+.feature-item h4{font-size:15.5px;font-weight:600;margin:0 0 6px;font-family:'Inter',sans-serif;}
+.feature-item p{font-size:13.5px;color:var(--ink-soft);max-width:340px;margin:0;}
+.feature-media{position:relative;height:420px;}
+.fmedia-main{
+  position:absolute;inset:0 0 0 60px;border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-tight);
+}
+.fmedia-main img{width:100%;height:100%;object-fit:cover;}
+.fmedia-small{
+  position:absolute;left:0;top:40px;width:150px;height:190px;border-radius:var(--r-md);overflow:hidden;
+  box-shadow:var(--shadow-soft);border:5px solid #fff;
+}
+.fmedia-small img{width:100%;height:100%;object-fit:cover;}
+.fchip{
+  position:absolute;background:#fff;border-radius:var(--r-pill);box-shadow:var(--shadow-tight);
+  padding:9px 16px;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:8px;
+}
+.fchip.top{top:12px;left:150px;}
+.fchip.bottom{bottom:24px;left:20px;}
+.fchip .ic{font-size:15px;}
+
+
+
+
 /* ---------- page frame / hero card ---------- */
 .page-frame{padding:18px 18px 0;}
 .hero-card{

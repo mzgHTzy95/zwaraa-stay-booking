@@ -8,7 +8,7 @@ import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { CabinExpand } from "@/components/site/cabin-expand";
 import type { ExpandCabin, OriginRect } from "@/components/site/cabin-expand";
 import { cabinCover, heroLagoon } from "@/lib/images";
-
+import { MapPinned } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -98,13 +98,17 @@ function Home() {
     });
   };
 
+  // Use the first cabin's photo for the small overlapping feature image,
+  // falling back to the hero shot while cabins are loading / if none exist.
+  const featureSmallImg =
+    cabins && cabins.length > 0 ? cabinCover(cabins[0].slug, cabins[0].photos) : heroLagoon;
+
   return (
     <div className="min-h-screen">
       <div className="page-frame">
         <div className="hero-card">
           <img src={heroLagoon} alt="Lagoon" className="hero-img" />
           <div className="hero-overlay" />
-          
           <SiteHeader variant="hero" />
 
           <div className="hero-content">
@@ -115,11 +119,10 @@ function Home() {
             <h1>{t("hero.title")}</h1>
             <p className="sub">{t("hero.text")}</p>
           </div>
-          
           {/* Quick jump pill */}
           <div className="search-pill">
              <div className="search-field">
-               <span className="ic">📍</span>
+              <span className="ic"><MapPinned /></span>
                <div className="txt">
                  <div className="lbl">Destination</div>
                  <div className="val">{t("brand.name")}</div>
@@ -206,6 +209,40 @@ function Home() {
               })}
             </div>
           )}
+        </div>
+      </section>
+
+      <section className="feature">
+        <div className="wrap feature-inner">
+          <div className="feature-list">
+            <h2>Ce qui rend Zwaraa unique</h2>
+            <div className="feature-item">
+              <h4>Un lieu, pas une chaîne</h4>
+              <p>Chaque bungalow est construit à la main par des habitants de Nefza — pas deux ne sont tout à fait identiques.</p>
+            </div>
+            <div className="feature-item">
+              <h4>Eau douce naturelle</h4>
+              <p>Le lagon est alimenté par des sources de montagne, entre le fleuve et la Méditerranée.</p>
+            </div>
+            <div className="feature-item">
+              <h4>Tout est inclus</h4>
+              <p>Repas et balade en bateau accompagnent chaque réservation, sans supplément caché.</p>
+            </div>
+            <div className="feature-item">
+              <h4>Paiement simple et sûr</h4>
+              <p>Réservez et payez en ligne en quelques minutes, confirmation immédiate.</p>
+            </div>
+          </div>
+          <div className="feature-media">
+            <div className="fmedia-main">
+              <img src={heroLagoon} alt="Bungalows sur le lagon" />
+            </div>
+            <div className="fmedia-small">
+              <img src={featureSmallImg} alt="Détail du lagon" />
+            </div>
+            <div className="fchip top"><span className="ic">🌲</span> Collines de Béja</div>
+            <div className="fchip bottom"><span className="ic">🌊</span> Source d'eau douce</div>
+          </div>
         </div>
       </section>
 

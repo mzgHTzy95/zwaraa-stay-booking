@@ -51,10 +51,11 @@ function Receipt() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <SiteHeader />
-      <div className="mx-auto max-w-xl px-5 pt-12 pb-20">
-        {isLoading ? (
+      <div className="page-frame pb-24">
+        <div className="wrap max-w-xl pt-12">
+          {isLoading ? (
           <div className="flex min-h-[40vh] items-center justify-center">
             <span className="block h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
           </div>
@@ -153,31 +154,32 @@ function Receipt() {
             </div>
 
             {/* Action buttons */}
-            <div className="mt-6 flex gap-3 print:hidden">
+            <div className="mt-8 flex gap-4 print:hidden">
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="rounded-xl border border-input px-4 py-3 text-sm hover:border-primary transition-colors"
+                className="btn-outline-pill flex-1"
               >
                 {t("receipt.print")}
               </button>
               <button
                 type="button"
                 onClick={downloadReceipt}
-                className="rounded-xl border border-forest/40 bg-forest/8 px-4 py-3 text-sm text-forest font-medium hover:bg-forest/15 transition-colors flex items-center gap-2"
+                className="btn-outline-pill flex-[1.5] border-forest text-forest hover:bg-forest/5 flex items-center justify-center gap-2"
               >
                 <span>⬇</span>
                 {t("receipt.download")}
               </button>
               <Link
                 to="/"
-                className="flex-1 rounded-xl bg-coral px-4 py-3 text-center text-sm font-medium text-coral-foreground hover:bg-coral/90 transition-all"
+                className="btn-pill btn-coral flex-1"
               >
                 {t("receipt.home")}
               </Link>
             </div>
           </div>
         )}
+      </div>
       </div>
       <SiteFooter />
     </div>
