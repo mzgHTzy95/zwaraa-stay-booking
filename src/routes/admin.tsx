@@ -107,15 +107,21 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-          <span className="font-[family-name:var(--font-display)] text-lg text-primary">
-            {t("brand.name")} <span className="text-muted-foreground text-sm">· {t("admin.title")}</span>
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-4">
+          <span className="flex items-center gap-2 font-[family-name:var(--font-display)] text-lg text-primary">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-coral text-sm text-coral-foreground">
+              Z
+            </span>
+            {t("brand.name")} <span className="hidden text-sm text-muted-foreground sm:inline">· {t("admin.title")}</span>
           </span>
-          <LanguageSwitch />
+          <div className="flex items-center gap-2">
+            <InstallAdminButton />
+            <LanguageSwitch />
+          </div>
         </div>
       </header>
       <div className="page-frame pb-24">
-         <main className="wrap pt-10">{children}</main>
+         <main className="wrap max-w-6xl pt-10">{children}</main>
       </div>
     </div>
   );
