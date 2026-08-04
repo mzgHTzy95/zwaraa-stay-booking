@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n";
-import { Languages } from "lucide-react";
+import { Heart, Languages, Menu, Waves } from "lucide-react";
 
 export function LanguageSwitch({ variant = "solid" }: { variant?: "hero" | "solid" }) {
   const { lang, setLang } = useI18n();
@@ -43,7 +43,7 @@ export function SiteHeader({ variant = "solid" }: { variant?: "hero" | "solid" }
     return (
       <div className="hero-nav">
         <Link to="/" className="brand">
-          <div className="brand-badge text-coral">🌊</div>
+          <div className="brand-badge text-coral"><Waves size={17} /></div>
           <span className="brand-name">{t("brand.name")}</span>
         </Link>
         <nav className="links">
@@ -53,7 +53,7 @@ export function SiteHeader({ variant = "solid" }: { variant?: "hero" | "solid" }
         </nav>
         <div className="nav-right">
           <LanguageSwitch variant="hero" />
-          <button className="menu-toggle">☰</button>
+          <button className="menu-toggle" aria-label="Menu"><Menu size={22} /></button>
         </div>
       </div>
     );
@@ -108,7 +108,9 @@ export function SiteFooter() {
       </div>
       <div className="foot-bottom">
         <span>© {new Date().getFullYear()} {t("brand.name")}. {t("footer.rights")}</span>
-        <span>Made with 🤍 in Tunisia</span>
+        <span className="inline-flex items-center gap-1.5">
+          Made with <Heart size={12} className="text-coral" fill="currentColor" /> in Tunisia
+        </span>
       </div>
     </footer>
   );

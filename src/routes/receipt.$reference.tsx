@@ -6,6 +6,7 @@ import { getReceipt } from "@/lib/booking.functions";
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { WaveDivider } from "@/components/site/ornaments";
+import { Download } from "lucide-react";
 
 export const Route = createFileRoute("/receipt/$reference")({
   head: () => ({
@@ -167,7 +168,7 @@ function Receipt() {
                 onClick={downloadReceipt}
                 className="btn-outline-pill flex-[1.5] border-forest text-forest hover:bg-forest/5 flex items-center justify-center gap-2"
               >
-                <span>⬇</span>
+                <Download className="h-4 w-4" />
                 {t("receipt.download")}
               </button>
               <Link
