@@ -166,12 +166,12 @@ function CabinDetail() {
         <WaveDivider />
 
         <section className="grid gap-8 sm:grid-cols-2">
-          <div>
+          <div className="rounded-2xl border border-border bg-card p-6 card-shadow">
             <h2 className="text-2xl text-primary">{t("cabin.included")}</h2>
             <ul className="mt-5 space-y-3">
               {included.map((item) => (
                 <li key={item} className="flex items-start gap-3 text-sm">
-                  <span className="mt-[6px] block h-[6px] w-[6px] shrink-0 bg-amber" />
+                  <span className="mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full bg-amber" />
                   {item}
                 </li>
               ))}
@@ -183,11 +183,13 @@ function CabinDetail() {
 
         <WaveDivider />
 
-        <section className="grid gap-10 sm:grid-cols-[auto_1fr]">
-          <div>
-            <h2 className="text-2xl text-primary">{t("cabin.checkAvailability")}</h2>
-            <p className="mt-2 text-xs text-muted-foreground">{t("cabin.pickDate")}</p>
-            <div className="mt-4 border border-border bg-card p-2">
+        <section className="grid gap-8 sm:grid-cols-[auto_1fr]">
+          <div className="rounded-2xl border border-border bg-card p-4 card-shadow">
+            <h2 className="flex items-center gap-2 text-lg text-primary">
+              <CalendarCheck size={17} /> {t("cabin.checkAvailability")}
+            </h2>
+            <p className="mt-1 text-xs text-muted-foreground">{t("cabin.pickDate")}</p>
+            <div className="mt-3">
               <Calendar
                 mode="single"
                 selected={date}
@@ -202,11 +204,17 @@ function CabinDetail() {
             {(["half_day", "24h"] as const).map((slot) => {
               const taken = isTaken(slot);
               const price = slot === "half_day" ? cabin.price_half_day : cabin.price_24h;
+              const SlotIcon = slot === "half_day" ? Sun : Moon;
               return (
-                <div key={slot} className="border border-border bg-card p-5">
+                <div
+                  key={slot}
+                  className="rounded-2xl border border-border bg-card p-5 card-shadow transition-shadow hover:card-shadow-hover"
+                >
                   <div className="flex items-baseline justify-between gap-4">
-                    <h3 className="text-lg text-primary">{t(`slot.${slot}`)}</h3>
-                    <span className="num text-lg">{formatPrice(price, lang)}</span>
+                    <h3 className="flex items-center gap-2 text-lg text-primary">
+                      <SlotIcon size={16} className="text-amber" /> {t(`slot.${slot}`)}
+                    </h3>
+                    <span className="num text-lg font-semibold">{formatPrice(price, lang)}</span>
                   </div>
                   {slot === "24h" ? (
                     <p className="mt-1 text-[11px] text-muted-foreground">{t("cabin.perPerson")}</p>
@@ -216,8 +224,8 @@ function CabinDetail() {
                     <p
                       className={
                         taken
-                          ? "num mt-2 text-xs text-destructive"
-                          : "num mt-2 text-xs text-forest"
+                          ? "num mt-2 inline-flex rounded-full bg-destructive/10 px-2.5 py-1 text-xs text-destructive"
+                          : "num mt-2 inline-flex rounded-full bg-forest/10 px-2.5 py-1 text-xs text-forest"
                       }
                     >
                       {dateKey} — {taken ? t("cabin.unavailable") : t("cabin.available")}
@@ -231,7 +239,7 @@ function CabinDetail() {
                     type="button"
                     disabled={taken}
                     onClick={() => goBook(slot)}
-                    className="mt-4 w-full bg-coral px-4 py-3 text-sm font-medium text-coral-foreground transition-colors hover:bg-coral/90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
+                    className="btn-pill btn-coral mt-4 w-full py-3.5 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none"
                   >
                     {t("cabin.reserve")}
                   </button>
