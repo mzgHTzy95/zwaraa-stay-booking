@@ -506,27 +506,27 @@ function ReservationCard({
             <button
               type="button"
               onClick={() => onQuickStatus(r.id, "confirmed")}
-              className="rounded-lg border border-forest/30 bg-forest/10 px-3 py-1.5 text-xs font-medium text-forest transition-colors hover:bg-forest/20"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-forest/30 bg-forest/10 px-3 py-1.5 text-xs font-medium text-forest transition-colors hover:bg-forest/20"
             >
-              ✓ {t("admin.confirm")}
+              <Check className="h-3.5 w-3.5" /> {t("admin.confirm")}
             </button>
           )}
           {r.status !== "completed" && r.status !== "cancelled" && (
             <button
               type="button"
               onClick={() => onQuickStatus(r.id, "completed")}
-              className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
             >
-              ✓ {t("admin.complete")}
+              <Check className="h-3.5 w-3.5" /> {t("admin.complete")}
             </button>
           )}
           {r.status !== "cancelled" && (
             <button
               type="button"
               onClick={() => onQuickStatus(r.id, "cancelled")}
-              className="rounded-lg border border-amber/30 bg-amber/10 px-3 py-1.5 text-xs font-medium text-amber-foreground/80 transition-colors hover:bg-amber/20"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-amber/30 bg-amber/10 px-3 py-1.5 text-xs font-medium text-amber-foreground/80 transition-colors hover:bg-amber/20"
             >
-              ✗ {t("admin.cancel")}
+              <X className="h-3.5 w-3.5" /> {t("admin.cancel")}
             </button>
           )}
 
@@ -611,9 +611,9 @@ function AddCabinCard({ onSaved }: { onSaved: () => void }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="w-full rounded-2xl border-2 border-dashed border-primary/30 px-4 py-4 text-sm text-primary hover:border-primary hover:bg-primary/5 transition-colors"
+        className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary/30 px-4 py-4 text-sm text-primary hover:border-primary hover:bg-primary/5 transition-colors"
       >
-        + {t("admin.addCabin")}
+        <Plus className="h-4 w-4" /> {t("admin.addCabin")}
       </button>
     );
   }
