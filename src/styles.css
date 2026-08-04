@@ -169,6 +169,35 @@
   box-shadow: var(--shadow-tight);
 }
 
+@utility card-shadow {
+  box-shadow: var(--shadow-tight);
+}
+
+@utility card-shadow-hover {
+  box-shadow: var(--shadow-soft);
+}
+
+/* Compact page hero used on inner pages (detail, booking, receipt) */
+@utility mini-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-soft);
+  background: linear-gradient(
+    120deg,
+    color-mix(in oklab, var(--primary) 92%, black 8%),
+    color-mix(in oklab, var(--primary) 55%, var(--forest) 45%)
+  );
+  color: #fff;
+}
+
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
 /* Pill button */
 @utility btn-pill {
   display: inline-flex;
