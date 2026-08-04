@@ -11,9 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
-import { Route as IndexcopyRouteImport } from './routes/index copy'
 import { Route as BookSlugRouteImport } from './routes/book.$slug'
-import { Route as BookSlugcopyRouteImport } from './routes/book.$slug copy'
 import { Route as CabinsSlugRouteImport } from './routes/cabins.$slug'
 import { Route as ReceiptReferenceRouteImport } from './routes/receipt.$reference'
 
@@ -27,19 +25,9 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexcopyRoute = IndexcopyRouteImport.update({
-  id: '/index copy',
-  path: '/index copy',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const BookSlugRoute = BookSlugRouteImport.update({
   id: '/book/$slug',
   path: '/book/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BookSlugcopyRoute = BookSlugcopyRouteImport.update({
-  id: '/book/$slug copy',
-  path: '/book/$slug copy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CabinsSlugRoute = CabinsSlugRouteImport.update({
@@ -56,18 +44,14 @@ const ReceiptReferenceRoute = ReceiptReferenceRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/index copy': typeof IndexcopyRoute
   '/book/$slug': typeof BookSlugRoute
-  '/book/$slug copy': typeof BookSlugcopyRoute
   '/cabins/$slug': typeof CabinsSlugRoute
   '/receipt/$reference': typeof ReceiptReferenceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/index copy': typeof IndexcopyRoute
   '/book/$slug': typeof BookSlugRoute
-  '/book/$slug copy': typeof BookSlugcopyRoute
   '/cabins/$slug': typeof CabinsSlugRoute
   '/receipt/$reference': typeof ReceiptReferenceRoute
 }
@@ -75,38 +59,21 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/index copy': typeof IndexcopyRoute
   '/book/$slug': typeof BookSlugRoute
-  '/book/$slug copy': typeof BookSlugcopyRoute
   '/cabins/$slug': typeof CabinsSlugRoute
   '/receipt/$reference': typeof ReceiptReferenceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
-    | '/admin'
-    | '/index copy'
-    | '/book/$slug'
-    | '/book/$slug copy'
-    | '/cabins/$slug'
-    | '/receipt/$reference'
+    '/' | '/admin' | '/book/$slug' | '/cabins/$slug' | '/receipt/$reference'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/admin'
-    | '/index copy'
-    | '/book/$slug'
-    | '/book/$slug copy'
-    | '/cabins/$slug'
-    | '/receipt/$reference'
+  to: '/' | '/admin' | '/book/$slug' | '/cabins/$slug' | '/receipt/$reference'
   id:
     | '__root__'
     | '/'
     | '/admin'
-    | '/index copy'
     | '/book/$slug'
-    | '/book/$slug copy'
     | '/cabins/$slug'
     | '/receipt/$reference'
   fileRoutesById: FileRoutesById
@@ -114,9 +81,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
-  IndexcopyRoute: typeof IndexcopyRoute
   BookSlugRoute: typeof BookSlugRoute
-  BookSlugcopyRoute: typeof BookSlugcopyRoute
   CabinsSlugRoute: typeof CabinsSlugRoute
   ReceiptReferenceRoute: typeof ReceiptReferenceRoute
 }
@@ -137,25 +102,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/index copy': {
-      id: '/index copy'
-      path: '/index copy'
-      fullPath: '/index copy'
-      preLoaderRoute: typeof IndexcopyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/book/$slug': {
       id: '/book/$slug'
       path: '/book/$slug'
       fullPath: '/book/$slug'
       preLoaderRoute: typeof BookSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/book/$slug copy': {
-      id: '/book/$slug copy'
-      path: '/book/$slug copy'
-      fullPath: '/book/$slug copy'
-      preLoaderRoute: typeof BookSlugcopyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cabins/$slug': {
@@ -178,9 +129,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
-  IndexcopyRoute: IndexcopyRoute,
   BookSlugRoute: BookSlugRoute,
-  BookSlugcopyRoute: BookSlugcopyRoute,
   CabinsSlugRoute: CabinsSlugRoute,
   ReceiptReferenceRoute: ReceiptReferenceRoute,
 }
