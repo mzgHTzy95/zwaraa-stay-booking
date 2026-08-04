@@ -100,8 +100,10 @@ function Home() {
 
   // Use the first cabin's photo for the small overlapping feature image,
   // falling back to the hero shot while cabins are loading / if none exist.
-  const featureSmallImg =
-    cabins && cabins.length > 0 ? cabinCover(cabins[0].slug, cabins[0].photos) : heroLagoon;
+  const firstCabin = cabins?.[0];
+  const featureSmallImg = firstCabin
+    ? cabinCover(firstCabin.slug, firstCabin.photos)
+    : heroLagoon;
 
   return (
     <div className="min-h-screen">
