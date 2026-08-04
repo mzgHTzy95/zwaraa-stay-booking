@@ -10,6 +10,7 @@ import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { PlankPhoto, WaveDivider } from "@/components/site/ornaments";
 import { cabinGallery } from "@/lib/images";
 import { PackList } from "@/components/site/pack";
+import { ArrowLeft, CalendarCheck, MapPin, Moon, Sun, Users } from "lucide-react";
 
 import { Calendar } from "@/components/ui/calendar";
 
