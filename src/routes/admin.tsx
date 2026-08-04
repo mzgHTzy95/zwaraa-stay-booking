@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { adminExists, bootstrapAdmin } from "@/lib/admin-setup.functions";
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { LanguageSwitch } from "@/components/site/chrome";
+import { InstallAdminButton } from "@/components/site/install-button";
+import { Check, Plus, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
