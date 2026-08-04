@@ -111,27 +111,50 @@ function CabinDetail() {
     <div className="min-h-screen">
       <SiteHeader />
 
-      <article className="mx-auto max-w-5xl px-5 pt-10">
-        <Link to="/" className="text-xs text-muted-foreground hover:text-primary">
-          ← {t("nav.cabins")}
-        </Link>
-        <h1 className="mt-4 text-4xl text-primary sm:text-5xl">
-          {lang === "ar" ? cabin.name_ar : cabin.name}
-        </h1>
-        <p className="num mt-2 text-xs uppercase tracking-[0.18em] text-forest">
-          {t("cabin.capacity", { n: cabin.capacity })}
-        </p>
+      <div className="page-frame">
+        <div className="mini-hero px-6 py-9 sm:px-12 sm:py-12">
+          <div className="wrap max-w-5xl !px-0">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-xs text-white/75 transition-colors hover:text-white"
+            >
+              <ArrowLeft size={14} /> {t("nav.cabins")}
+            </Link>
+            <h1 className="mt-4 text-4xl text-white sm:text-5xl">
+              {lang === "ar" ? cabin.name_ar : cabin.name}
+            </h1>
+            <div className="mt-4 flex flex-wrap items-center gap-2.5">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs">
+                <Users size={13} /> {t("cabin.capacity", { n: cabin.capacity })}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs">
+                <MapPin size={13} /> Nefza, Béja
+              </span>
+              <span className="num inline-flex items-center gap-1.5 rounded-full bg-amber px-3 py-1.5 text-xs font-semibold text-amber-foreground">
+                {formatPrice(cabin.price_24h, lang)} / 24 h
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      <article className="mx-auto max-w-5xl px-5 pt-10">
         <PlankPhoto
           src={photos[0]!}
           alt={cabin.name}
-          className="mt-8"
+          className="rounded-2xl overflow-hidden"
           imgClassName="aspect-[16/9]"
           priority
         />
         <div className="mt-4 grid grid-cols-3 gap-4">
           {photos.slice(1, 4).map((p, i) => (
-            <PlankPhoto key={i} src={p} alt={`${cabin.name} — ${i + 2}`} imgClassName="aspect-[4/3]" />
+            <PlankPhoto
+              key={i}
+              src={p}
+              alt={`${cabin.name} — ${i + 2}`}
+              className="rounded-xl overflow-hidden"
+              imgClassName="aspect-[4/3]"
+            />
           ))}
         </div>
 
