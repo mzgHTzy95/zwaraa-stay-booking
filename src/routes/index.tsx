@@ -242,8 +242,8 @@ function Home() {
             <div className="fmedia-small">
               <img src={featureSmallImg} alt="Détail du lagon" />
             </div>
-            <div className="fchip top"><span className="ic">🌲</span> Collines de Béja</div>
-            <div className="fchip bottom"><span className="ic">🌊</span> Source d'eau douce</div>
+            <div className="fchip top"><span className="ic text-forest"><TreePine size={15} /></span> Collines de Béja</div>
+            <div className="fchip bottom"><span className="ic text-primary"><Waves size={15} /></span> Source d'eau douce</div>
           </div>
         </div>
       </section>
