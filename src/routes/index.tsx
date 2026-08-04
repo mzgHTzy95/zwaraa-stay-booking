@@ -8,7 +8,7 @@ import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { CabinExpand } from "@/components/site/cabin-expand";
 import type { ExpandCabin, OriginRect } from "@/components/site/cabin-expand";
 import { cabinCover, heroLagoon } from "@/lib/images";
-import { MapPinned } from "lucide-react";
+import { ArrowRight, Lock, MapPinned, Sparkles, TreePine, Users, Waves } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -100,8 +100,10 @@ function Home() {
 
   // Use the first cabin's photo for the small overlapping feature image,
   // falling back to the hero shot while cabins are loading / if none exist.
-  const featureSmallImg =
-    cabins && cabins.length > 0 ? cabinCover(cabins[0].slug, cabins[0].photos) : heroLagoon;
+  const firstCabin = cabins?.[0];
+  const featureSmallImg = firstCabin
+    ? cabinCover(firstCabin.slug, firstCabin.photos)
+    : heroLagoon;
 
   return (
     <div className="min-h-screen">
@@ -183,7 +185,7 @@ function Home() {
                       <div className="roof-chip" />
                       {isReserved && (
                         <div className="fav-btn text-destructive shadow" title={t("cabin.reserved")}>
-                          🔒
+                          <Lock size={14} />
                         </div>
                       )}
                     </div>
@@ -191,16 +193,16 @@ function Home() {
                     <div className="cabin-body">
                       <h3>{lang === "ar" ? cabin.name_ar : cabin.name}</h3>
                       <div className="cabin-meta">
-                         <span>👤 {t("cabin.capacity", { n: cabin.capacity })}</span>
-                         <span>✨ Vue sur l'eau</span>
+                         <span><Users size={14} /> {t("cabin.capacity", { n: cabin.capacity })}</span>
+                         <span><Sparkles size={14} /> Vue sur l'eau</span>
                       </div>
                       <div className="cabin-prices">
                          <div className="price-block">
                             <div className="price-label">{t("slot.24h")}</div>
                             <div className="price-val num">{formatPrice(cabin.price_24h, lang)} <span>/pers.</span></div>
                          </div>
-                         <div className="cabin-details-btn">
-                            {t("cabin.view")} →
+                         <div className="cabin-details-btn inline-flex items-center gap-1.5">
+                            {t("cabin.view")} <ArrowRight size={14} />
                          </div>
                       </div>
                     </div>
@@ -240,8 +242,8 @@ function Home() {
             <div className="fmedia-small">
               <img src={featureSmallImg} alt="Détail du lagon" />
             </div>
-            <div className="fchip top"><span className="ic">🌲</span> Collines de Béja</div>
-            <div className="fchip bottom"><span className="ic">🌊</span> Source d'eau douce</div>
+            <div className="fchip top"><span className="ic text-forest"><TreePine size={15} /></span> Collines de Béja</div>
+            <div className="fchip bottom"><span className="ic text-primary"><Waves size={15} /></span> Source d'eau douce</div>
           </div>
         </div>
       </section>

@@ -99,7 +99,7 @@ function Field({
 }: {
   label: string;
   children: React.ReactNode;
-  error?: string;
+  error?: string | undefined;
 }) {
   return (
     <label className="block">
@@ -197,8 +197,8 @@ function SummaryCard({
   nights: number;
   guestsCount: number;
   price: number;
-  t: (key: string, vars?: Record<string, unknown>) => string;
-  lang: string;
+  t: (key: string, vars?: Record<string, string | number>) => string;
+  lang: "fr" | "ar";
 }) {
   const photo = cabin?.photos?.[0] as string | undefined;
   return (

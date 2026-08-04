@@ -10,6 +10,7 @@ import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { PlankPhoto, WaveDivider } from "@/components/site/ornaments";
 import { cabinGallery } from "@/lib/images";
 import { PackList } from "@/components/site/pack";
+import { ArrowLeft, CalendarCheck, MapPin, Moon, Sun, Users } from "lucide-react";
 
 import { Calendar } from "@/components/ui/calendar";
 
@@ -111,27 +112,50 @@ function CabinDetail() {
     <div className="min-h-screen">
       <SiteHeader />
 
-      <article className="mx-auto max-w-5xl px-5 pt-10">
-        <Link to="/" className="text-xs text-muted-foreground hover:text-primary">
-          ← {t("nav.cabins")}
-        </Link>
-        <h1 className="mt-4 text-4xl text-primary sm:text-5xl">
-          {lang === "ar" ? cabin.name_ar : cabin.name}
-        </h1>
-        <p className="num mt-2 text-xs uppercase tracking-[0.18em] text-forest">
-          {t("cabin.capacity", { n: cabin.capacity })}
-        </p>
+      <div className="page-frame">
+        <div className="mini-hero px-6 py-9 sm:px-12 sm:py-12">
+          <div className="wrap max-w-5xl !px-0">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-xs text-white/75 transition-colors hover:text-white"
+            >
+              <ArrowLeft size={14} /> {t("nav.cabins")}
+            </Link>
+            <h1 className="mt-4 text-4xl text-white sm:text-5xl">
+              {lang === "ar" ? cabin.name_ar : cabin.name}
+            </h1>
+            <div className="mt-4 flex flex-wrap items-center gap-2.5">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs">
+                <Users size={13} /> {t("cabin.capacity", { n: cabin.capacity })}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs">
+                <MapPin size={13} /> Nefza, Béja
+              </span>
+              <span className="num inline-flex items-center gap-1.5 rounded-full bg-amber px-3 py-1.5 text-xs font-semibold text-amber-foreground">
+                {formatPrice(cabin.price_24h, lang)} / 24 h
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      <article className="mx-auto max-w-5xl px-5 pt-10">
         <PlankPhoto
           src={photos[0]!}
           alt={cabin.name}
-          className="mt-8"
+          className="rounded-2xl overflow-hidden"
           imgClassName="aspect-[16/9]"
           priority
         />
         <div className="mt-4 grid grid-cols-3 gap-4">
           {photos.slice(1, 4).map((p, i) => (
-            <PlankPhoto key={i} src={p} alt={`${cabin.name} — ${i + 2}`} imgClassName="aspect-[4/3]" />
+            <PlankPhoto
+              key={i}
+              src={p}
+              alt={`${cabin.name} — ${i + 2}`}
+              className="rounded-xl overflow-hidden"
+              imgClassName="aspect-[4/3]"
+            />
           ))}
         </div>
 
@@ -142,12 +166,12 @@ function CabinDetail() {
         <WaveDivider />
 
         <section className="grid gap-8 sm:grid-cols-2">
-          <div>
+          <div className="rounded-2xl border border-border bg-card p-6 card-shadow">
             <h2 className="text-2xl text-primary">{t("cabin.included")}</h2>
             <ul className="mt-5 space-y-3">
               {included.map((item) => (
                 <li key={item} className="flex items-start gap-3 text-sm">
-                  <span className="mt-[6px] block h-[6px] w-[6px] shrink-0 bg-amber" />
+                  <span className="mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full bg-amber" />
                   {item}
                 </li>
               ))}
@@ -159,11 +183,13 @@ function CabinDetail() {
 
         <WaveDivider />
 
-        <section className="grid gap-10 sm:grid-cols-[auto_1fr]">
-          <div>
-            <h2 className="text-2xl text-primary">{t("cabin.checkAvailability")}</h2>
-            <p className="mt-2 text-xs text-muted-foreground">{t("cabin.pickDate")}</p>
-            <div className="mt-4 border border-border bg-card p-2">
+        <section className="grid gap-8 sm:grid-cols-[auto_1fr]">
+          <div className="rounded-2xl border border-border bg-card p-4 card-shadow">
+            <h2 className="flex items-center gap-2 text-lg text-primary">
+              <CalendarCheck size={17} /> {t("cabin.checkAvailability")}
+            </h2>
+            <p className="mt-1 text-xs text-muted-foreground">{t("cabin.pickDate")}</p>
+            <div className="mt-3">
               <Calendar
                 mode="single"
                 selected={date}
@@ -178,11 +204,17 @@ function CabinDetail() {
             {(["half_day", "24h"] as const).map((slot) => {
               const taken = isTaken(slot);
               const price = slot === "half_day" ? cabin.price_half_day : cabin.price_24h;
+              const SlotIcon = slot === "half_day" ? Sun : Moon;
               return (
-                <div key={slot} className="border border-border bg-card p-5">
+                <div
+                  key={slot}
+                  className="rounded-2xl border border-border bg-card p-5 card-shadow transition-shadow hover:card-shadow-hover"
+                >
                   <div className="flex items-baseline justify-between gap-4">
-                    <h3 className="text-lg text-primary">{t(`slot.${slot}`)}</h3>
-                    <span className="num text-lg">{formatPrice(price, lang)}</span>
+                    <h3 className="flex items-center gap-2 text-lg text-primary">
+                      <SlotIcon size={16} className="text-amber" /> {t(`slot.${slot}`)}
+                    </h3>
+                    <span className="num text-lg font-semibold">{formatPrice(price, lang)}</span>
                   </div>
                   {slot === "24h" ? (
                     <p className="mt-1 text-[11px] text-muted-foreground">{t("cabin.perPerson")}</p>
@@ -192,8 +224,8 @@ function CabinDetail() {
                     <p
                       className={
                         taken
-                          ? "num mt-2 text-xs text-destructive"
-                          : "num mt-2 text-xs text-forest"
+                          ? "num mt-2 inline-flex rounded-full bg-destructive/10 px-2.5 py-1 text-xs text-destructive"
+                          : "num mt-2 inline-flex rounded-full bg-forest/10 px-2.5 py-1 text-xs text-forest"
                       }
                     >
                       {dateKey} — {taken ? t("cabin.unavailable") : t("cabin.available")}
@@ -207,7 +239,7 @@ function CabinDetail() {
                     type="button"
                     disabled={taken}
                     onClick={() => goBook(slot)}
-                    className="mt-4 w-full bg-coral px-4 py-3 text-sm font-medium text-coral-foreground transition-colors hover:bg-coral/90 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground"
+                    className="btn-pill btn-coral mt-4 w-full py-3.5 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none"
                   >
                     {t("cabin.reserve")}
                   </button>

@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { adminExists, bootstrapAdmin } from "@/lib/admin-setup.functions";
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { LanguageSwitch } from "@/components/site/chrome";
+import { InstallAdminButton } from "@/components/site/install-button";
+import { Check, Plus, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -105,15 +107,21 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-          <span className="font-[family-name:var(--font-display)] text-lg text-primary">
-            {t("brand.name")} <span className="text-muted-foreground text-sm">· {t("admin.title")}</span>
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-4">
+          <span className="flex items-center gap-2 font-[family-name:var(--font-display)] text-lg text-primary">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-coral text-sm text-coral-foreground">
+              Z
+            </span>
+            {t("brand.name")} <span className="hidden text-sm text-muted-foreground sm:inline">· {t("admin.title")}</span>
           </span>
-          <LanguageSwitch />
+          <div className="flex items-center gap-2">
+            <InstallAdminButton />
+            <LanguageSwitch />
+          </div>
         </div>
       </header>
       <div className="page-frame pb-24">
-         <main className="wrap pt-10">{children}</main>
+         <main className="wrap max-w-6xl pt-10">{children}</main>
       </div>
     </div>
   );
@@ -498,27 +506,27 @@ function ReservationCard({
             <button
               type="button"
               onClick={() => onQuickStatus(r.id, "confirmed")}
-              className="rounded-lg border border-forest/30 bg-forest/10 px-3 py-1.5 text-xs font-medium text-forest transition-colors hover:bg-forest/20"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-forest/30 bg-forest/10 px-3 py-1.5 text-xs font-medium text-forest transition-colors hover:bg-forest/20"
             >
-              ✓ {t("admin.confirm")}
+              <Check className="h-3.5 w-3.5" /> {t("admin.confirm")}
             </button>
           )}
           {r.status !== "completed" && r.status !== "cancelled" && (
             <button
               type="button"
               onClick={() => onQuickStatus(r.id, "completed")}
-              className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
             >
-              ✓ {t("admin.complete")}
+              <Check className="h-3.5 w-3.5" /> {t("admin.complete")}
             </button>
           )}
           {r.status !== "cancelled" && (
             <button
               type="button"
               onClick={() => onQuickStatus(r.id, "cancelled")}
-              className="rounded-lg border border-amber/30 bg-amber/10 px-3 py-1.5 text-xs font-medium text-amber-foreground/80 transition-colors hover:bg-amber/20"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-amber/30 bg-amber/10 px-3 py-1.5 text-xs font-medium text-amber-foreground/80 transition-colors hover:bg-amber/20"
             >
-              ✗ {t("admin.cancel")}
+              <X className="h-3.5 w-3.5" /> {t("admin.cancel")}
             </button>
           )}
 
@@ -603,9 +611,9 @@ function AddCabinCard({ onSaved }: { onSaved: () => void }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="w-full rounded-2xl border-2 border-dashed border-primary/30 px-4 py-4 text-sm text-primary hover:border-primary hover:bg-primary/5 transition-colors"
+        className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary/30 px-4 py-4 text-sm text-primary hover:border-primary hover:bg-primary/5 transition-colors"
       >
-        + {t("admin.addCabin")}
+        <Plus className="h-4 w-4" /> {t("admin.addCabin")}
       </button>
     );
   }
