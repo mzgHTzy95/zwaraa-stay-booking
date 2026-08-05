@@ -178,72 +178,33 @@ function CabinDetail() {
 
         <WaveDivider />
 
-        <section className="grid gap-8 sm:grid-cols-[auto_1fr]">
-          <div className="rounded-2xl border border-border bg-card p-4 card-shadow">
-            <h2 className="flex items-center gap-2 text-lg text-primary">
-              <CalendarCheck size={17} /> {t("cabin.checkAvailability")}
-            </h2>
-            <p className="mt-1 text-xs text-muted-foreground">{t("cabin.pickDate")}</p>
-            <div className="mt-3">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                disabled={[{ before: new Date() }, ...fullyBookedDays]}
-                className="pointer-events-auto"
-              />
-            </div>
+        {/* Gallery page: pricing is fleet-wide, booking happens from the search form */}
+        <section className="rounded-2xl border border-border bg-card p-6 card-shadow">
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <dl className="flex flex-wrap gap-10">
+              <div>
+                <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <Sun size={13} className="text-amber" /> {t("slot.half_day")}
+                </dt>
+                <dd className="num mt-1 text-xl font-semibold">{formatPrice(cabin.price_half_day, lang)}</dd>
+                <dd className="text-[11px] text-muted-foreground">{t("cabin.perPersonHalf")}</dd>
+              </div>
+              <div>
+                <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <Moon size={13} className="text-primary" /> {t("slot.24h")}
+                </dt>
+                <dd className="num mt-1 text-xl font-semibold">{formatPrice(cabin.price_24h, lang)}</dd>
+                <dd className="text-[11px] text-muted-foreground">{t("cabin.perPerson")}</dd>
+              </div>
+            </dl>
+            <Link to="/" hash="search" className="btn-pill btn-coral inline-flex items-center gap-2 py-3.5">
+              <CalendarCheck size={16} /> {t("search.cta")}
+            </Link>
           </div>
-
-          <div className="space-y-4 self-start">
-            {(["half_day", "24h"] as const).map((slot) => {
-              const taken = isTaken(slot);
-              const price = slot === "half_day" ? cabin.price_half_day : cabin.price_24h;
-              const SlotIcon = slot === "half_day" ? Sun : Moon;
-              return (
-                <div
-                  key={slot}
-                  className="rounded-2xl border border-border bg-card p-5 card-shadow transition-shadow hover:card-shadow-hover"
-                >
-                  <div className="flex items-baseline justify-between gap-4">
-                    <h3 className="flex items-center gap-2 text-lg text-primary">
-                      <SlotIcon size={16} className="text-amber" /> {t(`slot.${slot}`)}
-                    </h3>
-                    <span className="num text-lg font-semibold">{formatPrice(price, lang)}</span>
-                  </div>
-                  {slot === "24h" ? (
-                    <p className="mt-1 text-[11px] text-muted-foreground">{t("cabin.perPerson")}</p>
-                  ) : null}
-
-                  {dateKey ? (
-                    <p
-                      className={
-                        taken
-                          ? "num mt-2 inline-flex rounded-full bg-destructive/10 px-2.5 py-1 text-xs text-destructive"
-                          : "num mt-2 inline-flex rounded-full bg-forest/10 px-2.5 py-1 text-xs text-forest"
-                      }
-                    >
-                      {dateKey} — {taken ? t("cabin.unavailable") : t("cabin.available")}
-                    </p>
-                  ) : (
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      {t("book.selectSlotFirst")}
-                    </p>
-                  )}
-                  <button
-                    type="button"
-                    disabled={taken}
-                    onClick={() => goBook(slot)}
-                    className="btn-pill btn-coral mt-4 w-full py-3.5 disabled:cursor-not-allowed disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none"
-                  >
-                    {t("cabin.reserve")}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
+          <p className="mt-4 text-xs text-muted-foreground">{t("gallery.note")}</p>
         </section>
       </article>
+
 
       <SiteFooter />
     </div>
