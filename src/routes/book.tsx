@@ -32,7 +32,10 @@ import { PackList } from "@/components/site/pack";
 const searchSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   slot: z.enum(["half_day", "24h"]).optional(),
+  guests: z.number().int().optional(),
+  nights: z.number().int().optional(),
 });
+
 
 export const Route = createFileRoute("/book")({
   validateSearch: searchSchema,
