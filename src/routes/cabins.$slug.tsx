@@ -75,12 +75,8 @@ function CabinDetail() {
     );
   }
 
-  const dateKey = date ? format(date, "yyyy-MM-dd") : null;
-  const isTaken = (slot: "half_day" | "24h") =>
-    !!dateKey && (booked ?? []).some((b) => b.date === dateKey && b.slot === slot);
-  const fullyBookedDays = (booked ?? [])
-    .filter((b) => b.slot === "24h")
-    .map((b) => new Date(`${b.date}T00:00:00`));
+
+
 
   const photos = cabinGallery(cabin.slug, cabin.photos);
   const included = lang === "ar" ? cabin.included_package_ar : cabin.included_package;
