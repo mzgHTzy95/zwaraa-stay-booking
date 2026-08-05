@@ -157,13 +157,15 @@ function Home() {
         </div>
       </section>
 
+      <AvailabilitySearch />
+
       <section id="cabins" className="cabins">
         <div className="wrap">
           <div className="section-head">
             <h2>{t("cabins.title")}</h2>
-            <div className="see-all">{t("cabins.subtitle")}</div>
+            <div className="see-all">{t("gallery.note")}</div>
           </div>
-          
+
           {isLoading ? (
             <div className="py-16 text-center text-sm text-muted-foreground">{t("common.loading")}</div>
           ) : (
@@ -202,7 +204,7 @@ function Home() {
                             <div className="price-val num">{formatPrice(cabin.price_24h, lang)} <span>/pers.</span></div>
                          </div>
                          <div className="cabin-details-btn inline-flex items-center gap-1.5">
-                            {t("cabin.view")} <ArrowRight size={14} />
+                            {t("cabin.viewPhotos")} <ArrowRight size={14} />
                          </div>
                       </div>
                     </div>
@@ -213,6 +215,7 @@ function Home() {
           )}
         </div>
       </section>
+
 
       <section className="feature">
         <div className="wrap feature-inner">
