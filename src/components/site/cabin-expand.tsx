@@ -157,7 +157,7 @@ export function CabinExpand({
                       {t("slot.half_day")}
                     </dt>
                     <dd className="num mt-1 text-xl font-semibold">{formatPrice(cabin.price_half_day, lang)}</dd>
-                    <dd className="text-[10px] text-muted-foreground">forfait</dd>
+                    <dd className="text-[10px] text-muted-foreground">{t("cabin.perPersonHalf")}</dd>
                   </div>
                   <div>
                     <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -167,15 +167,8 @@ export function CabinExpand({
                     <dd className="mt-0.5 text-[11px] text-muted-foreground">{t("cabin.perPerson")}</dd>
                   </div>
                 </dl>
-                <div className="flex gap-3">
-                  <Link
-                    to="/book"
-                    search={{ date: undefined, slot: "24h" as const }}
-                    className="rounded-xl bg-coral px-6 py-3 text-sm font-medium text-coral-foreground hover:bg-coral/90 transition-all"
-                  >
-                    {t("cabin.reserve")}
-                  </Link>
-                </div>
+                <p className="max-w-xs text-[11px] text-muted-foreground">{t("gallery.note")}</p>
+
               </div>
             </div>
           </div>

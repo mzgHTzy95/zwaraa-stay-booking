@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { OccupancyCalendar } from "@/components/site/admin-calendar";
+import type { CalendarReservation, CalendarCabin } from "@/components/site/admin-calendar";
+
 import { toast } from "sonner";
 import type { Session } from "@supabase/supabase-js";
 import { useServerFn } from "@tanstack/react-start";
@@ -253,7 +256,7 @@ const STATUS_CONFIG: Record<
 function Dashboard() {
   const { t, lang } = useI18n();
   const qc = useQueryClient();
-  const [tab, setTab] = useState<"reservations" | "cabins">("reservations");
+  const [tab, setTab] = useState<"reservations" | "calendar" | "cabins">("reservations");
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"all" | ReservationRow["status"]>("all");
   const [editing, setEditing] = useState<ReservationRow | null>(null);
@@ -333,7 +336,7 @@ function Dashboard() {
       {/* Top nav */}
       <div className="flex items-center justify-between">
         <div className="flex gap-1 rounded-xl border border-border bg-card p-1 card-shadow">
-          {(["reservations", "cabins"] as const).map((k) => (
+          {(["reservations", "calendar", "cabins"] as const).map((k) => (
             <button
               key={k}
               type="button"
@@ -345,9 +348,14 @@ function Dashboard() {
                   : "text-muted-foreground hover:text-primary",
               ].join(" ")}
             >
-              {k === "reservations" ? t("admin.reservations") : t("admin.cabinsTab")}
+              {k === "reservations"
+                ? t("admin.reservations")
+                : k === "calendar"
+                  ? t("admin.calendarTab")
+                  : t("admin.cabinsTab")}
             </button>
           ))}
+
         </div>
         <button
           type="button"
@@ -366,7 +374,15 @@ function Dashboard() {
         <Stat label={t("admin.month")} value={String(stats.month)} />
       </div>
 
+      {tab === "calendar" ? (
+        <OccupancyCalendar
+          reservations={(reservations ?? []) as unknown as CalendarReservation[]}
+          cabins={(cabins ?? []) as unknown as CalendarCabin[]}
+        />
+      ) : null}
+
       {tab === "reservations" ? (
+
         <section className="mt-10">
           <div className="flex flex-col gap-3 sm:flex-row">
             <input

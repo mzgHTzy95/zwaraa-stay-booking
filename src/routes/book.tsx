@@ -32,7 +32,10 @@ import { PackList } from "@/components/site/pack";
 const searchSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   slot: z.enum(["half_day", "24h"]).optional(),
+  guests: z.number().int().optional(),
+  nights: z.number().int().optional(),
 });
+
 
 export const Route = createFileRoute("/book")({
   validateSearch: searchSchema,
@@ -287,7 +290,7 @@ function BookingFlow() {
     search.date ? new Date(`${search.date}T00:00:00`) : undefined,
   );
   const [slot, setSlot] = useState<"half_day" | "24h">(search.slot ?? "half_day");
-  const [nights, setNights] = useState(1);
+  const [nights, setNights] = useState(Math.min(30, Math.max(1, search.nights ?? 1)));
   const [payMethod, setPayMethod] = useState<PayMethod>("card");
 
   const [guest, setGuest] = useState<Guest>({
@@ -295,8 +298,9 @@ function BookingFlow() {
     fullName: "",
     phone: "",
     dateOfBirth: "",
-    guestsCount: 2,
+    guestsCount: Math.max(1, search.guests ?? 2),
   });
+
   const [errors, setErrors] = useState<Partial<Record<keyof Guest, string>>>({});
   const [reservation, setReservation] = useState<{ id: string; reference: string; total: number } | null>(
     null,
@@ -354,7 +358,10 @@ function BookingFlow() {
   const effectiveNights = slot === "24h" ? nights : 1;
   const unitPrice = Number(slot === "half_day" ? cabin.price_half_day : cabin.price_24h);
   const price =
-    slot === "half_day" ? unitPrice : unitPrice * guest.guestsCount * effectiveNights;
+    slot === "half_day"
+      ? unitPrice * guest.guestsCount
+      : unitPrice * guest.guestsCount * effectiveNights;
+
 
   const stayDays = (start: string, count: number) => {
     const base = new Date(`${start}T00:00:00Z`).getTime();

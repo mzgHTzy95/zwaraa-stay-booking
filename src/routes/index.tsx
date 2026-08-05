@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { CabinExpand } from "@/components/site/cabin-expand";
+import { AvailabilitySearch } from "@/components/site/availability-search";
+
 import type { ExpandCabin, OriginRect } from "@/components/site/cabin-expand";
 import { cabinCover, heroLagoon } from "@/lib/images";
 import { ArrowRight, Lock, MapPinned, Sparkles, TreePine, Users, Waves } from "lucide-react";
@@ -130,7 +132,7 @@ function Home() {
                  <div className="val">{t("brand.name")}</div>
                </div>
              </div>
-             <a href="#cabins" className="btn-cta self-center">{t("hero.cta")}</a>
+             <a href="#search" className="btn-cta self-center">{t("hero.cta")}</a>
           </div>
         </div>
       </div>
@@ -157,13 +159,15 @@ function Home() {
         </div>
       </section>
 
+      <AvailabilitySearch />
+
       <section id="cabins" className="cabins">
         <div className="wrap">
           <div className="section-head">
             <h2>{t("cabins.title")}</h2>
-            <div className="see-all">{t("cabins.subtitle")}</div>
+            <div className="see-all">{t("gallery.note")}</div>
           </div>
-          
+
           {isLoading ? (
             <div className="py-16 text-center text-sm text-muted-foreground">{t("common.loading")}</div>
           ) : (
@@ -202,7 +206,7 @@ function Home() {
                             <div className="price-val num">{formatPrice(cabin.price_24h, lang)} <span>/pers.</span></div>
                          </div>
                          <div className="cabin-details-btn inline-flex items-center gap-1.5">
-                            {t("cabin.view")} <ArrowRight size={14} />
+                            {t("cabin.viewPhotos")} <ArrowRight size={14} />
                          </div>
                       </div>
                     </div>
@@ -213,6 +217,7 @@ function Home() {
           )}
         </div>
       </section>
+
 
       <section className="feature">
         <div className="wrap feature-inner">
