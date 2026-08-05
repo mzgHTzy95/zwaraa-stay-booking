@@ -333,7 +333,7 @@ function Dashboard() {
       {/* Top nav */}
       <div className="flex items-center justify-between">
         <div className="flex gap-1 rounded-xl border border-border bg-card p-1 card-shadow">
-          {(["reservations", "cabins"] as const).map((k) => (
+          {(["reservations", "calendar", "cabins"] as const).map((k) => (
             <button
               key={k}
               type="button"
@@ -345,9 +345,14 @@ function Dashboard() {
                   : "text-muted-foreground hover:text-primary",
               ].join(" ")}
             >
-              {k === "reservations" ? t("admin.reservations") : t("admin.cabinsTab")}
+              {k === "reservations"
+                ? t("admin.reservations")
+                : k === "calendar"
+                  ? t("admin.calendarTab")
+                  : t("admin.cabinsTab")}
             </button>
           ))}
+
         </div>
         <button
           type="button"
