@@ -47,6 +47,52 @@ export const getBookedSlots = createServerFn({ method: "POST" })
     return out;
   });
 
+/**
+ * Per-day availability across the whole (active) fleet.
+ * Returns how many bungalows are still free on each date for each pack.
+ */
+export const getDayAvailability = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => availabilityInput.parse(data))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: cabins, error: cabinError } = await supabaseAdmin
+      .from("cabins")
+      .select("id, capacity")
+      .eq("is_active", true);
+    if (cabinError) throw new Error(cabinError.message);
+    const totalCabins = cabins?.length ?? 0;
+    const maxCapacity = Math.max(0, ...(cabins ?? []).map((c) => Number(c.capacity)));
+
+    const { data: rows, error } = await supabaseAdmin
+      .from("reservations")
+      .select("reservation_date, nights, slot")
+      .neq("status", "cancelled")
+      .gte("reservation_date", new Date(new Date(`${data.from}T00:00:00Z`).getTime() - 30 * 86400000).toISOString().slice(0, 10))
+      .lte("reservation_date", data.to);
+    if (error) throw new Error(error.message);
+
+    const used: Record<string, number> = {};
+    for (const r of rows ?? []) {
+      const nights = Math.max(1, Number(r.nights ?? 1));
+      const start = new Date(`${r.reservation_date}T00:00:00Z`).getTime();
+      for (let i = 0; i < nights; i += 1) {
+        const d = new Date(start + i * 86400000).toISOString().slice(0, 10);
+        used[d] = (used[d] ?? 0) + 1;
+      }
+    }
+
+    const days: { date: string; free: number }[] = [];
+    const from = new Date(`${data.from}T00:00:00Z`).getTime();
+    const to = new Date(`${data.to}T00:00:00Z`).getTime();
+    for (let ts = from; ts <= to; ts += 86400000) {
+      const date = new Date(ts).toISOString().slice(0, 10);
+      days.push({ date, free: Math.max(0, totalCabins - (used[date] ?? 0)) });
+    }
+
+    return { totalCabins, maxCapacity, days };
+  });
+
+
 const reservationInput = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   slot: z.enum(["half_day", "24h"]),
