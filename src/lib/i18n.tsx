@@ -315,6 +315,15 @@ const ar: Dict = {
   "admin.confirm": "تأكيد",
   "admin.complete": "إتمام",
   "admin.quickStatus": "تغيير سريع",
+  "admin.calendarTab": "الرزنامة",
+  "admin.occupancy": "نسبة الإشغال",
+  "admin.freeUnits": "{n} متاح",
+  "admin.noBookingsDay": "لا توجد حجوزات في هذا اليوم.",
+  "admin.dayDetails": "حجوزات اليوم",
+  "admin.assigned": "البنغالو المسند",
+  "admin.prevMonth": "الشهر السابق",
+  "admin.nextMonth": "الشهر الموالي",
+
 
   "status.pending": "في الانتظار",
   "status.confirmed": "مؤكدة",
