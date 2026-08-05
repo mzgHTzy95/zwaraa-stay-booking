@@ -358,7 +358,10 @@ function BookingFlow() {
   const effectiveNights = slot === "24h" ? nights : 1;
   const unitPrice = Number(slot === "half_day" ? cabin.price_half_day : cabin.price_24h);
   const price =
-    slot === "half_day" ? unitPrice : unitPrice * guest.guestsCount * effectiveNights;
+    slot === "half_day"
+      ? unitPrice * guest.guestsCount
+      : unitPrice * guest.guestsCount * effectiveNights;
+
 
   const stayDays = (start: string, count: number) => {
     const base = new Date(`${start}T00:00:00Z`).getTime();
