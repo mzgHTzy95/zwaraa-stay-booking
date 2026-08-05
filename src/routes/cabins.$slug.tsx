@@ -31,9 +31,8 @@ export const Route = createFileRoute("/cabins/$slug")({
 function CabinDetail() {
   const { slug } = Route.useParams();
   const { t, lang } = useI18n();
-  const navigate = useNavigate();
-  const [date, setDate] = useState<Date | undefined>();
-  const fetchBooked = useServerFn(getBookedSlots);
+
+
 
   const { data: cabin, isLoading } = useQuery({
     queryKey: ["cabin", slug],
