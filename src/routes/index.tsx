@@ -132,7 +132,7 @@ function Home() {
                  <div className="val">{t("brand.name")}</div>
                </div>
              </div>
-             <a href="#cabins" className="btn-cta self-center">{t("hero.cta")}</a>
+             <a href="#search" className="btn-cta self-center">{t("hero.cta")}</a>
           </div>
         </div>
       </div>
