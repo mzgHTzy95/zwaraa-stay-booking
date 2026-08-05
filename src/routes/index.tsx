@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { CabinExpand } from "@/components/site/cabin-expand";
+import { AvailabilitySearch } from "@/components/site/availability-search";
+
 import type { ExpandCabin, OriginRect } from "@/components/site/cabin-expand";
 import { cabinCover, heroLagoon } from "@/lib/images";
 import { ArrowRight, Lock, MapPinned, Sparkles, TreePine, Users, Waves } from "lucide-react";
