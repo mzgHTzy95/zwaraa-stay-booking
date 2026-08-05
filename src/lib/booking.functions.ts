@@ -108,8 +108,9 @@ export const createReservation = createServerFn({ method: "POST" })
 
     const total =
       data.slot === "half_day"
-        ? Number(availableCabin.price_half_day)
+        ? Number(availableCabin.price_half_day) * data.guestsCount
         : Number(availableCabin.price_24h) * data.guestsCount * nights;
+
 
     const { data: inserted, error } = await supabaseAdmin
       .from("reservations")
