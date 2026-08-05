@@ -1,10 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { format, addMonths } from "date-fns";
-import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { getBookedSlots } from "@/lib/booking.functions";
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { PlankPhoto, WaveDivider } from "@/components/site/ornaments";
@@ -12,7 +8,6 @@ import { cabinGallery } from "@/lib/images";
 import { PackList } from "@/components/site/pack";
 import { ArrowLeft, CalendarCheck, MapPin, Moon, Sun, Users } from "lucide-react";
 
-import { Calendar } from "@/components/ui/calendar";
 
 export const Route = createFileRoute("/cabins/$slug")({
   head: () => ({
