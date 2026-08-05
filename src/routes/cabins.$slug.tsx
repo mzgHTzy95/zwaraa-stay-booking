@@ -48,16 +48,7 @@ function CabinDetail() {
     },
   });
 
-  const range = useMemo(() => {
-    const from = new Date();
-    return { from: format(from, "yyyy-MM-dd"), to: format(addMonths(from, 6), "yyyy-MM-dd") };
-  }, []);
 
-  const { data: booked } = useQuery({
-    queryKey: ["booked", cabin?.id],
-    enabled: !!cabin?.id,
-    queryFn: () => fetchBooked({ data: { cabinId: cabin!.id, from: range.from, to: range.to } }),
-  });
 
   if (isLoading) {
     return (
