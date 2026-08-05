@@ -290,7 +290,7 @@ function BookingFlow() {
     search.date ? new Date(`${search.date}T00:00:00`) : undefined,
   );
   const [slot, setSlot] = useState<"half_day" | "24h">(search.slot ?? "half_day");
-  const [nights, setNights] = useState(1);
+  const [nights, setNights] = useState(Math.min(30, Math.max(1, search.nights ?? 1)));
   const [payMethod, setPayMethod] = useState<PayMethod>("card");
 
   const [guest, setGuest] = useState<Guest>({
@@ -298,8 +298,9 @@ function BookingFlow() {
     fullName: "",
     phone: "",
     dateOfBirth: "",
-    guestsCount: 2,
+    guestsCount: Math.max(1, search.guests ?? 2),
   });
+
   const [errors, setErrors] = useState<Partial<Record<keyof Guest, string>>>({});
   const [reservation, setReservation] = useState<{ id: string; reference: string; total: number } | null>(
     null,
