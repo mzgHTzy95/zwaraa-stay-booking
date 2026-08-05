@@ -150,6 +150,15 @@ const fr: Dict = {
   "admin.confirm": "Confirmer",
   "admin.complete": "Terminer",
   "admin.quickStatus": "Statut rapide",
+  "admin.calendarTab": "Calendrier",
+  "admin.occupancy": "Occupation",
+  "admin.freeUnits": "{n} libre(s)",
+  "admin.noBookingsDay": "Aucune réservation ce jour.",
+  "admin.dayDetails": "Réservations du jour",
+  "admin.assigned": "Bungalow attribué",
+  "admin.prevMonth": "Mois précédent",
+  "admin.nextMonth": "Mois suivant",
+
 
   "status.pending": "En attente",
   "status.confirmed": "Confirmée",
