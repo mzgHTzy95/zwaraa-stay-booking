@@ -34,7 +34,7 @@ const searchSchema = z.object({
   slot: z.enum(["half_day", "24h"]).optional(),
 });
 
-export const Route = createFileRoute("/book/$slug")({
+export const Route = createFileRoute("/book")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
@@ -278,7 +278,6 @@ function SummaryCard({
 }
 
 function BookingFlow() {
-  const { slug } = Route.useParams();
   const search = Route.useSearch();
   const { t, lang } = useI18n();
   const navigate = useNavigate();
@@ -311,13 +310,14 @@ function BookingFlow() {
   const pay = useServerFn(payReservation);
 
   const { data: cabin } = useQuery({
-    queryKey: ["cabin", slug],
+    queryKey: ["cabin", "base"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("cabins")
         .select("*")
-        .eq("slug", slug)
         .eq("is_active", true)
+        .order("sort_order")
+        .limit(1)
         .maybeSingle();
       if (error) throw error;
       return data;
@@ -330,9 +330,8 @@ function BookingFlow() {
   }, []);
 
   const { data: booked } = useQuery({
-    queryKey: ["booked", cabin?.id],
-    enabled: !!cabin?.id,
-    queryFn: () => fetchBooked({ data: { cabinId: cabin!.id, from: range.from, to: range.to } }),
+    queryKey: ["booked-all"],
+    queryFn: () => fetchBooked({ data: { from: range.from, to: range.to } }),
   });
 
   const stepRef = useRef<HTMLElement | HTMLFormElement>(null);
@@ -401,7 +400,7 @@ function BookingFlow() {
   const confirm = async () => {
     if (!dateKey) return;
     const result = await create({
-      data: { cabinId: cabin.id, date: dateKey, slot, nights: effectiveNights, ...guest },
+      data: { date: dateKey, slot, nights: effectiveNights, ...guest },
     });
 
     if (!result.ok) {
@@ -439,7 +438,7 @@ function BookingFlow() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
-      <div className="page-frame pb-24">
+      <div className="page-frame pb-24 mb-25">
         <div className="wrap max-w-5xl pt-8">
           {/* Mini booking-context bar */}
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-4 ">
@@ -457,8 +456,7 @@ function BookingFlow() {
               </div>
             </div>
             <Link
-              to="/cabins/$slug"
-              params={{ slug }}
+              to="/"
               className="flex shrink-0 items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
             >
               Modifier <ArrowRight className="h-3.5 w-3.5" />

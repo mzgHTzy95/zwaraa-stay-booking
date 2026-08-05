@@ -83,11 +83,11 @@ export function CabinExpand({
         }}
       >
         <div
-          className={`mx-auto max-w-4xl px-5 pb-20 pt-8 transition-opacity duration-300 ${
+          className={`mx-auto max-w-6xl px-5 pb-20 pt-8 transition-opacity duration-300 ${
             open ? "opacity-100 delay-200" : "opacity-0"
           }`}
         >
-          <div className="flex items-start justify-between gap-6">
+          <div className="flex items-start justify-between gap-6 mb-8">
             <div>
               <p className="num text-[11px] uppercase tracking-[0.22em] text-forest">
                 {t("cabin.capacity", { n: cabin.capacity })}
@@ -105,78 +105,78 @@ export function CabinExpand({
             </button>
           </div>
 
-          <PlankPhoto
-            src={photos[0]!}
-            alt={cabin.name}
-            className="mt-7 rounded-2xl overflow-hidden"
-            imgClassName="aspect-[16/9]"
-            priority
-          />
-          <div className="mt-4 grid grid-cols-3 gap-4">
-            {photos.slice(1, 4).map((p, i) => (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            {/* Left Column: Images */}
+            <div>
               <PlankPhoto
-                key={i}
-                src={p}
-                alt={`${cabin.name} — ${i + 2}`}
-                className="rounded-xl overflow-hidden"
-                imgClassName="aspect-[4/3]"
+                src={photos[0]!}
+                alt={cabin.name}
+                className="rounded-2xl overflow-hidden"
+                imgClassName="aspect-[16/9]"
+                priority
               />
-            ))}
-          </div>
-
-          <p className="mt-8 max-w-2xl text-base leading-relaxed text-foreground/85">
-            {lang === "ar" ? cabin.description_ar : cabin.description}
-          </p>
-
-          <div className="mt-9 grid gap-6 sm:grid-cols-2">
-            <section className="rounded-2xl border border-amber/25 bg-amber/5 p-5">
-              <h3 className="text-lg text-primary">{t("cabin.included")}</h3>
-              <ul className="mt-4 space-y-2.5 text-sm">
-                {included.map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <span className="mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full bg-amber" />
-                    {item}
-                  </li>
+              <div className="mt-4 grid grid-cols-3 gap-4">
+                {photos.slice(1, 4).map((p, i) => (
+                  <PlankPhoto
+                    key={i}
+                    src={p}
+                    alt={`${cabin.name} — ${i + 2}`}
+                    className="rounded-xl overflow-hidden"
+                    imgClassName="aspect-[4/3]"
+                  />
                 ))}
-              </ul>
-            </section>
-            <PackList />
-          </div>
+              </div>
+            </div>
 
-          {/* Pricing + CTA */}
-          <div className="mt-10 flex flex-wrap items-end justify-between gap-6 rounded-2xl border border-primary/20 bg-primary/5 px-6 py-5">
-            <dl className="flex gap-10">
-              <div>
-                <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                  {t("slot.half_day")}
-                </dt>
-                <dd className="num mt-1 text-xl font-semibold">{formatPrice(cabin.price_half_day, lang)}</dd>
-                <dd className="text-[10px] text-muted-foreground">forfait</dd>
+            {/* Right Column: Details */}
+            <div className="flex flex-col">
+              <p className="max-w-2xl text-base leading-relaxed text-foreground/85">
+                {lang === "ar" ? cabin.description_ar : cabin.description}
+              </p>
+
+              <div className="mt-9 grid gap-6 sm:grid-cols-2">
+                <section className="rounded-2xl border border-amber/25 bg-amber/5 p-5">
+                  <h3 className="text-lg text-primary">{t("cabin.included")}</h3>
+                  <ul className="mt-4 space-y-2.5 text-sm">
+                    {included.map((item) => (
+                      <li key={item} className="flex items-start gap-3">
+                        <span className="mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full bg-amber" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+                <PackList />
               </div>
-              <div>
-                <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                  {t("slot.24h")}
-                </dt>
-                <dd className="num mt-1 text-xl font-semibold">{formatPrice(cabin.price_24h, lang)}</dd>
-                <dd className="mt-0.5 text-[11px] text-muted-foreground">{t("cabin.perPerson")}</dd>
+
+              {/* Pricing + CTA */}
+              <div className="mt-auto pt-10 flex flex-wrap items-end justify-between gap-6 rounded-2xl border border-primary/20 bg-primary/5 px-6 py-5">
+                <dl className="flex gap-10">
+                  <div>
+                    <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                      {t("slot.half_day")}
+                    </dt>
+                    <dd className="num mt-1 text-xl font-semibold">{formatPrice(cabin.price_half_day, lang)}</dd>
+                    <dd className="text-[10px] text-muted-foreground">forfait</dd>
+                  </div>
+                  <div>
+                    <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                      {t("slot.24h")}
+                    </dt>
+                    <dd className="num mt-1 text-xl font-semibold">{formatPrice(cabin.price_24h, lang)}</dd>
+                    <dd className="mt-0.5 text-[11px] text-muted-foreground">{t("cabin.perPerson")}</dd>
+                  </div>
+                </dl>
+                <div className="flex gap-3">
+                  <Link
+                    to="/book"
+                    search={{ date: undefined, slot: "24h" as const }}
+                    className="rounded-xl bg-coral px-6 py-3 text-sm font-medium text-coral-foreground hover:bg-coral/90 transition-all"
+                  >
+                    {t("cabin.reserve")}
+                  </Link>
+                </div>
               </div>
-            </dl>
-            <div className="flex gap-3">
-              <Link
-                to="/cabins/$slug"
-                params={{ slug: cabin.slug }}
-                className="rounded-xl border border-input px-5 py-3 text-sm text-primary hover:border-primary transition-colors"
-              >
-                {t("cabin.checkAvailability")}
-              </Link>
-              <Link
-                to="/book/$slug"
-                params={{ slug: cabin.slug }}
-                search={{ date: undefined, slot: "24h" as const }}
-                className="rounded-xl bg-coral px-6 py-3 text-sm font-medium text-coral-foreground hover:bg-coral/90 transition-all"
-              >
-                {t("cabin.reserve")}
-              </Link>
             </div>
           </div>
         </div>

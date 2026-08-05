@@ -2,7 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 const availabilityInput = z.object({
-  cabinId: z.string().uuid(),
   from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 });
@@ -11,30 +10,44 @@ export const getBookedSlots = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => availabilityInput.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: cabins, error: cabinError } = await supabaseAdmin.from("cabins").select("id").eq("is_active", true);
+    if (cabinError) throw new Error(cabinError.message);
+    const totalCabins = cabins?.length || 0;
+    if (totalCabins === 0) return [];
+
     const { data: rows, error } = await supabaseAdmin
       .from("reservations")
       .select("reservation_date, nights, slot")
-      .eq("cabin_id", data.cabinId)
       .neq("status", "cancelled")
       .gte("reservation_date", data.from)
       .lte("reservation_date", data.to);
     if (error) throw new Error(error.message);
 
-    const out: { date: string; slot: "half_day" | "24h" }[] = [];
+    const counts: Record<string, { half_day: number; "24h": number }> = {};
     for (const r of rows ?? []) {
       const nights = Math.max(1, Number(r.nights ?? 1));
       const start = new Date(`${r.reservation_date}T00:00:00Z`);
       for (let i = 0; i < nights; i += 1) {
-        const d = new Date(start.getTime() + i * 86400000);
-        out.push({ date: d.toISOString().slice(0, 10), slot: r.slot });
-        if (r.slot === "24h") out.push({ date: d.toISOString().slice(0, 10), slot: "half_day" });
+        const d = new Date(start.getTime() + i * 86400000).toISOString().slice(0, 10);
+        if (!counts[d]) counts[d] = { half_day: 0, "24h": 0 };
+        if (r.slot === "24h") {
+          counts[d]["24h"]++;
+          counts[d]["half_day"]++;
+        } else {
+          counts[d]["half_day"]++;
+        }
       }
+    }
+
+    const out: { date: string; slot: "half_day" | "24h" }[] = [];
+    for (const [date, count] of Object.entries(counts)) {
+      if (count["half_day"] >= totalCabins) out.push({ date, slot: "half_day" });
+      if (count["24h"] >= totalCabins) out.push({ date, slot: "24h" });
     }
     return out;
   });
 
 const reservationInput = z.object({
-  cabinId: z.string().uuid(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   slot: z.enum(["half_day", "24h"]),
   nights: z.number().int().min(1).max(30).default(1),
@@ -50,26 +63,58 @@ export const createReservation = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const { data: cabin, error: cabinError } = await supabaseAdmin
+    const { data: cabins, error: cabinError } = await supabaseAdmin
       .from("cabins")
       .select("id, capacity, price_half_day, price_24h, is_active")
-      .eq("id", data.cabinId)
-      .maybeSingle();
+      .eq("is_active", true);
     if (cabinError) throw new Error(cabinError.message);
-    if (!cabin || !cabin.is_active) return { ok: false as const, reason: "cabin" as const };
-    if (data.guestsCount > cabin.capacity)
-      return { ok: false as const, reason: "capacity" as const };
+    if (!cabins || cabins.length === 0) return { ok: false as const, reason: "cabin" as const };
+
+    const capacityValidCabins = cabins.filter((c) => data.guestsCount <= c.capacity);
+    if (capacityValidCabins.length === 0) return { ok: false as const, reason: "capacity" as const };
 
     const nights = data.slot === "24h" ? data.nights : 1;
+    
+    // Check overlaps
+    const { data: existingReservations, error: resError } = await supabaseAdmin
+      .from("reservations")
+      .select("cabin_id, reservation_date, nights, slot")
+      .neq("status", "cancelled")
+      .gte("reservation_date", new Date(new Date(`${data.date}T00:00:00Z`).getTime() - 30 * 86400000).toISOString().slice(0, 10));
+
+    if (resError) throw new Error(resError.message);
+
+    const requestedDates: string[] = [];
+    for (let i = 0; i < nights; i++) {
+        requestedDates.push(new Date(new Date(`${data.date}T00:00:00Z`).getTime() + i * 86400000).toISOString().slice(0, 10));
+    }
+
+    const unavailableCabinIds = new Set<string>();
+    for (const r of existingReservations ?? []) {
+      const rNights = Math.max(1, Number(r.nights ?? 1));
+      const rStart = new Date(`${r.reservation_date}T00:00:00Z`);
+      for (let i = 0; i < rNights; i += 1) {
+        const d = new Date(rStart.getTime() + i * 86400000).toISOString().slice(0, 10);
+        if (requestedDates.includes(d)) {
+          if (data.slot === "24h" || r.slot === "24h" || data.slot === r.slot) {
+             unavailableCabinIds.add(r.cabin_id);
+          }
+        }
+      }
+    }
+
+    const availableCabin = capacityValidCabins.find((c) => !unavailableCabinIds.has(c.id));
+    if (!availableCabin) return { ok: false as const, reason: "taken" as const };
+
     const total =
       data.slot === "half_day"
-        ? Number(cabin.price_half_day)
-        : Number(cabin.price_24h) * data.guestsCount * nights;
+        ? Number(availableCabin.price_half_day)
+        : Number(availableCabin.price_24h) * data.guestsCount * nights;
 
     const { data: inserted, error } = await supabaseAdmin
       .from("reservations")
       .insert({
-        cabin_id: data.cabinId,
+        cabin_id: availableCabin.id,
         reservation_date: data.date,
         slot: data.slot,
         nights,

@@ -54,7 +54,7 @@ function Receipt() {
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
-      <div className="page-frame pb-24">
+      <div className="page-frame pb-24 mb-25">
         <div className="wrap max-w-xl pt-12">
           {isLoading ? (
           <div className="flex min-h-[40vh] items-center justify-center">

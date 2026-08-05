@@ -69,7 +69,7 @@ function CabinDetail() {
     return (
       <div className="min-h-screen">
         <SiteHeader />
-        <p className="mx-auto max-w-5xl px-5 py-20 text-sm text-muted-foreground">
+        <p className="mx-auto max-w-5xl mb-25 px-5 py-20 text-sm text-muted-foreground">
           {t("common.loading")}
         </p>
       </div>
