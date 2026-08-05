@@ -371,7 +371,15 @@ function Dashboard() {
         <Stat label={t("admin.month")} value={String(stats.month)} />
       </div>
 
+      {tab === "calendar" ? (
+        <OccupancyCalendar
+          reservations={(reservations ?? []) as unknown as CalendarReservation[]}
+          cabins={(cabins ?? []) as unknown as CalendarCabin[]}
+        />
+      ) : null}
+
       {tab === "reservations" ? (
+
         <section className="mt-10">
           <div className="flex flex-col gap-3 sm:flex-row">
             <input
