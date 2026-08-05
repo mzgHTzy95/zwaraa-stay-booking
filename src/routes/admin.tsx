@@ -253,7 +253,7 @@ const STATUS_CONFIG: Record<
 function Dashboard() {
   const { t, lang } = useI18n();
   const qc = useQueryClient();
-  const [tab, setTab] = useState<"reservations" | "cabins">("reservations");
+  const [tab, setTab] = useState<"reservations" | "calendar" | "cabins">("reservations");
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"all" | ReservationRow["status"]>("all");
   const [editing, setEditing] = useState<ReservationRow | null>(null);
