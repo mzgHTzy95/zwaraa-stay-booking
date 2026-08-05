@@ -100,13 +100,8 @@ function CabinDetail() {
   const photos = cabinGallery(cabin.slug, cabin.photos);
   const included = lang === "ar" ? cabin.included_package_ar : cabin.included_package;
 
-  const goBook = (slot: "half_day" | "24h") => {
-    navigate({
-      to: "/book/$slug",
-      params: { slug: cabin.slug },
-      search: { date: dateKey ?? undefined, slot },
-    });
-  };
+
+
 
   return (
     <div className="min-h-screen">
