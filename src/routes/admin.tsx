@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { OccupancyCalendar } from "@/components/site/admin-calendar";
+import type { CalendarReservation, CalendarCabin } from "@/components/site/admin-calendar";
+
 import { toast } from "sonner";
 import type { Session } from "@supabase/supabase-js";
 import { useServerFn } from "@tanstack/react-start";
