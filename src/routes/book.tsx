@@ -223,6 +223,7 @@ function SummaryCard({
       <div className="p-5">
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Récapitulatif</p>
         <p className="mt-1 text-base font-semibold text-primary">{cabinName}</p>
+        <p className="mt-0.5 text-[11px] text-muted-foreground">{t("book.anyCabinNote")}</p>
 
         <div className="mt-4 space-y-2 text-sm">
           <div className="flex justify-between">
