@@ -201,6 +201,12 @@ const ar: Dict = {
   "cabin.reserved": "محجوز",
   "cabin.filterAll": "الكل",
   "cabin.viewPhotos": "عرض الصور",
+  "slot.hoursHalf": "١٠:٠٠ – ١٧:٠٠",
+  "slot.hours24": "الدخول ١٤:٠٠ · الخروج ١٢:٠٠",
+  "book.anyCabin": "بنغالو على البحيرة",
+  "book.anyCabinNote": "يُسنَد تلقائياً عند التأكيد",
+  "admin.deleteConfirm": "حذف هذا الحجز نهائياً؟",
+  "search.weekdays": "ن,ث,ر,خ,ج,س,ح",
   "gallery.note":
     "كل البنغالوهات لها نفس الصيغ ونفس الأسعار. تحجز تاريخاً ويُسنَد إليك بنغالو متاح تلقائياً.",
   "search.title": "تحقق من التوفر",
