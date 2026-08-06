@@ -487,7 +487,7 @@ function BookingFlow() {
           <ConnectedStepper step={step} steps={steps} />
 
           <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px]">
-            <aside className="order-1 h-fit lg:sticky lg:top-24 lg:order-2">
+            <aside className="order-2 h-fit lg:sticky lg:top-24">
               <SummaryCard
                 cabin={cabin}
                 cabinName={cabinName}
