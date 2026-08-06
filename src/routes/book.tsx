@@ -502,7 +502,7 @@ function BookingFlow() {
               />
             </aside>
 
-            <div className="order-2 lg:order-1">
+            <div className="order-1">
               {/* ── STEP 1: Date & slot ── */}
               {step === 1 && (
                 <section ref={stepRef as React.RefObject<HTMLElement>} tabIndex={-1} className="animate-rise outline-none">
