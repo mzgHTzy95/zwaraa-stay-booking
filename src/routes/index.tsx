@@ -136,7 +136,6 @@ function Home() {
           ) : (
             <div className="cabin-grid">
               {(cabins ?? []).map((cabin) => {
-                const isReserved = reservedCabinIds.has(cabin.id);
                 return (
                   <button
                     key={cabin.id}
@@ -150,12 +149,8 @@ function Home() {
                     <div className="cabin-photo">
                       <img src={cabinCover(cabin.slug, cabin.photos)} alt={cabin.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
                       <div className="roof-chip" />
-                      {isReserved && (
-                        <div className="fav-btn text-destructive shadow" title={t("cabin.reserved")}>
-                          <Lock size={14} />
-                        </div>
-                      )}
                     </div>
+
                     
                     <div className="cabin-body">
                       <h3>{lang === "ar" ? cabin.name_ar : cabin.name}</h3>
