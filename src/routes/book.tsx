@@ -377,7 +377,7 @@ function BookingFlow() {
     stayDays(start, count).some((d) => (booked ?? []).some((b) => b.date === d && b.slot === s));
 
   const taken = isRangeTaken(dateKey, slot, effectiveNights);
-  const cabinName = lang === "ar" ? cabin.name_ar : cabin.name;
+  const cabinName = t("book.anyCabin");
   const included = lang === "ar" ? cabin.included_package_ar : cabin.included_package;
 
   function updateGuest<K extends keyof Guest>(key: K, value: Guest[K]) {
