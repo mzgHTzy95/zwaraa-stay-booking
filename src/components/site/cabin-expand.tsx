@@ -87,7 +87,7 @@ export function CabinExpand({
             open ? "opacity-100 delay-200" : "opacity-0"
           }`}
         >
-          <div className="flex items-start justify-between gap-6 mb-8">
+          <div className="sticky top-0 z-10 -mx-5 mb-8 flex items-start justify-between gap-6 bg-background/90 px-5 py-4 backdrop-blur-sm">
             <div>
               <p className="num text-[11px] uppercase tracking-[0.22em] text-forest">
                 {t("cabin.capacity", { n: cabin.capacity })}
@@ -104,6 +104,7 @@ export function CabinExpand({
               {t("cabin.close")}
             </button>
           </div>
+
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             {/* Left Column: Images */}
