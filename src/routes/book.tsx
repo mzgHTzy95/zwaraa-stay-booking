@@ -313,20 +313,23 @@ function BookingFlow() {
   const create = useServerFn(createReservation);
   const pay = useServerFn(payReservation);
 
-  const { data: cabin } = useQuery({
-    queryKey: ["cabin", "base"],
+  const { data: cabins } = useQuery({
+    queryKey: ["cabins", "active"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("cabins")
         .select("*")
         .eq("is_active", true)
-        .order("sort_order")
-        .limit(1)
-        .maybeSingle();
+        .order("sort_order");
       if (error) throw error;
-      return data;
+      return data ?? [];
     },
   });
+
+  const fleetMaxCapacity = Math.max(1, ...(cabins ?? []).map((c) => Number(c.capacity)));
+  const cabin =
+    (cabins ?? []).find((c) => Number(c.capacity) >= guest.guestsCount) ?? (cabins ?? [])[0] ?? null;
+
 
   const range = useMemo(() => {
     const from = new Date();
