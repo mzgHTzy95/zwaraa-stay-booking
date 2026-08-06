@@ -230,9 +230,14 @@ function SummaryCard({
             <span className="text-muted-foreground">Date</span>
             <span className="num font-medium text-primary">{dateKey ?? "—"}</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-3">
             <span className="text-muted-foreground">Formule</span>
-            <span className="font-medium text-primary">{t(`slot.${slot}`)}</span>
+            <span className="text-end font-medium text-primary">
+              {t(`slot.${slot}`)}
+              <span className="num block text-[11px] font-normal text-muted-foreground">
+                {slot === "half_day" ? t("slot.hoursHalf") : t("slot.hours24")}
+              </span>
+            </span>
           </div>
           {slot === "24h" ? (
             <div className="flex justify-between">
