@@ -4,6 +4,8 @@ import { useI18n, formatPrice } from "@/lib/i18n";
 import { cabinGallery } from "@/lib/images";
 import { PlankPhoto } from "@/components/site/ornaments";
 import { PackList } from "@/components/site/pack";
+import { CalendarCheck } from "lucide-react";
+
 
 export type ExpandCabin = {
   id: string;
