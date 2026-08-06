@@ -45,48 +45,12 @@ function useCabins() {
   });
 }
 
-function useAllBooked(cabinIds: string[]) {
-  return useQuery({
-    queryKey: ["all-booked", cabinIds.join(",")],
-    enabled: cabinIds.length > 0,
-    queryFn: async () => {
-      const today = format(new Date(), "yyyy-MM-dd");
-      const soon = format(addMonths(new Date(), 1), "yyyy-MM-dd");
-      const { data, error } = await supabase
-        .from("reservations")
-        .select("cabin_id, reservation_date, nights, slot")
-        .in("cabin_id", cabinIds)
-        .neq("status", "cancelled")
-        .gte("reservation_date", today)
-        .lte("reservation_date", soon);
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-}
-
 function Home() {
   const { t, lang } = useI18n();
   const { data: cabins, isLoading } = useCabins();
   const cardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [expanded, setExpanded] = useState<{ cabin: ExpandCabin; origin: OriginRect } | null>(null);
 
-  const cabinIds = useMemo(() => (cabins ?? []).map((c) => c.id), [cabins]);
-  const { data: bookedRows } = useAllBooked(cabinIds);
-
-  const reservedCabinIds = useMemo(() => {
-    const today = format(new Date(), "yyyy-MM-dd");
-    const ids = new Set<string>();
-    for (const row of bookedRows ?? []) {
-      const nights = Math.max(1, Number(row.nights ?? 1));
-      const start = new Date(`${row.reservation_date}T00:00:00Z`).getTime();
-      for (let i = 0; i < nights; i++) {
-        const d = new Date(start + i * 86400000).toISOString().slice(0, 10);
-        if (d === today) ids.add(row.cabin_id);
-      }
-    }
-    return ids;
-  }, [bookedRows]);
 
   const openCabin = (cabin: ExpandCabin) => {
     const el = cardRefs.current[cabin.id];
