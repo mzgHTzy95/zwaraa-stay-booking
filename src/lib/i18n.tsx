@@ -35,6 +35,12 @@ const fr: Dict = {
   "cabin.reserved": "Réservé",
   "cabin.filterAll": "Tous",
   "cabin.viewPhotos": "Voir les photos",
+  "slot.hoursHalf": "10h – 17h",
+  "slot.hours24": "arrivée 14h · départ 12h",
+  "book.anyCabin": "Un bungalow sur la lagune",
+  "book.anyCabinNote": "Attribué automatiquement à la confirmation",
+  "admin.deleteConfirm": "Supprimer définitivement cette réservation ?",
+  "search.weekdays": "L,M,M,J,V,S,D",
   "gallery.note":
     "Tous les bungalows proposent les mêmes formules et les mêmes tarifs. Vous réservez une date : un bungalow libre vous est attribué automatiquement.",
   "search.title": "Vérifier les disponibilités",
