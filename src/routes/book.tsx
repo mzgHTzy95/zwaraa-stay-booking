@@ -549,9 +549,12 @@ function BookingFlow() {
                           )}
                           <SlotIcon className="h-5 w-5" />
                           <span className="mt-2 block text-sm font-medium">{t(`slot.${s}`)}</span>
+                          <span className={["num block text-[11px]", active ? "opacity-85" : "text-muted-foreground"].join(" ")}>
+                            {s === "half_day" ? t("slot.hoursHalf") : t("slot.hours24")}
+                          </span>
                           <span className="num mt-1 block text-lg font-semibold">{formatPrice(p, lang)}</span>
                           <span className={["mt-0.5 block text-[11px]", active ? "" : "text-muted-foreground"].join(" ")}>
-                            {s === "24h" ? t("cabin.perPerson") : "forfait"}
+                            {s === "24h" ? t("cabin.perPerson") : t("cabin.perPersonHalf")}
                           </span>
                           {busy ? (
                             <span className="mt-1.5 inline-block rounded-full bg-destructive px-2 py-0.5 text-[11px] font-medium text-destructive-foreground">
@@ -563,9 +566,9 @@ function BookingFlow() {
                     })}
                   </div>
 
-                  {slot === "24h" && (
-                    <div className="mt-5 rounded-2xl border border-border bg-card p-5 ">
-                      <div className="grid gap-5 sm:grid-cols-2">
+                  <div className="mt-5 rounded-2xl border border-border bg-card p-5 ">
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      {slot === "24h" ? (
                         <Field label={t("book.nights")}>
                           <input
                             type="number"
@@ -576,22 +579,25 @@ function BookingFlow() {
                             onChange={(e) => setNights(clamp(Number(e.target.value), 1, 30))}
                           />
                         </Field>
-                        <Field label={t("book.guests")}>
-                          <input
-                            type="number"
-                            min={1}
-                            max={fleetMaxCapacity}
-                            className={`${inputClass} num`}
-                            value={guest.guestsCount}
-                            onChange={(e) =>
-                              updateGuest("guestsCount", clamp(Number(e.target.value), 1, fleetMaxCapacity))
-                            }
-                          />
-                        </Field>
-                      </div>
-                      <p className="mt-3 text-[11px] text-muted-foreground">{t("book.nightsNote")}</p>
+                      ) : null}
+                      <Field label={t("book.guests")}>
+                        <input
+                          type="number"
+                          min={1}
+                          max={fleetMaxCapacity}
+                          className={`${inputClass} num`}
+                          value={guest.guestsCount}
+                          onChange={(e) =>
+                            updateGuest("guestsCount", clamp(Number(e.target.value), 1, fleetMaxCapacity))
+                          }
+                        />
+                      </Field>
                     </div>
-                  )}
+                    {slot === "24h" ? (
+                      <p className="mt-3 text-[11px] text-muted-foreground">{t("book.nightsNote")}</p>
+                    ) : null}
+                  </div>
+
 
                   <button
                     type="button"
