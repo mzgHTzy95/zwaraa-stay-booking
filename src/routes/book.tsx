@@ -574,11 +574,11 @@ function BookingFlow() {
                           <input
                             type="number"
                             min={1}
-                            max={cabin.capacity}
+                            max={fleetMaxCapacity}
                             className={`${inputClass} num`}
                             value={guest.guestsCount}
                             onChange={(e) =>
-                              updateGuest("guestsCount", clamp(Number(e.target.value), 1, cabin.capacity))
+                              updateGuest("guestsCount", clamp(Number(e.target.value), 1, fleetMaxCapacity))
                             }
                           />
                         </Field>
@@ -673,11 +673,11 @@ function BookingFlow() {
                           <input
                             type="number"
                             min={1}
-                            max={cabin.capacity}
+                            max={fleetMaxCapacity}
                             className={[inputClass, "num", errors.guestsCount ? inputErrorClass : ""].join(" ")}
                             value={guest.guestsCount}
                             onChange={(e) =>
-                              updateGuest("guestsCount", clamp(Number(e.target.value), 1, cabin.capacity))
+                              updateGuest("guestsCount", clamp(Number(e.target.value), 1, fleetMaxCapacity))
                             }
                             aria-invalid={!!errors.guestsCount}
                             required
