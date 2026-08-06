@@ -178,9 +178,10 @@ function CabinDetail() {
                 <dd className="text-[11px] text-muted-foreground">{t("cabin.perPerson")}</dd>
               </div>
             </dl>
-            <Link to="/" hash="search" className="btn-pill btn-coral inline-flex items-center gap-2 py-3.5">
-              <CalendarCheck size={16} /> {t("search.cta")}
+            <Link to="/book" className="btn-pill btn-coral inline-flex items-center gap-2 py-3.5">
+              <CalendarCheck size={16} /> {t("cabin.reserve")}
             </Link>
+
           </div>
           <p className="mt-4 text-xs text-muted-foreground">{t("gallery.note")}</p>
         </section>
