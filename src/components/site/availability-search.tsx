@@ -201,9 +201,13 @@ export function AvailabilitySearch() {
                     >
                       <Icon className="h-4 w-4" />
                       {t(`slot.${s}`)}
+                      <span className={["num text-[10px]", active ? "opacity-80" : "text-muted-foreground"].join(" ")}>
+                        {s === "half_day" ? t("slot.hoursHalf") : t("slot.hours24")}
+                      </span>
                     </button>
                   );
                 })}
+
               </div>
             </div>
 
