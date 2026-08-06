@@ -88,7 +88,7 @@ export function AvailabilitySearch() {
   };
 
   const locale = lang === "ar" ? arTN : frLocale;
-  const weekdays = ["L", "M", "M", "J", "V", "S", "D"];
+  const weekdays = t("search.weekdays").split(",");
 
   return (
     <section id="search" className="wrap scroll-mt-24 py-14">
