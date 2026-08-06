@@ -418,6 +418,7 @@ function Dashboard() {
                   onEdit={() => setEditing(r)}
                   onQuickStatus={quickStatus}
                   onDelete={async () => {
+                    if (!window.confirm(t("admin.deleteConfirm"))) return;
                     const { error } = await supabase
                       .from("reservations")
                       .delete()
@@ -425,6 +426,7 @@ function Dashboard() {
                     if (error) toast.error(error.message);
                     else refresh();
                   }}
+
                   lang={lang}
                 />
               ))

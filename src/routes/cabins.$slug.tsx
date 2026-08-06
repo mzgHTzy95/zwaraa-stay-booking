@@ -161,14 +161,15 @@ function CabinDetail() {
 
         {/* Gallery page: pricing is fleet-wide, booking happens from the search form */}
         <section className="rounded-2xl border border-border bg-card p-6 card-shadow">
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <dl className="flex flex-wrap gap-10">
+          <div className="flex flex-col gap-6 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+            <dl className="flex flex-wrap gap-8 sm:gap-10">
               <div>
                 <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">
                   <Sun size={13} className="text-amber" /> {t("slot.half_day")}
                 </dt>
                 <dd className="num mt-1 text-xl font-semibold">{formatPrice(cabin.price_half_day, lang)}</dd>
                 <dd className="text-[11px] text-muted-foreground">{t("cabin.perPersonHalf")}</dd>
+                <dd className="num text-[11px] text-muted-foreground">{t("slot.hoursHalf")}</dd>
               </div>
               <div>
                 <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">
@@ -176,13 +177,19 @@ function CabinDetail() {
                 </dt>
                 <dd className="num mt-1 text-xl font-semibold">{formatPrice(cabin.price_24h, lang)}</dd>
                 <dd className="text-[11px] text-muted-foreground">{t("cabin.perPerson")}</dd>
+                <dd className="num text-[11px] text-muted-foreground">{t("slot.hours24")}</dd>
               </div>
             </dl>
-            <Link to="/book" className="btn-pill btn-coral inline-flex items-center gap-2 py-3.5">
+            <Link
+              to="/"
+              hash="search"
+              className="btn-pill btn-coral inline-flex w-full items-center justify-center gap-2 py-3.5 sm:w-auto"
+            >
               <CalendarCheck size={16} /> {t("cabin.reserve")}
             </Link>
 
           </div>
+
           <p className="mt-4 text-xs text-muted-foreground">{t("gallery.note")}</p>
         </section>
       </article>
