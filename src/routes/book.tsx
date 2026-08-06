@@ -398,9 +398,9 @@ function BookingFlow() {
       toast.error(t("common.error"));
       return;
     }
-    if (guest.guestsCount > cabin.capacity) {
-      setErrors((prev) => ({ ...prev, guestsCount: t("cabin.capacity", { n: cabin.capacity }) }));
-      toast.error(t("cabin.capacity", { n: cabin.capacity }));
+    if (guest.guestsCount > fleetMaxCapacity) {
+      setErrors((prev) => ({ ...prev, guestsCount: t("cabin.capacity", { n: fleetMaxCapacity }) }));
+      toast.error(t("cabin.capacity", { n: fleetMaxCapacity }));
       return;
     }
     setErrors({});
