@@ -223,15 +223,21 @@ function SummaryCard({
       <div className="p-5">
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Récapitulatif</p>
         <p className="mt-1 text-base font-semibold text-primary">{cabinName}</p>
+        <p className="mt-0.5 text-[11px] text-muted-foreground">{t("book.anyCabinNote")}</p>
 
         <div className="mt-4 space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Date</span>
             <span className="num font-medium text-primary">{dateKey ?? "—"}</span>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between gap-3">
             <span className="text-muted-foreground">Formule</span>
-            <span className="font-medium text-primary">{t(`slot.${slot}`)}</span>
+            <span className="text-end font-medium text-primary">
+              {t(`slot.${slot}`)}
+              <span className="num block text-[11px] font-normal text-muted-foreground">
+                {slot === "half_day" ? t("slot.hoursHalf") : t("slot.hours24")}
+              </span>
+            </span>
           </div>
           {slot === "24h" ? (
             <div className="flex justify-between">
@@ -313,20 +319,23 @@ function BookingFlow() {
   const create = useServerFn(createReservation);
   const pay = useServerFn(payReservation);
 
-  const { data: cabin } = useQuery({
-    queryKey: ["cabin", "base"],
+  const { data: cabins } = useQuery({
+    queryKey: ["cabins", "active"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("cabins")
         .select("*")
         .eq("is_active", true)
-        .order("sort_order")
-        .limit(1)
-        .maybeSingle();
+        .order("sort_order");
       if (error) throw error;
-      return data;
+      return data ?? [];
     },
   });
+
+  const fleetMaxCapacity = Math.max(1, ...(cabins ?? []).map((c) => Number(c.capacity)));
+  const cabin =
+    (cabins ?? []).find((c) => Number(c.capacity) >= guest.guestsCount) ?? (cabins ?? [])[0] ?? null;
+
 
   const range = useMemo(() => {
     const from = new Date();
@@ -374,7 +383,7 @@ function BookingFlow() {
     stayDays(start, count).some((d) => (booked ?? []).some((b) => b.date === d && b.slot === s));
 
   const taken = isRangeTaken(dateKey, slot, effectiveNights);
-  const cabinName = lang === "ar" ? cabin.name_ar : cabin.name;
+  const cabinName = t("book.anyCabin");
   const included = lang === "ar" ? cabin.included_package_ar : cabin.included_package;
 
   function updateGuest<K extends keyof Guest>(key: K, value: Guest[K]) {
@@ -395,9 +404,9 @@ function BookingFlow() {
       toast.error(t("common.error"));
       return;
     }
-    if (guest.guestsCount > cabin.capacity) {
-      setErrors((prev) => ({ ...prev, guestsCount: t("cabin.capacity", { n: cabin.capacity }) }));
-      toast.error(t("cabin.capacity", { n: cabin.capacity }));
+    if (guest.guestsCount > fleetMaxCapacity) {
+      setErrors((prev) => ({ ...prev, guestsCount: t("cabin.capacity", { n: fleetMaxCapacity }) }));
+      toast.error(t("cabin.capacity", { n: fleetMaxCapacity }));
       return;
     }
     setErrors({});
@@ -478,7 +487,7 @@ function BookingFlow() {
           <ConnectedStepper step={step} steps={steps} />
 
           <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px]">
-            <aside className="order-1 h-fit lg:sticky lg:top-24 lg:order-2">
+            <aside className="order-2 h-fit lg:sticky lg:top-24">
               <SummaryCard
                 cabin={cabin}
                 cabinName={cabinName}
@@ -493,7 +502,7 @@ function BookingFlow() {
               />
             </aside>
 
-            <div className="order-2 lg:order-1">
+            <div className="order-1">
               {/* ── STEP 1: Date & slot ── */}
               {step === 1 && (
                 <section ref={stepRef as React.RefObject<HTMLElement>} tabIndex={-1} className="animate-rise outline-none">
@@ -540,9 +549,12 @@ function BookingFlow() {
                           )}
                           <SlotIcon className="h-5 w-5" />
                           <span className="mt-2 block text-sm font-medium">{t(`slot.${s}`)}</span>
+                          <span className={["num block text-[11px]", active ? "opacity-85" : "text-muted-foreground"].join(" ")}>
+                            {s === "half_day" ? t("slot.hoursHalf") : t("slot.hours24")}
+                          </span>
                           <span className="num mt-1 block text-lg font-semibold">{formatPrice(p, lang)}</span>
                           <span className={["mt-0.5 block text-[11px]", active ? "" : "text-muted-foreground"].join(" ")}>
-                            {s === "24h" ? t("cabin.perPerson") : "forfait"}
+                            {s === "24h" ? t("cabin.perPerson") : t("cabin.perPersonHalf")}
                           </span>
                           {busy ? (
                             <span className="mt-1.5 inline-block rounded-full bg-destructive px-2 py-0.5 text-[11px] font-medium text-destructive-foreground">
@@ -554,9 +566,9 @@ function BookingFlow() {
                     })}
                   </div>
 
-                  {slot === "24h" && (
-                    <div className="mt-5 rounded-2xl border border-border bg-card p-5 ">
-                      <div className="grid gap-5 sm:grid-cols-2">
+                  <div className="mt-5 rounded-2xl border border-border bg-card p-5 ">
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      {slot === "24h" ? (
                         <Field label={t("book.nights")}>
                           <input
                             type="number"
@@ -567,22 +579,25 @@ function BookingFlow() {
                             onChange={(e) => setNights(clamp(Number(e.target.value), 1, 30))}
                           />
                         </Field>
-                        <Field label={t("book.guests")}>
-                          <input
-                            type="number"
-                            min={1}
-                            max={cabin.capacity}
-                            className={`${inputClass} num`}
-                            value={guest.guestsCount}
-                            onChange={(e) =>
-                              updateGuest("guestsCount", clamp(Number(e.target.value), 1, cabin.capacity))
-                            }
-                          />
-                        </Field>
-                      </div>
-                      <p className="mt-3 text-[11px] text-muted-foreground">{t("book.nightsNote")}</p>
+                      ) : null}
+                      <Field label={t("book.guests")}>
+                        <input
+                          type="number"
+                          min={1}
+                          max={fleetMaxCapacity}
+                          className={`${inputClass} num`}
+                          value={guest.guestsCount}
+                          onChange={(e) =>
+                            updateGuest("guestsCount", clamp(Number(e.target.value), 1, fleetMaxCapacity))
+                          }
+                        />
+                      </Field>
                     </div>
-                  )}
+                    {slot === "24h" ? (
+                      <p className="mt-3 text-[11px] text-muted-foreground">{t("book.nightsNote")}</p>
+                    ) : null}
+                  </div>
+
 
                   <button
                     type="button"
@@ -670,11 +685,11 @@ function BookingFlow() {
                           <input
                             type="number"
                             min={1}
-                            max={cabin.capacity}
+                            max={fleetMaxCapacity}
                             className={[inputClass, "num", errors.guestsCount ? inputErrorClass : ""].join(" ")}
                             value={guest.guestsCount}
                             onChange={(e) =>
-                              updateGuest("guestsCount", clamp(Number(e.target.value), 1, cabin.capacity))
+                              updateGuest("guestsCount", clamp(Number(e.target.value), 1, fleetMaxCapacity))
                             }
                             aria-invalid={!!errors.guestsCount}
                             required

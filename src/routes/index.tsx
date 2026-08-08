@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useRef, useState, useMemo } from "react";
-import { format, addMonths } from "date-fns";
+import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { SiteHeader, SiteFooter } from "@/components/site/chrome";
@@ -10,7 +9,7 @@ import { AvailabilitySearch } from "@/components/site/availability-search";
 
 import type { ExpandCabin, OriginRect } from "@/components/site/cabin-expand";
 import { cabinCover, heroLagoon } from "@/lib/images";
-import { ArrowRight, Lock, MapPinned, Sparkles, TreePine, Users, Waves } from "lucide-react";
+import { ArrowRight, MapPinned, Sparkles, TreePine, Users, Waves } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -46,48 +45,12 @@ function useCabins() {
   });
 }
 
-function useAllBooked(cabinIds: string[]) {
-  return useQuery({
-    queryKey: ["all-booked", cabinIds.join(",")],
-    enabled: cabinIds.length > 0,
-    queryFn: async () => {
-      const today = format(new Date(), "yyyy-MM-dd");
-      const soon = format(addMonths(new Date(), 1), "yyyy-MM-dd");
-      const { data, error } = await supabase
-        .from("reservations")
-        .select("cabin_id, reservation_date, nights, slot")
-        .in("cabin_id", cabinIds)
-        .neq("status", "cancelled")
-        .gte("reservation_date", today)
-        .lte("reservation_date", soon);
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-}
-
 function Home() {
   const { t, lang } = useI18n();
   const { data: cabins, isLoading } = useCabins();
   const cardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [expanded, setExpanded] = useState<{ cabin: ExpandCabin; origin: OriginRect } | null>(null);
 
-  const cabinIds = useMemo(() => (cabins ?? []).map((c) => c.id), [cabins]);
-  const { data: bookedRows } = useAllBooked(cabinIds);
-
-  const reservedCabinIds = useMemo(() => {
-    const today = format(new Date(), "yyyy-MM-dd");
-    const ids = new Set<string>();
-    for (const row of bookedRows ?? []) {
-      const nights = Math.max(1, Number(row.nights ?? 1));
-      const start = new Date(`${row.reservation_date}T00:00:00Z`).getTime();
-      for (let i = 0; i < nights; i++) {
-        const d = new Date(start + i * 86400000).toISOString().slice(0, 10);
-        if (d === today) ids.add(row.cabin_id);
-      }
-    }
-    return ids;
-  }, [bookedRows]);
 
   const openCabin = (cabin: ExpandCabin) => {
     const el = cardRefs.current[cabin.id];
@@ -173,7 +136,6 @@ function Home() {
           ) : (
             <div className="cabin-grid">
               {(cabins ?? []).map((cabin) => {
-                const isReserved = reservedCabinIds.has(cabin.id);
                 return (
                   <button
                     key={cabin.id}
@@ -187,12 +149,8 @@ function Home() {
                     <div className="cabin-photo">
                       <img src={cabinCover(cabin.slug, cabin.photos)} alt={cabin.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
                       <div className="roof-chip" />
-                      {isReserved && (
-                        <div className="fav-btn text-destructive shadow" title={t("cabin.reserved")}>
-                          <Lock size={14} />
-                        </div>
-                      )}
                     </div>
+
                     
                     <div className="cabin-body">
                       <h3>{lang === "ar" ? cabin.name_ar : cabin.name}</h3>

@@ -4,6 +4,8 @@ import { useI18n, formatPrice } from "@/lib/i18n";
 import { cabinGallery } from "@/lib/images";
 import { PlankPhoto } from "@/components/site/ornaments";
 import { PackList } from "@/components/site/pack";
+import { CalendarCheck } from "lucide-react";
+
 
 export type ExpandCabin = {
   id: string;
@@ -87,7 +89,7 @@ export function CabinExpand({
             open ? "opacity-100 delay-200" : "opacity-0"
           }`}
         >
-          <div className="flex items-start justify-between gap-6 mb-8">
+          <div className="sticky top-0 z-10 -mx-5 mb-8 flex items-start justify-between gap-6 bg-background/90 px-5 py-4 backdrop-blur-sm">
             <div>
               <p className="num text-[11px] uppercase tracking-[0.22em] text-forest">
                 {t("cabin.capacity", { n: cabin.capacity })}
@@ -104,6 +106,7 @@ export function CabinExpand({
               {t("cabin.close")}
             </button>
           </div>
+
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             {/* Left Column: Images */}
@@ -171,9 +174,20 @@ export function CabinExpand({
                     <dd className="mt-0.5 text-[11px] text-muted-foreground">{t("cabin.perPerson")}</dd>
                   </div>
                 </dl>
-                <p className="max-w-xs text-[11px] text-muted-foreground">{t("gallery.note")}</p>
+                <div className="flex w-full flex-col gap-3 sm:w-auto sm:items-end">
+                  <Link
+                    to="/"
+                    hash="search"
+                    onClick={close}
+                    className="btn-pill btn-coral inline-flex w-full items-center justify-center gap-2 py-3.5 sm:w-auto"
+                  >
+                    <CalendarCheck size={16} /> {t("cabin.reserve")}
+                  </Link>
 
+                  <p className="max-w-xs text-[11px] text-muted-foreground">{t("gallery.note")}</p>
+                </div>
               </div>
+
             </div>
           </div>
         </div>
