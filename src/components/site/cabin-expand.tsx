@@ -126,16 +126,20 @@ export function CabinExpand({
                   />
                 ))}
               </div>
+              <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
+
+                            <p className="max-w-2xl text-base leading-relaxed text-foreground/85">
+                {lang === "ar" ? cabin.description_ar : cabin.description}
+              </p>
+
+              </div>
             </div>
 
             {/* Right Column: Details */}
             <div className="flex flex-col">
-              <p className="max-w-2xl text-base leading-relaxed text-foreground/85">
-                {lang === "ar" ? cabin.description_ar : cabin.description}
-              </p>
 
-              <div className="mt-9 grid gap-6 sm:grid-cols-2">
-                <section className="rounded-2xl border border-amber/25 bg-amber/5 p-5">
+              <div className="grid gap-6 sm:grid-cols-2">
+                <section className="rounded-xl border border-amber/25 bg-amber/5 p-5">
                   <h3 className="text-lg text-primary">{t("cabin.included")}</h3>
                   <ul className="mt-4 space-y-2.5 text-sm">
                     {included.map((item) => (
@@ -150,7 +154,7 @@ export function CabinExpand({
               </div>
 
               {/* Pricing + CTA */}
-              <div className="mt-auto pt-10 flex flex-wrap items-end justify-between gap-6 rounded-2xl border border-primary/20 bg-primary/5 px-6 py-5">
+              <div className="mt-3 pt-10 flex flex-wrap items-end justify-between gap-6 rounded-xl border border-primary/20 bg-primary/5 px-6 py-5">
                 <dl className="flex gap-10">
                   <div>
                     <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">

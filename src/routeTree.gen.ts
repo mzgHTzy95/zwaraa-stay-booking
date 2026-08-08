@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BookRouteImport } from './routes/book'
+import { Route as IndexcopyRouteImport } from './routes/index copy'
+import { Route as BookSlugcopyRouteImport } from './routes/book.$slug copy'
 import { Route as CabinsSlugRouteImport } from './routes/cabins.$slug'
 import { Route as ReceiptReferenceRouteImport } from './routes/receipt.$reference'
 
@@ -30,6 +32,16 @@ const BookRoute = BookRouteImport.update({
   path: '/book',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IndexcopyRoute = IndexcopyRouteImport.update({
+  id: '/index copy',
+  path: '/index copy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookSlugcopyRoute = BookSlugcopyRouteImport.update({
+  id: '/$slug copy',
+  path: '/$slug copy',
+  getParentRoute: () => BookRoute,
+} as any)
 const CabinsSlugRoute = CabinsSlugRouteImport.update({
   id: '/cabins/$slug',
   path: '/cabins/$slug',
@@ -44,14 +56,18 @@ const ReceiptReferenceRoute = ReceiptReferenceRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/book': typeof BookRoute
+  '/book': typeof BookRouteWithChildren
+  '/index copy': typeof IndexcopyRoute
+  '/book/$slug copy': typeof BookSlugcopyRoute
   '/cabins/$slug': typeof CabinsSlugRoute
   '/receipt/$reference': typeof ReceiptReferenceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/book': typeof BookRoute
+  '/book': typeof BookRouteWithChildren
+  '/index copy': typeof IndexcopyRoute
+  '/book/$slug copy': typeof BookSlugcopyRoute
   '/cabins/$slug': typeof CabinsSlugRoute
   '/receipt/$reference': typeof ReceiptReferenceRoute
 }
@@ -59,20 +75,38 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/book': typeof BookRoute
+  '/book': typeof BookRouteWithChildren
+  '/index copy': typeof IndexcopyRoute
+  '/book/$slug copy': typeof BookSlugcopyRoute
   '/cabins/$slug': typeof CabinsSlugRoute
   '/receipt/$reference': typeof ReceiptReferenceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/book' | '/cabins/$slug' | '/receipt/$reference'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/book'
+    | '/index copy'
+    | '/book/$slug copy'
+    | '/cabins/$slug'
+    | '/receipt/$reference'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/book' | '/cabins/$slug' | '/receipt/$reference'
+  to:
+    | '/'
+    | '/admin'
+    | '/book'
+    | '/index copy'
+    | '/book/$slug copy'
+    | '/cabins/$slug'
+    | '/receipt/$reference'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/book'
+    | '/index copy'
+    | '/book/$slug copy'
     | '/cabins/$slug'
     | '/receipt/$reference'
   fileRoutesById: FileRoutesById
@@ -80,7 +114,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
-  BookRoute: typeof BookRoute
+  BookRoute: typeof BookRouteWithChildren
+  IndexcopyRoute: typeof IndexcopyRoute
   CabinsSlugRoute: typeof CabinsSlugRoute
   ReceiptReferenceRoute: typeof ReceiptReferenceRoute
 }
@@ -108,6 +143,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/index copy': {
+      id: '/index copy'
+      path: '/index copy'
+      fullPath: '/index copy'
+      preLoaderRoute: typeof IndexcopyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/book/$slug copy': {
+      id: '/book/$slug copy'
+      path: '/$slug copy'
+      fullPath: '/book/$slug copy'
+      preLoaderRoute: typeof BookSlugcopyRouteImport
+      parentRoute: typeof BookRoute
+    }
     '/cabins/$slug': {
       id: '/cabins/$slug'
       path: '/cabins/$slug'
@@ -125,13 +174,34 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface BookRouteChildren {
+  BookSlugcopyRoute: typeof BookSlugcopyRoute
+}
+
+const BookRouteChildren: BookRouteChildren = {
+  BookSlugcopyRoute: BookSlugcopyRoute,
+}
+
+const BookRouteWithChildren = BookRoute._addFileChildren(BookRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
-  BookRoute: BookRoute,
+  BookRoute: BookRouteWithChildren,
+  IndexcopyRoute: IndexcopyRoute,
   CabinsSlugRoute: CabinsSlugRoute,
   ReceiptReferenceRoute: ReceiptReferenceRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { addMonths, format, startOfMonth, endOfMonth, isBefore, startOfToday } from "date-fns";
+import { addMonths,  format, startOfMonth, endOfMonth, isBefore, startOfToday } from "date-fns";
 import { fr as frLocale, arTN } from "date-fns/locale";
 import { CalendarDays, ChevronLeft, ChevronRight, Moon, Search, Sun, Users } from "lucide-react";
 import { getDayAvailability } from "@/lib/booking.functions";
@@ -92,7 +92,7 @@ export function AvailabilitySearch() {
 
   return (
     <section id="search" className="wrap scroll-mt-24 py-14">
-      <div className="rounded-3xl border border-border bg-card p-6 card-shadow sm:p-8">
+      <div className="rounded-3xl border border-border bg-card p-6 card-shadow sm:p-8 mb-20">
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-full bg-coral/15 text-coral">
             <Search className="h-5 w-5" />
@@ -193,7 +193,7 @@ export function AvailabilitySearch() {
                       aria-pressed={active}
                       onClick={() => setSlot(s)}
                       className={[
-                        "flex flex-col items-start gap-1 rounded-xl border px-3.5 py-3 text-start text-sm transition-all",
+                        "flex flex-col items-start gap-1 rounded-md border px-3.5 py-3 text-start text-sm transition-all",
                         active
                           ? "border-coral bg-coral text-coral-foreground font-medium"
                           : "border-border bg-card text-primary hover:border-primary/40",
@@ -237,7 +237,7 @@ export function AvailabilitySearch() {
               </label>
             ) : null}
 
-            <div className="rounded-xl border border-dashed border-border bg-secondary/60 p-4 text-sm">
+            <div className="rounded-md border border-dashed border-border bg-secondary/60 p-4 text-sm">
               {!selected ? (
                 <p className="text-muted-foreground">{t("search.pickDate")}</p>
               ) : overCapacity ? (

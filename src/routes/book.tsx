@@ -700,7 +700,7 @@ function BookingFlow() {
                 <section ref={stepRef as React.RefObject<HTMLElement>} tabIndex={-1} className="animate-rise outline-none">
                   <h2 className="text-xl text-primary">{t("book.review")}</h2>
 
-                  <div className="mt-5 overflow-hidden rounded-2xl border border-border bg-card ">
+                  <div className="mt-5 overflow-hidden rounded-md border border-border bg-card ">
                     <div className="h-1.5 w-full" aria-hidden="true" />
                     <dl className="divide-y divide-border text-sm">
                       <Row label={t("book.cabin")} value={cabinName} />
@@ -717,7 +717,7 @@ function BookingFlow() {
                   </div>
 
                   <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-border bg-card p-4 ">
+                    <div className="rounded-md border border-border bg-card p-4 ">
                       <p className="text-xs uppercase tracking-wider text-muted-foreground">
                         {t("cabin.included")}
                       </p>
@@ -733,7 +733,7 @@ function BookingFlow() {
                     {slot === "24h" ? <PackList /> : null}
                   </div>
 
-                  <div className="mt-5 flex items-center justify-between rounded-2xl border border-coral bg-coral px-5 py-5 text-coral-foreground">
+                  <div className="mt-5 flex items-center justify-between rounded-xl border border-coral bg-coral px-5 py-5 text-coral-foreground">
                     <div>
                       <span className="text-xs font-semibold uppercase tracking-wider">{t("book.total")}</span>
                       {slot === "24h" ? (
