@@ -44,8 +44,21 @@ function Receipt() {
       });
       const link = document.createElement("a");
       link.download = `recu-${data.reference}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
+      if (canvas.toBlob) {
+        const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+        if (!blob) throw new Error("Unable to create PNG blob");
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } else {
+        link.href = canvas.toDataURL("image/png");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     } catch (err) {
       console.error("Download failed:", err);
     }
@@ -102,7 +115,7 @@ function Receipt() {
               {/* Receipt header */}
               <div className="flex items-start justify-between border-b border-border pb-4 mb-4">
                 <div>
-                  <p className="font-[family-name:var(--font-display)] text-xl text-primary">Zwaraa</p>
+                  <p className="font-display text-xl text-primary">Zwaraa</p>
                   <p className="text-[11px] text-muted-foreground mt-0.5">Halq El Oued Ezzouaraa · Nefza</p>
                 </div>
                 <span className="rounded-full bg-forest/15 px-3 py-1.5 text-xs font-medium text-forest">
@@ -111,7 +124,7 @@ function Receipt() {
               </div>
 
               {/* Reference */}
-              <div className="mb-5 rounded-xl bg-secondary p-3">
+              <div className="mb-5 rounded-xl bg-secondary py-3 px-6">
                 <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("receipt.ref")}</p>
                 <p className="num mt-1 text-xl font-semibold text-primary">{data.reference}</p>
               </div>

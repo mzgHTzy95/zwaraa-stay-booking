@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Zwaraa Admin icon">
+  <rect width="1024" height="1024" rx="220" fill="#0E8CA8" />
+  <path d="M256 352h512v96H256zm0 224h512v96H256zm0 224h512v96H256z" fill="#FFF9EF" opacity="0.9" />
+  <circle cx="512" cy="256" r="96" fill="#FFF9EF" opacity="0.95" />
+</svg>

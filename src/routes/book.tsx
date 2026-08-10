@@ -445,9 +445,9 @@ function BookingFlow() {
   const steps = [t("book.step1"), t("book.step2"), t("book.step3"), t("book.step4")];
 
   const PAY_METHODS: { id: PayMethod; Icon: typeof CreditCard; label: string }[] = [
-    { id: "card", Icon: CreditCard, label: t("book.payMethod.card") },
+    // { id: "card", Icon: CreditCard, label: t("book.payMethod.card") },
     { id: "d17", Icon: Smartphone, label: t("book.payMethod.d17") },
-    { id: "bank", Icon: Landmark, label: t("book.payMethod.bank") },
+    // { id: "bank", Icon: Landmark, label: t("book.payMethod.bank") },
     { id: "cash", Icon: Banknote, label: t("book.payMethod.cash") },
   ];
 
@@ -715,9 +715,9 @@ function BookingFlow() {
                 <section ref={stepRef as React.RefObject<HTMLElement>} tabIndex={-1} className="animate-rise outline-none">
                   <h2 className="text-xl text-primary">{t("book.review")}</h2>
 
-                  <div className="mt-5 overflow-hidden rounded-md border border-border bg-card ">
+                  <div className="mt-5 overflow-hidden rounded-xl border border-border bg-card ">
                     <div className="h-1.5 w-full" aria-hidden="true" />
-                    <dl className="divide-y divide-border text-sm">
+                    <dl className="divide-y divide-border text-sm p-2">
                       <Row label={t("book.cabin")} value={cabinName} />
                       <Row label={t("book.date")} value={dateKey ?? ""} mono />
                       <Row label={t("book.slot")} value={t(`slot.${slot}`)} />
@@ -732,11 +732,11 @@ function BookingFlow() {
                   </div>
 
                   <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-md border border-border bg-card p-4 ">
+                    <div className="rounded-xl border border-border bg-card p-8 ">
                       <p className="text-xs uppercase tracking-wider text-muted-foreground">
                         {t("cabin.included")}
                       </p>
-                      <ul className="mt-3 space-y-2 text-sm">
+                      <ul className="mt-3 space-y-2 pl-3 text-sm">
                         {included.map((i: string) => (
                           <li key={i} className="flex items-start gap-2">
                             <span className="mt-1.5 block h-1.5 w-1.5 shrink-0 rounded-full bg-amber" />
@@ -800,7 +800,7 @@ function BookingFlow() {
                             aria-pressed={payMethod === m.id}
                             onClick={() => setPayMethod(m.id)}
                             className={[
-                              "flex flex-col items-center gap-1.5 rounded-xl border p-3 text-center text-xs transition-all",
+                              "flex flex-col items-center gap-1.5 rounded-md border p-3 text-center text-xs transition-all",
                               payMethod === m.id
                                 ? "scale-[1.02] border-coral bg-coral text-coral-foreground font-medium shadow-md"
                                 : "border-border bg-card text-muted-foreground",

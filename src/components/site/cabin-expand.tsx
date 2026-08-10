@@ -173,7 +173,6 @@ export function CabinExpand({
                     <dd className="num mt-1 text-xl font-semibold">{formatPrice(cabin.price_24h, lang)}</dd>
                     <dd className="mt-0.5 text-[11px] text-muted-foreground">{t("cabin.perPerson")}</dd>
                   </div>
-                </dl>
                 <div className="flex w-full flex-col gap-3 sm:w-auto sm:items-end">
                   <Link
                     to="/"
@@ -186,6 +185,7 @@ export function CabinExpand({
 
                   <p className="max-w-xs text-[11px] text-muted-foreground">{t("gallery.note")}</p>
                 </div>
+                </dl>
               </div>
 
             </div>

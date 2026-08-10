@@ -1,4 +1,11 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import type { ReactNode } from "react";
 
 export type Lang = "fr" | "ar";
@@ -44,7 +51,8 @@ const fr: Dict = {
   "gallery.note":
     "Tous les bungalows proposent les mêmes formules et les mêmes tarifs. Vous réservez une date : un bungalow libre vous est attribué automatiquement.",
   "search.title": "Vérifier les disponibilités",
-  "search.subtitle": "Choisissez une date, une formule et le nombre de personnes.",
+  "search.subtitle":
+    "Choisissez une date, une formule et le nombre de personnes.",
   "search.date": "Date d'arrivée",
   "search.pack": "Formule",
   "search.guests": "Personnes",
@@ -58,11 +66,11 @@ const fr: Dict = {
   "search.pickDate": "Sélectionnez une date sur le calendrier.",
   "search.autoAssign": "Un bungalow libre vous sera attribué automatiquement.",
   "search.book": "Réserver cette date",
-  "search.capacityWarn": "Nombre de personnes supérieur à la capacité d'un bungalow ({n}).",
+  "search.capacityWarn":
+    "Nombre de personnes supérieur à la capacité d'un bungalow ({n}).",
 
   "pack.title": "Formule 24 h — prix par personne",
-  "pack.note":
-    "Le tarif 24 heures s'entend par personne et par jour.",
+  "pack.note": "Le tarif 24 heures s'entend par personne et par jour.",
   "pack.meals": "3 repas inclus",
   "pack.mealsDetail": "Petit-déjeuner, déjeuner et dîner",
   "pack.horse": "Balade à cheval",
@@ -72,7 +80,8 @@ const fr: Dict = {
   "pack.kayak": "Kayak tandem",
   "pack.kayakDetail": "Sortie en kayak à deux",
   "book.nights": "Nombre de jours (24 h)",
-  "book.nightsNote": "Vous pouvez rester plus de 24 heures : choisissez le nombre de jours.",
+  "book.nightsNote":
+    "Vous pouvez rester plus de 24 heures : choisissez le nombre de jours.",
   "book.nightsValue": "{n} × 24 h",
   "book.priceDetail": "{price} × {guests} pers. × {nights} j.",
 
@@ -110,8 +119,10 @@ const fr: Dict = {
   "book.payMethod.bank": "Virement bancaire",
   "book.payMethod.cash": "Espèces (sur place)",
   "book.payMethod.d17Phone": "Numéro D17",
-  "book.payMethod.bankNote": "Effectuez un virement à l'ordre de Zwaraa — RIB : 12 345 678 901 234 567 890 12. Indiquez votre référence de réservation.",
-  "book.payMethod.cashNote": "Réglez en espèces à votre arrivée. Votre réservation est confirmée dès maintenant.",
+  "book.payMethod.bankNote":
+    "Effectuez un virement à l'ordre de Zwaraa — RIB : 12 345 678 901 234 567 890 12. Indiquez votre référence de réservation.",
+  "book.payMethod.cashNote":
+    "Réglez en espèces à votre arrivée. Votre réservation est confirmée dès maintenant.",
   "receipt.title": "Reçu de réservation",
   "receipt.paid": "Payé",
   "receipt.ref": "Référence",
@@ -125,6 +136,13 @@ const fr: Dict = {
   "admin.email": "E-mail",
   "admin.password": "Mot de passe",
   "admin.signIn": "Se connecter",
+  "admin.turnstileLoading": "Vérification en cours...",
+  "admin.turnstileRequired": "Complétez la vérification anti-bot.",
+  "admin.turnstileError": "Erreur du widget Turnstile. Réessayez.",
+  "admin.turnstileFailed": "Vérification échouée. Réessayez.",
+  "admin.createFirst": "Créer le compte administrateur",
+  "admin.createFirstNote":
+    "Aucun compte administrateur n'existe encore. Créez-le maintenant (une seule fois).",
   "admin.signOut": "Déconnexion",
   "admin.reservations": "Réservations",
   "admin.cabinsTab": "Bungalows",
@@ -140,6 +158,8 @@ const fr: Dict = {
   "admin.cancel": "Annuler",
   "admin.edit": "Modifier",
   "admin.noAccess": "Ce compte n'a pas les droits d'administration.",
+  "admin.turnstileLoadError":
+    "Impossible de charger la vérification anti-bot. Vérifiez votre connexion.",
   "admin.priceHalf": "Prix demi-journée",
   "admin.price24": "Prix 24 heures",
   "admin.empty": "Aucune réservation.",
@@ -164,7 +184,6 @@ const fr: Dict = {
   "admin.assigned": "Bungalow attribué",
   "admin.prevMonth": "Mois précédent",
   "admin.nextMonth": "Mois suivant",
-
 
   "status.pending": "En attente",
   "status.confirmed": "Confirmée",
@@ -281,7 +300,8 @@ const ar: Dict = {
   "book.payMethod.bank": "تحويل بنكي",
   "book.payMethod.cash": "نقداً (عند الوصول)",
   "book.payMethod.d17Phone": "رقم D17",
-  "book.payMethod.bankNote": "قم بتحويل المبلغ باسم الزوارع — RIB: 12 345 678 901 234 567 890 12. أذكر رقم الحجز.",
+  "book.payMethod.bankNote":
+    "قم بتحويل المبلغ باسم الزوارع — RIB: 12 345 678 901 234 567 890 12. أذكر رقم الحجز.",
   "book.payMethod.cashNote": "ادفع نقداً عند وصولك. حجزك مؤكد الآن.",
   "receipt.title": "وصل الحجز",
   "receipt.paid": "خالص",
@@ -296,6 +316,13 @@ const ar: Dict = {
   "admin.email": "البريد الإلكتروني",
   "admin.password": "كلمة المرور",
   "admin.signIn": "دخول",
+  "admin.turnstileLoading": "جارٍ التحقق...",
+  "admin.turnstileRequired": "أكمل التحقق لمنع الروبوتات.",
+  "admin.turnstileError": "حدث خطأ في عنصر Turnstile. حاول مرة أخرى.",
+  "admin.turnstileFailed": "فشل التحقق. حاول مرة أخرى.",
+  "admin.createFirst": "إنشاء حساب المسؤول",
+  "admin.createFirstNote":
+    "لا يوجد حساب مسؤول بعد. أنشئ واحدًا الآن (مرة واحدة فقط).",
   "admin.signOut": "خروج",
   "admin.reservations": "الحجوزات",
   "admin.cabinsTab": "البنغالوهات",
@@ -311,6 +338,7 @@ const ar: Dict = {
   "admin.cancel": "إلغاء",
   "admin.edit": "تعديل",
   "admin.noAccess": "هذا الحساب لا يملك صلاحيات الإدارة.",
+  "admin.turnstileLoadError": "تعذر تحميل التحقق ضد الروبوتات. تحقق من اتصالك.",
   "admin.priceHalf": "سعر نصف اليوم",
   "admin.price24": "سعر ٢٤ ساعة",
   "admin.empty": "لا توجد حجوزات.",
@@ -335,7 +363,6 @@ const ar: Dict = {
   "admin.assigned": "البنغالو المسند",
   "admin.prevMonth": "الشهر السابق",
   "admin.nextMonth": "الشهر الموالي",
-
 
   "status.pending": "في الانتظار",
   "status.confirmed": "مؤكدة",
@@ -381,7 +408,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     (key: string, vars?: Record<string, string | number>) => {
       let out = dicts[lang][key] ?? dicts.fr[key] ?? key;
       if (vars) {
-        for (const [k, v] of Object.entries(vars)) out = out.replace(`{${k}}`, String(v));
+        for (const [k, v] of Object.entries(vars))
+          out = out.replace(`{${k}}`, String(v));
       }
       return out;
     },
@@ -389,7 +417,12 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ lang, dir: (lang === "ar" ? "rtl" : "ltr") as "ltr" | "rtl", setLang, t }),
+    () => ({
+      lang,
+      dir: (lang === "ar" ? "rtl" : "ltr") as "ltr" | "rtl",
+      setLang,
+      t,
+    }),
     [lang, setLang, t],
   );
 

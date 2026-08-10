@@ -71,7 +71,7 @@ export function OccupancyCalendar({
 
   return (
     <section className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div className="rounded-2xl border border-border bg-card p-5 card-shadow">
+      <div className="rounded-2xl border border-border bg-card p-5 ">
         <div className="flex items-center justify-between">
           <h3 className="flex items-center gap-2 text-base font-medium text-primary">
             <CalendarDays className="h-4 w-4" /> {t("admin.occupancy")}
@@ -137,7 +137,7 @@ export function OccupancyCalendar({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-5 card-shadow">
+      <div className="rounded-2xl border border-border bg-card p-5">
         <h3 className="text-base font-medium text-primary">{t("admin.dayDetails")}</h3>
         <p className="num mt-0.5 text-xs text-muted-foreground">
           {selected} · {t("admin.freeUnits", { n: Math.max(0, totalUnits - dayRows.length) })}
@@ -147,7 +147,7 @@ export function OccupancyCalendar({
             <p className="text-sm text-muted-foreground">{t("admin.noBookingsDay")}</p>
           ) : (
             dayRows.map((r) => (
-              <div key={`${r.id}-${selected}`} className="rounded-xl border border-border/70 bg-background p-3">
+              <div key={`${r.id}-${selected}`} className="rounded-md border border-border/70 bg-background p-3">
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-sm font-medium text-primary">{r.full_name}</span>
                   <span className="num text-[11px] text-muted-foreground">{r.reference}</span>

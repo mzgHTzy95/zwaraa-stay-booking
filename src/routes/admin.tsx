@@ -1,14 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { OccupancyCalendar } from "@/components/site/admin-calendar";
-import type { CalendarReservation, CalendarCabin } from "@/components/site/admin-calendar";
+import type {
+  CalendarReservation,
+  CalendarCabin,
+} from "@/components/site/admin-calendar";
 
 import { toast } from "sonner";
 import type { Session } from "@supabase/supabase-js";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { adminExists, bootstrapAdmin } from "@/lib/admin-setup.functions";
+import { verifyTurnstile } from "@/lib/turnstile";
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { LanguageSwitch } from "@/components/site/chrome";
 import { InstallAdminButton } from "@/components/site/install-button";
@@ -18,14 +22,21 @@ export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
       { title: "Administration — Zwaraa" },
-      { name: "description", content: "Espace d'administration des réservations Zwaraa." },
+      {
+        name: "description",
+        content: "Espace d'administration des réservations Zwaraa.",
+      },
       { property: "og:title", content: "Administration — Zwaraa" },
-      { property: "og:description", content: "Gestion des réservations et des tarifs." },
+      {
+        property: "og:description",
+        content: "Gestion des réservations et des tarifs.",
+      },
       { name: "robots", content: "noindex" },
     ],
     links: [
       // Admin-only PWA manifest
       { rel: "manifest", href: "/manifest.admin.json" },
+      { rel: "apple-touch-icon", href: "/icons/admin-icon.svg" },
     ],
   }),
   component: AdminPage,
@@ -34,6 +45,9 @@ export const Route = createFileRoute("/admin")({
 const inputClass =
   "w-full rounded-xl border border-input bg-card px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all";
 
+// Toggle to temporarily disable Turnstile while developing or testing.
+const TURNSTILE_DISABLED = true;
+
 function AdminPage() {
   const { t } = useI18n();
   const [session, setSession] = useState<Session | null>(null);
@@ -41,7 +55,9 @@ function AdminPage() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) =>
+      setSession(s),
+    );
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setReady(true);
@@ -73,7 +89,12 @@ function AdminPage() {
     );
   }
 
-  if (!session) return <Shell><LoginCard /></Shell>;
+  if (!session)
+    return (
+      <Shell>
+        <LoginCard />
+      </Shell>
+    );
 
   if (isAdmin === null) {
     return (
@@ -108,14 +129,17 @@ function AdminPage() {
 function Shell({ children }: { children: React.ReactNode }) {
   const { t } = useI18n();
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-full bg-background">
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-4">
           <span className="flex items-center gap-2 font-[family-name:var(--font-display)] text-lg text-primary">
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-coral text-sm text-coral-foreground">
               Z
             </span>
-            {t("brand.name")} <span className="hidden text-sm text-muted-foreground sm:inline">· {t("admin.title")}</span>
+            {t("brand.name")}{" "}
+            <span className="hidden text-sm text-muted-foreground sm:inline">
+              · {t("admin.title")}
+            </span>
           </span>
           <div className="flex items-center gap-2">
             <InstallAdminButton />
@@ -124,7 +148,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <div className="page-frame pb-24">
-         <main className="wrap max-w-6xl pt-10">{children}</main>
+        <main className="wrap max-w-6xl pt-10">{children}</main>
       </div>
     </div>
   );
@@ -135,20 +159,104 @@ function LoginCard() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileError, setTurnstileError] = useState<string | null>(null);
+  const [turnstileLoadError, setTurnstileLoadError] = useState<string | null>(
+    null,
+  );
+  const [turnstileReady, setTurnstileReady] = useState(false);
+  const widgetContainerRef = useRef<HTMLDivElement | null>(null);
+  const widgetIdRef = useRef<number | null>(null);
   const checkExists = useServerFn(adminExists);
   const bootstrap = useServerFn(bootstrapAdmin);
+  const verifyTurnstileFn = useServerFn(verifyTurnstile);
+  const siteKey = import.meta.env["VITE_TURNSTILE_SITEKEY"] ?? "";
 
   const { data: exists, refetch } = useQuery({
     queryKey: ["admin-exists"],
     queryFn: () => checkExists(),
   });
 
+  useEffect(() => {
+    if (TURNSTILE_DISABLED) return;
+    if (!siteKey || typeof window === "undefined") return;
+
+    const existingScript = document.querySelector(
+      'script[src="https://challenges.cloudflare.com/turnstile/v0/api.js"]',
+    );
+
+    const renderWidget = () => {
+      const win = window as any;
+      if (!win.turnstile || !widgetContainerRef.current) return;
+      widgetIdRef.current = win.turnstile.render(widgetContainerRef.current, {
+        sitekey: siteKey,
+        callback: (token: string) => {
+          setTurnstileToken(token);
+          setTurnstileError(null);
+        },
+        "error-callback": () => {
+          setTurnstileError(t("admin.turnstileError"));
+          setTurnstileToken("");
+        },
+        "expired-callback": () => {
+          setTurnstileToken("");
+        },
+      });
+      setTurnstileReady(true);
+    };
+
+    if (existingScript) {
+      const win = window as any;
+      if (win.turnstile) {
+        renderWidget();
+      } else {
+        existingScript.addEventListener("load", renderWidget, { once: true });
+      }
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      renderWidget();
+      setTurnstileLoadError(null);
+    };
+    script.onerror = () => {
+      setTurnstileLoadError(t("admin.turnstileLoadError"));
+      setTurnstileReady(false);
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      script.onload = null;
+      script.onerror = null;
+    };
+  }, [siteKey, t]);
+
+  const resetTurnstile = () => {
+    const win = window as any;
+    if (win.turnstile && widgetIdRef.current !== null) {
+      win.turnstile.reset(widgetIdRef.current);
+    }
+    setTurnstileToken("");
+    setTurnstileError(null);
+  };
+
   const signIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
     setBusy(false);
-    if (error) toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+    }
   };
 
   const createFirst = async () => {
@@ -156,6 +264,7 @@ function LoginCard() {
       toast.error("8+");
       return;
     }
+
     setBusy(true);
     const result = await bootstrap({ data: { email, password } });
     if (!result.ok) {
@@ -164,14 +273,24 @@ function LoginCard() {
       await refetch();
       return;
     }
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
     setBusy(false);
-    if (error) toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+    }
   };
 
   return (
     <div className="flex min-h-[70vh] items-center justify-center">
-      <form onSubmit={signIn} className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-card p-7 card-shadow">
+      <form
+        onSubmit={signIn}
+        className="w-full max-w-sm space-y-4 rounded-2xl border border-border bg-card p-7 "
+      >
         <h1 className="text-2xl text-primary">{t("admin.login")}</h1>
         <label className="block">
           <span className="text-xs uppercase tracking-wider text-muted-foreground">
@@ -199,15 +318,31 @@ function LoginCard() {
         </label>
         <button
           type="submit"
-          disabled={busy}
+          disabled={busy || !email || password.length < 8}
           className="w-full btn-pill btn-coral disabled:opacity-60 py-4 text-base"
         >
           {t("admin.signIn")}
         </button>
+        {/* <div className="rounded-2xl border border-border bg-muted p-4">
+          <div ref={widgetContainerRef} className="min-h-[90px]" />
+          {!turnstileReady && !turnstileLoadError ? (
+            <p className="mt-3 text-xs text-muted-foreground">
+              {t("admin.turnstileLoading")}
+            </p>
+          ) : null}
+          {turnstileLoadError ? (
+            <p className="mt-3 text-xs text-destructive">
+              {turnstileLoadError}
+            </p>
+          ) : null}
+          {turnstileError && !turnstileLoadError ? (
+            <p className="mt-3 text-xs text-destructive">{turnstileError}</p>
+          ) : null}
+        </div> */}
         {exists === false ? (
           <div className="rounded-xl border border-border/60 bg-secondary p-4">
             <p className="text-xs text-muted-foreground">
-              Aucun compte administrateur n'existe encore. Créez-le maintenant (une seule fois).
+              {t("admin.createFirstNote")}
             </p>
             <button
               type="button"
@@ -215,7 +350,7 @@ function LoginCard() {
               disabled={busy || !email || password.length < 8}
               className="mt-4 w-full btn-outline-pill disabled:opacity-50 text-[13px]"
             >
-              Créer le compte administrateur
+              {t("admin.createFirst")}
             </button>
           </div>
         ) : null}
@@ -247,16 +382,34 @@ const STATUS_CONFIG: Record<
   ReservationRow["status"],
   { label: string; color: string; bg: string }
 > = {
-  pending: { label: "En attente", color: "text-amber-foreground", bg: "bg-amber/15 border-amber/30" },
-  confirmed: { label: "Confirmée", color: "text-forest", bg: "bg-forest/10 border-forest/25" },
-  cancelled: { label: "Annulée", color: "text-destructive", bg: "bg-destructive/10 border-destructive/25" },
-  completed: { label: "Terminée", color: "text-primary", bg: "bg-primary/10 border-primary/25" },
+  pending: {
+    label: "En attente",
+    color: "text-amber-foreground",
+    bg: "bg-amber/15 border-amber/30",
+  },
+  confirmed: {
+    label: "Confirmée",
+    color: "text-forest",
+    bg: "bg-forest/10 border-forest/25",
+  },
+  cancelled: {
+    label: "Annulée",
+    color: "text-destructive",
+    bg: "bg-destructive/10 border-destructive/25",
+  },
+  completed: {
+    label: "Terminée",
+    color: "text-primary",
+    bg: "bg-primary/10 border-primary/25",
+  },
 };
 
 function Dashboard() {
   const { t, lang } = useI18n();
   const qc = useQueryClient();
-  const [tab, setTab] = useState<"reservations" | "calendar" | "cabins">("reservations");
+  const [tab, setTab] = useState<"reservations" | "calendar" | "cabins">(
+    "reservations",
+  );
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"all" | ReservationRow["status"]>("all");
   const [editing, setEditing] = useState<ReservationRow | null>(null);
@@ -276,7 +429,10 @@ function Dashboard() {
   const { data: cabins } = useQuery({
     queryKey: ["admin-cabins"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("cabins").select("*").order("sort_order");
+      const { data, error } = await supabase
+        .from("cabins")
+        .select("*")
+        .order("sort_order");
       if (error) throw error;
       return data;
     },
@@ -287,7 +443,9 @@ function Dashboard() {
     const now = new Date();
     const weekAgo = new Date(now.getTime() - 7 * 864e5);
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const paid = rows.filter((r) => r.payment_status === "paid" && r.status !== "cancelled");
+    const paid = rows.filter(
+      (r) => r.payment_status === "paid" && r.status !== "cancelled",
+    );
     return {
       revenue: paid.reduce((s, r) => s + Number(r.total_price), 0),
       week: rows.filter((r) => new Date(r.created_at) >= weekAgo).length,
@@ -319,7 +477,10 @@ function Dashboard() {
     return lang === "ar" ? c.name_ar : c.name;
   };
 
-  const quickStatus = async (id: string, newStatus: ReservationRow["status"]) => {
+  const quickStatus = async (
+    id: string,
+    newStatus: ReservationRow["status"],
+  ) => {
     const { error } = await supabase
       .from("reservations")
       .update({ status: newStatus })
@@ -334,15 +495,15 @@ function Dashboard() {
   return (
     <Shell>
       {/* Top nav */}
-      <div className="flex items-center justify-between">
-        <div className="flex gap-1 rounded-xl border border-border bg-card p-1 card-shadow">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0 flex flex-wrap items-center gap-1 overflow-x-auto rounded-xl border border-border bg-card p-1">
           {(["reservations", "calendar", "cabins"] as const).map((k) => (
             <button
               key={k}
               type="button"
               onClick={() => setTab(k)}
               className={[
-                "rounded-lg px-4 py-2 text-sm transition-all",
+                "whitespace-nowrap rounded-lg px-4 py-2 text-sm transition-all",
                 tab === k
                   ? "bg-coral text-coral-foreground font-medium shadow-sm"
                   : "text-muted-foreground hover:text-primary",
@@ -355,20 +516,23 @@ function Dashboard() {
                   : t("admin.cabinsTab")}
             </button>
           ))}
-
         </div>
         <button
           type="button"
           onClick={() => supabase.auth.signOut()}
-          className="btn-outline-pill border-border/70 py-[7px]"
+          className="btn-outline-pill flex-shrink-0 border-border/70 py-1.75"
         >
           {t("admin.signOut")}
         </button>
       </div>
 
       {/* Stats */}
-      <div className="mt-8 grid gap-4 sm:grid-cols-4">
-        <Stat label={t("admin.revenue")} value={formatPrice(stats.revenue, lang)} accent />
+      <div className="mt-8 grid gap-4 grid-cols-2 sm:grid-cols-4">
+        <Stat
+          label={t("admin.revenue")}
+          value={formatPrice(stats.revenue, lang)}
+          accent
+        />
         <Stat label={t("admin.count")} value={String(stats.total)} />
         <Stat label={t("admin.week")} value={String(stats.week)} />
         <Stat label={t("admin.month")} value={String(stats.month)} />
@@ -376,13 +540,14 @@ function Dashboard() {
 
       {tab === "calendar" ? (
         <OccupancyCalendar
-          reservations={(reservations ?? []) as unknown as CalendarReservation[]}
+          reservations={
+            (reservations ?? []) as unknown as CalendarReservation[]
+          }
           cabins={(cabins ?? []) as unknown as CalendarCabin[]}
         />
       ) : null}
 
       {tab === "reservations" ? (
-
         <section className="mt-10">
           <div className="flex flex-col gap-3 sm:flex-row">
             <input
@@ -406,7 +571,7 @@ function Dashboard() {
 
           <div className="mt-5 space-y-3">
             {filtered.length === 0 ? (
-              <div className="rounded-2xl border border-border bg-card p-10 text-center text-muted-foreground card-shadow">
+              <div className="rounded-2xl border border-border bg-card p-10 text-center text-muted-foreground ">
                 {t("admin.empty")}
               </div>
             ) : (
@@ -444,7 +609,6 @@ function Dashboard() {
         </section>
       )}
 
-
       {editing ? (
         <EditReservation
           reservation={editing}
@@ -478,16 +642,22 @@ function ReservationCard({
   const sc = STATUS_CONFIG[r.status];
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 card-shadow transition-shadow hover:card-shadow-hover">
+    <div className="rounded-2xl border border-border bg-card p-5  transition-shadow hover:card-shadow-hover">
       {/* Top row */}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
-          <span className={`num rounded-full border px-3 py-1 text-[11px] font-medium ${sc.bg} ${sc.color}`}>
+          <span
+            className={`num rounded-full border px-3 py-1 text-[11px] font-medium ${sc.bg} ${sc.color}`}
+          >
             {t(`status.${r.status}`)}
           </span>
-          <span className="num text-xs text-muted-foreground">{r.reference}</span>
+          <span className="num text-xs text-muted-foreground">
+            {r.reference}
+          </span>
         </div>
-        <span className={`text-xs ${r.payment_status === "paid" ? "text-forest font-medium" : "text-amber"}`}>
+        <span
+          className={`text-xs ${r.payment_status === "paid" ? "text-forest font-medium" : "text-amber"}`}
+        >
           {t(`pay.${r.payment_status}`)}
         </span>
       </div>
@@ -495,16 +665,24 @@ function ReservationCard({
       {/* Details grid */}
       <div className="mt-3 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-3">
         <div>
-          <span className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("book.cabin")}</span>
+          <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+            {t("book.cabin")}
+          </span>
           <p className="mt-0.5 font-medium text-foreground">{cabinName}</p>
         </div>
         <div>
-          <span className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("book.guest")}</span>
+          <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+            {t("book.guest")}
+          </span>
           <p className="mt-0.5">{r.full_name}</p>
-          <p className="num text-[11px] text-muted-foreground">{r.phone} · {r.cin}</p>
+          <p className="num text-[11px] text-muted-foreground">
+            {r.phone} · {r.cin}
+          </p>
         </div>
         <div>
-          <span className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("book.date")}</span>
+          <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+            {t("book.date")}
+          </span>
           <p className="num mt-0.5">{r.reservation_date}</p>
           <p className="text-[11px] text-muted-foreground">
             {t(`slot.${r.slot}`)}
@@ -516,7 +694,9 @@ function ReservationCard({
 
       {/* Price */}
       <div className="mt-3 border-t border-border/60 pt-3 flex items-center justify-between flex-wrap gap-3">
-        <span className="num text-lg font-semibold text-primary">{formatPrice(r.total_price, lang as "fr" | "ar")}</span>
+        <span className="num text-lg font-semibold text-primary">
+          {formatPrice(r.total_price, lang as "fr" | "ar")}
+        </span>
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Quick status buttons */}
@@ -571,15 +751,25 @@ function ReservationCard({
   );
 }
 
-function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+function Stat({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string;
+  accent?: boolean;
+}) {
   return (
     <div
       className={[
-        "rounded-2xl border p-5 card-shadow",
+        "rounded-2xl border p-5",
         accent ? "border-coral/30 bg-coral/5" : "border-border bg-card",
       ].join(" ")}
     >
-      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+        {label}
+      </p>
       <p className="num mt-2 text-2xl font-semibold text-primary">{value}</p>
     </div>
   );
@@ -637,14 +827,23 @@ function AddCabinCard({ onSaved }: { onSaved: () => void }) {
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-6 card-shadow">
+    <div className="rounded-2xl border border-border bg-card p-6 ">
       <h3 className="text-lg text-primary">{t("admin.addCabin")}</h3>
       <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Labeled label={t("admin.name")}>
-          <input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} />
+          <input
+            className={inputClass}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
         </Labeled>
         <Labeled label={t("admin.nameAr")}>
-          <input className={inputClass} value={nameAr} onChange={(e) => setNameAr(e.target.value)} dir="rtl" />
+          <input
+            className={inputClass}
+            value={nameAr}
+            onChange={(e) => setNameAr(e.target.value)}
+            dir="rtl"
+          />
         </Labeled>
         <Labeled label={t("admin.capacity")}>
           <input
@@ -693,10 +892,18 @@ function AddCabinCard({ onSaved }: { onSaved: () => void }) {
   );
 }
 
-function Labeled({ label, children }: { label: string; children: React.ReactNode }) {
+function Labeled({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block">
-      <span className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
       <div className="mt-1.5">{children}</div>
     </label>
   );
@@ -716,7 +923,6 @@ function CabinPriceCard({
   };
   onSaved: () => void;
 }) {
-
   const { t, lang } = useI18n();
   const [half, setHalf] = useState(String(cabin.price_half_day));
   const [full, setFull] = useState(String(cabin.price_24h));
@@ -748,12 +954,14 @@ function CabinPriceCard({
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 card-shadow">
+    <div className="rounded-2xl border border-border bg-card p-5 ">
       <div className="flex items-start justify-between gap-3">
-        <h3 className="text-lg text-primary">{lang === "ar" ? cabin.name_ar : cabin.name}</h3>
+        <h3 className="text-lg text-primary">
+          {lang === "ar" ? cabin.name_ar : cabin.name}
+        </h3>
         <span
           className={[
-            "rounded-full px-3 py-1 text-[11px] font-medium border",
+            "rounded-md px-3 py-1 text-[11px] font-medium border",
             cabin.is_active
               ? "bg-forest/10 text-forest border-forest/25"
               : "bg-destructive/10 text-destructive border-destructive/25",
@@ -801,10 +1009,11 @@ function CabinPriceCard({
           disabled={busy}
           className="btn-outline-pill disabled:opacity-60"
         >
-          {cabin.is_active ? t("admin.makeUnavailable") : t("admin.makeAvailable")}
+          {cabin.is_active
+            ? t("admin.makeUnavailable")
+            : t("admin.makeAvailable")}
         </button>
       </div>
-
     </div>
   );
 }
@@ -845,16 +1054,30 @@ function EditReservation({
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-foreground/40 p-4 backdrop-blur-sm">
       <form
         onSubmit={save}
-        className="mt-10 w-full max-w-lg space-y-4 rounded-2xl border border-border bg-card p-6 card-shadow"
+        className="mt-10 w-full max-w-lg space-y-4 rounded-2xl border border-border bg-card p-6 "
       >
         <div className="flex items-baseline justify-between">
           <h3 className="text-xl text-primary">{t("admin.edit")}</h3>
-          <span className="num text-xs text-muted-foreground">{reservation.reference}</span>
+          <span className="num text-xs text-muted-foreground">
+            {reservation.reference}
+          </span>
         </div>
 
-        <Input label={t("book.fullName")} value={form.full_name} onChange={(v) => setForm({ ...form, full_name: v })} />
-        <Input label={t("book.phone")} value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
-        <Input label="CIN" value={form.cin} onChange={(v) => setForm({ ...form, cin: v })} />
+        <Input
+          label={t("book.fullName")}
+          value={form.full_name}
+          onChange={(v) => setForm({ ...form, full_name: v })}
+        />
+        <Input
+          label={t("book.phone")}
+          value={form.phone}
+          onChange={(v) => setForm({ ...form, phone: v })}
+        />
+        <Input
+          label="CIN"
+          value={form.cin}
+          onChange={(v) => setForm({ ...form, cin: v })}
+        />
         <Input
           label={t("book.date")}
           type="date"
@@ -868,7 +1091,12 @@ function EditReservation({
           <select
             className={`${inputClass} mt-1.5`}
             value={form.slot}
-            onChange={(e) => setForm({ ...form, slot: e.target.value as ReservationRow["slot"] })}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                slot: e.target.value as ReservationRow["slot"],
+              })
+            }
           >
             <option value="half_day">{t("slot.half_day")}</option>
             <option value="24h">{t("slot.24h")}</option>
@@ -894,7 +1122,12 @@ function EditReservation({
             <select
               className={`${inputClass} mt-1.5`}
               value={form.status}
-              onChange={(e) => setForm({ ...form, status: e.target.value as ReservationRow["status"] })}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  status: e.target.value as ReservationRow["status"],
+                })
+              }
             >
               <option value="pending">{t("status.pending")}</option>
               <option value="confirmed">{t("status.confirmed")}</option>
@@ -910,7 +1143,11 @@ function EditReservation({
               className={`${inputClass} mt-1.5`}
               value={form.payment_status}
               onChange={(e) =>
-                setForm({ ...form, payment_status: e.target.value as ReservationRow["payment_status"] })
+                setForm({
+                  ...form,
+                  payment_status: e.target
+                    .value as ReservationRow["payment_status"],
+                })
               }
             >
               <option value="unpaid">{t("pay.unpaid")}</option>
@@ -952,7 +1189,9 @@ function Input({
 }) {
   return (
     <label className="block">
-      <span className="text-xs uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="text-xs uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
       <input
         type={type}
         className={`${inputClass} mt-1.5`}
