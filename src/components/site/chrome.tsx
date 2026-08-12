@@ -31,6 +31,18 @@ export function LanguageSwitch({ variant = "solid" }: { variant?: "hero" | "soli
       >
         عربي
       </button>
+      <span className={isHero ? "text-white/40" : "text-muted"}>/</span>
+      <button
+        type="button"
+        onClick={() => setLang("en")}
+        className={
+          lang === "en"
+            ? (isHero ? "font-bold text-white" : "rounded-full bg-coral px-3 py-1 font-medium text-coral-foreground")
+            : (isHero ? "text-white/70 hover:text-white" : "rounded-full px-3 py-1 text-muted-foreground hover:text-primary hover:bg-muted transition-colors")
+        }
+      >
+        EN
+      </button>
     </div>
   );
 }

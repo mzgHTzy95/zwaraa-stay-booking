@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +9,7 @@ import { AvailabilitySearch } from "@/components/site/availability-search";
 
 import type { ExpandCabin, OriginRect } from "@/components/site/cabin-expand";
 import { cabinCover, heroLagoon } from "@/lib/images";
-import { ArrowRight, MapPinned, Sparkles, TreePine, Users, Waves } from "lucide-react";
+import { ArrowRight, Camera, MapPinned, Sparkles, TreePine, Users, Waves } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -43,6 +43,37 @@ function useCabins() {
       return data;
     },
   });
+}
+
+function GalleryTeaser() {
+  const { t } = useI18n();
+  return (
+    <section className="relative overflow-hidden py-20 sm:py-28">
+      <img
+        src={heroLagoon}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl brightness-[0.65]"
+      />
+      <div className="absolute inset-0 bg-foreground/30" />
+      <div className="wrap relative z-10 flex justify-center px-4">
+        <div className="flex w-full max-w-xl flex-col items-center gap-4 rounded-3xl border border-white/20 bg-white/10 px-8 py-14 text-center shadow-soft backdrop-blur-xl">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
+            <Camera className="h-3.5 w-3.5" />
+            {t("home.galleryTeaser.kicker")}
+          </span>
+          <h2 className="text-3xl text-white">{t("home.galleryTeaser.title")}</h2>
+          <p className="max-w-md text-sm text-white/85">{t("home.galleryTeaser.body")}</p>
+          <Link
+            to="/gallery"
+            className="btn-pill btn-coral mt-2 inline-flex items-center gap-2 py-3 px-6"
+          >
+            {t("home.galleryTeaser.cta")} <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function Home() {
@@ -210,6 +241,8 @@ function Home() {
           </div>
         </div>
       </section>
+
+      <GalleryTeaser />
 
       {expanded ? (
         <CabinExpand

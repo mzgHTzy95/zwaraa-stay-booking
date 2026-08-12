@@ -16,7 +16,7 @@ export function InstallAdminButton({ className = "" }: { className?: string }) {
   const { lang } = useI18n();
   const [prompt, setPrompt] = useState<InstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
+  // const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     const onPrompt = (e: Event) => {
@@ -61,7 +61,7 @@ export function InstallAdminButton({ className = "" }: { className?: string }) {
       setPrompt(null);
       return;
     }
-    setShowHelp((v) => !v);
+    // setShowHelp((v) => !v);
   };
 
   return (
@@ -74,12 +74,12 @@ export function InstallAdminButton({ className = "" }: { className?: string }) {
         <Download className="h-3.5 w-3.5" />
         {label}
       </button>
-      {showHelp ? (
-        <div className="absolute end-0 z-50 mt-2 w-64 rounded-xl border border-border bg-card p-3 text-[11px] leading-relaxed text-muted-foreground shadow-soft">
+      {/* {showHelp ? (
+        <div className="absolute inset-e-0 z-50 mt-2 w-64 rounded-xl border border-border bg-card p-3 text-[11px] leading-relaxed text-muted-foreground shadow-soft">
           <Share className="mb-1 h-3.5 w-3.5 text-primary" />
           {help}
         </div>
-      ) : null}
+      ) : null} */}
     </div>
   );
 }

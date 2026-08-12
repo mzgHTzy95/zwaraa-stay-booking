@@ -11,9 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AdminGalleryRouteImport } from './routes/admin-gallery'
+import { Route as AdminTestimonialsRouteImport } from './routes/admin-testimonials'
 import { Route as BookRouteImport } from './routes/book'
-import { Route as IndexcopyRouteImport } from './routes/index copy'
-import { Route as BookSlugcopyRouteImport } from './routes/book.$slug copy'
+import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as CabinsSlugRouteImport } from './routes/cabins.$slug'
 import { Route as ReceiptReferenceRouteImport } from './routes/receipt.$reference'
 
@@ -27,20 +28,25 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminGalleryRoute = AdminGalleryRouteImport.update({
+  id: '/admin-gallery',
+  path: '/admin-gallery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTestimonialsRoute = AdminTestimonialsRouteImport.update({
+  id: '/admin-testimonials',
+  path: '/admin-testimonials',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BookRoute = BookRouteImport.update({
   id: '/book',
   path: '/book',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexcopyRoute = IndexcopyRouteImport.update({
-  id: '/index copy',
-  path: '/index copy',
+const GalleryRoute = GalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
   getParentRoute: () => rootRouteImport,
-} as any)
-const BookSlugcopyRoute = BookSlugcopyRouteImport.update({
-  id: '/$slug copy',
-  path: '/$slug copy',
-  getParentRoute: () => BookRoute,
 } as any)
 const CabinsSlugRoute = CabinsSlugRouteImport.update({
   id: '/cabins/$slug',
@@ -56,18 +62,20 @@ const ReceiptReferenceRoute = ReceiptReferenceRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/book': typeof BookRouteWithChildren
-  '/index copy': typeof IndexcopyRoute
-  '/book/$slug copy': typeof BookSlugcopyRoute
+  '/admin-gallery': typeof AdminGalleryRoute
+  '/admin-testimonials': typeof AdminTestimonialsRoute
+  '/book': typeof BookRoute
+  '/gallery': typeof GalleryRoute
   '/cabins/$slug': typeof CabinsSlugRoute
   '/receipt/$reference': typeof ReceiptReferenceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/book': typeof BookRouteWithChildren
-  '/index copy': typeof IndexcopyRoute
-  '/book/$slug copy': typeof BookSlugcopyRoute
+  '/admin-gallery': typeof AdminGalleryRoute
+  '/admin-testimonials': typeof AdminTestimonialsRoute
+  '/book': typeof BookRoute
+  '/gallery': typeof GalleryRoute
   '/cabins/$slug': typeof CabinsSlugRoute
   '/receipt/$reference': typeof ReceiptReferenceRoute
 }
@@ -75,9 +83,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/book': typeof BookRouteWithChildren
-  '/index copy': typeof IndexcopyRoute
-  '/book/$slug copy': typeof BookSlugcopyRoute
+  '/admin-gallery': typeof AdminGalleryRoute
+  '/admin-testimonials': typeof AdminTestimonialsRoute
+  '/book': typeof BookRoute
+  '/gallery': typeof GalleryRoute
   '/cabins/$slug': typeof CabinsSlugRoute
   '/receipt/$reference': typeof ReceiptReferenceRoute
 }
@@ -86,27 +95,30 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/admin-gallery'
+    | '/admin-testimonials'
     | '/book'
-    | '/index copy'
-    | '/book/$slug copy'
+    | '/gallery'
     | '/cabins/$slug'
     | '/receipt/$reference'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
+    | '/admin-gallery'
+    | '/admin-testimonials'
     | '/book'
-    | '/index copy'
-    | '/book/$slug copy'
+    | '/gallery'
     | '/cabins/$slug'
     | '/receipt/$reference'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/admin-gallery'
+    | '/admin-testimonials'
     | '/book'
-    | '/index copy'
-    | '/book/$slug copy'
+    | '/gallery'
     | '/cabins/$slug'
     | '/receipt/$reference'
   fileRoutesById: FileRoutesById
@@ -114,8 +126,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
-  BookRoute: typeof BookRouteWithChildren
-  IndexcopyRoute: typeof IndexcopyRoute
+  AdminGalleryRoute: typeof AdminGalleryRoute
+  AdminTestimonialsRoute: typeof AdminTestimonialsRoute
+  BookRoute: typeof BookRoute
+  GalleryRoute: typeof GalleryRoute
   CabinsSlugRoute: typeof CabinsSlugRoute
   ReceiptReferenceRoute: typeof ReceiptReferenceRoute
 }
@@ -136,6 +150,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin-gallery': {
+      id: '/admin-gallery'
+      path: '/admin-gallery'
+      fullPath: '/admin-gallery'
+      preLoaderRoute: typeof AdminGalleryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-testimonials': {
+      id: '/admin-testimonials'
+      path: '/admin-testimonials'
+      fullPath: '/admin-testimonials'
+      preLoaderRoute: typeof AdminTestimonialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/book': {
       id: '/book'
       path: '/book'
@@ -143,19 +171,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/index copy': {
-      id: '/index copy'
-      path: '/index copy'
-      fullPath: '/index copy'
-      preLoaderRoute: typeof IndexcopyRouteImport
+    '/gallery': {
+      id: '/gallery'
+      path: '/gallery'
+      fullPath: '/gallery'
+      preLoaderRoute: typeof GalleryRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/book/$slug copy': {
-      id: '/book/$slug copy'
-      path: '/$slug copy'
-      fullPath: '/book/$slug copy'
-      preLoaderRoute: typeof BookSlugcopyRouteImport
-      parentRoute: typeof BookRoute
     }
     '/cabins/$slug': {
       id: '/cabins/$slug'
@@ -174,21 +195,13 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface BookRouteChildren {
-  BookSlugcopyRoute: typeof BookSlugcopyRoute
-}
-
-const BookRouteChildren: BookRouteChildren = {
-  BookSlugcopyRoute: BookSlugcopyRoute,
-}
-
-const BookRouteWithChildren = BookRoute._addFileChildren(BookRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
-  BookRoute: BookRouteWithChildren,
-  IndexcopyRoute: IndexcopyRoute,
+  AdminGalleryRoute: AdminGalleryRoute,
+  AdminTestimonialsRoute: AdminTestimonialsRoute,
+  BookRoute: BookRoute,
+  GalleryRoute: GalleryRoute,
   CabinsSlugRoute: CabinsSlugRoute,
   ReceiptReferenceRoute: ReceiptReferenceRoute,
 }

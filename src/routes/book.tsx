@@ -6,6 +6,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { z } from "zod";
 import {
+  AlertTriangle,
   ArrowLeft,
   ArrowRight,
   Banknote,
@@ -17,9 +18,12 @@ import {
   IdCard,
   Landmark,
   Lock,
+  Minus,
   Moon,
+  Plus,
   Smartphone,
   Sun,
+  Users,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { createReservation, getBookedSlots, payReservation } from "@/lib/booking.functions";
@@ -62,7 +66,9 @@ const guestSchema = z.object({
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "dob")
     .refine((v) => new Date(v) <= new Date(), { message: "dob-future" }),
-  guestsCount: z.number().int().min(1).max(20),
+  adults: z.number().int().min(1).max(20),
+  children6_10: z.number().int().min(0).max(20),
+  childrenUnder5: z.number().int().min(0).max(20),
 });
 
 type Guest = z.infer<typeof guestSchema>;
@@ -73,8 +79,12 @@ const FIELD_ERROR_FR: Record<keyof Guest, string> = {
   fullName: "Nom complet requis (3 caractères minimum)",
   phone: "Numéro de téléphone invalide (8 à 12 chiffres)",
   dateOfBirth: "Date de naissance invalide",
-  guestsCount: "Nombre de personnes invalide",
+  adults: "Nombre d'adultes invalide",
+  children6_10: "Nombre d'enfants 6–10 invalide",
+  childrenUnder5: "Nombre d'enfants invalide",
 };
+
+const CHILDREN_6_10_PRICE = 50;
 
 function clamp(value: number, min: number, max: number) {
   if (Number.isNaN(value)) return min;
@@ -110,6 +120,60 @@ function Field({
       <div className="mt-1.5">{children}</div>
       {error ? <p className="mt-1.5 text-xs text-destructive">{error}</p> : null}
     </label>
+  );
+}
+
+/** Stepper control for a numeric count with +/- buttons */
+function CountStepper({
+  label,
+  sublabel,
+  value,
+  min = 0,
+  max = 20,
+  onChange,
+  highlight,
+}: {
+  label: string;
+  sublabel?: string;
+  value: number;
+  min?: number;
+  max?: number;
+  onChange: (v: number) => void;
+  highlight?: "coral" | "amber";
+}) {
+  const colors = {
+    coral: "bg-coral/10 border-coral/30 text-coral",
+    amber: "bg-amber/10 border-amber/30 text-amber-foreground",
+  };
+  const col = highlight ? colors[highlight] : "";
+  return (
+    <div className={`flex items-center justify-between rounded-xl border p-4 ${col || "border-border bg-card"}`}>
+      <div>
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        {sublabel && <p className="text-[11px] text-muted-foreground">{sublabel}</p>}
+      </div>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          aria-label="Diminuer"
+          disabled={value <= min}
+          onClick={() => onChange(Math.max(min, value - 1))}
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card text-primary transition-colors hover:border-primary disabled:opacity-40"
+        >
+          <Minus className="h-3.5 w-3.5" />
+        </button>
+        <span className="num w-6 text-center text-lg font-semibold text-primary">{value}</span>
+        <button
+          type="button"
+          aria-label="Augmenter"
+          disabled={value >= max}
+          onClick={() => onChange(Math.min(max, value + 1))}
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card text-primary transition-colors hover:border-primary disabled:opacity-40"
+        >
+          <Plus className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -187,7 +251,9 @@ function SummaryCard({
   dateKey,
   slot,
   nights,
-  guestsCount,
+  adults,
+  children6_10,
+  childrenUnder5,
   price,
   t,
   lang,
@@ -198,12 +264,15 @@ function SummaryCard({
   dateKey: string | null;
   slot: "half_day" | "24h";
   nights: number;
-  guestsCount: number;
+  adults: number;
+  children6_10: number;
+  childrenUnder5: number;
   price: number;
   t: (key: string, vars?: Record<string, string | number>) => string;
   lang: "fr" | "ar";
 }) {
   const photo = cabin?.photos?.[0] as string | undefined;
+  const totalGuests = adults + children6_10 + childrenUnder5;
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card ">
       <div className="relative h-32 w-full overflow-hidden bg-primary">
@@ -247,8 +316,20 @@ function SummaryCard({
           ) : null}
           <div className="flex justify-between">
             <span className="text-muted-foreground">{t("book.guests")}</span>
-            <span className="num font-medium text-primary">{guestsCount}</span>
+            <span className="num font-medium text-primary">{totalGuests}</span>
           </div>
+          {children6_10 > 0 && (
+            <div className="flex justify-between text-[11px]">
+              <span className="text-muted-foreground">Enfants 6–10</span>
+              <span className="num text-amber-foreground">{children6_10} × 50 DT</span>
+            </div>
+          )}
+          {childrenUnder5 > 0 && (
+            <div className="flex justify-between text-[11px]">
+              <span className="text-muted-foreground">Enfants ≤5</span>
+              <span className="num text-forest">Gratuit</span>
+            </div>
+          )}
         </div>
 
         {included?.length ? (
@@ -286,10 +367,63 @@ function SummaryCard({
   );
 }
 
+/** Cloudflare Turnstile widget hook */
+function useTurnstile(siteKey: string, disabled: boolean) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const widgetIdRef = useRef<number | null>(null);
+  const [token, setToken] = useState("");
+  const [ready, setReady] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (disabled || !siteKey || typeof window === "undefined") return;
+
+    const renderWidget = () => {
+      const win = window as any;
+      if (!win.turnstile || !containerRef.current) return;
+      widgetIdRef.current = win.turnstile.render(containerRef.current, {
+        sitekey: siteKey,
+        callback: (t: string) => { setToken(t); },
+        "expired-callback": () => { setToken(""); },
+        "error-callback": () => { setToken(""); },
+      });
+      setReady(true);
+    };
+
+    const existingScript = document.querySelector('script[src="https://challenges.cloudflare.com/turnstile/v0/api.js"]');
+    if (existingScript) {
+      const win = window as any;
+      if (win.turnstile) renderWidget();
+      else existingScript.addEventListener("load", renderWidget, { once: true });
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => { renderWidget(); setLoadError(null); };
+    script.onerror = () => { setLoadError("Impossible de charger la vérification anti-bot."); };
+    document.body.appendChild(script);
+    return () => { script.onload = null; script.onerror = null; };
+  }, [siteKey, disabled]);
+
+  const reset = () => {
+    const win = window as any;
+    if (win.turnstile && widgetIdRef.current !== null) win.turnstile.reset(widgetIdRef.current);
+    setToken("");
+  };
+
+  return { containerRef, token, ready, loadError, reset };
+}
+
 function BookingFlow() {
   const search = Route.useSearch();
   const { t, lang } = useI18n();
   const navigate = useNavigate();
+  const siteKey = import.meta.env["VITE_TURNSTILE_SITEKEY"] ?? "";
+  // const TURNSTILE_DISABLED = !siteKey;
+  const TURNSTILE_DISABLED = true;
 
   const [step, setStep] = useState(1);
   const [date, setDate] = useState<Date | undefined>(
@@ -304,7 +438,9 @@ function BookingFlow() {
     fullName: "",
     phone: "",
     dateOfBirth: "",
-    guestsCount: Math.max(1, search.guests ?? 2),
+    adults: Math.max(1, search.guests ?? 2),
+    children6_10: 0,
+    childrenUnder5: 0,
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof Guest, string>>>({});
@@ -314,6 +450,9 @@ function BookingFlow() {
   const [card, setCard] = useState({ number: "", name: "", expiry: "", cvv: "" });
   const [d17Phone, setD17Phone] = useState("");
   const [processing, setProcessing] = useState(false);
+
+  // Turnstile for booking form (Step 2)
+  const turnstile = useTurnstile(siteKey, TURNSTILE_DISABLED);
 
   const fetchBooked = useServerFn(getBookedSlots);
   const create = useServerFn(createReservation);
@@ -334,7 +473,7 @@ function BookingFlow() {
 
   const fleetMaxCapacity = Math.max(1, ...(cabins ?? []).map((c) => Number(c.capacity)));
   const cabin =
-    (cabins ?? []).find((c) => Number(c.capacity) >= guest.guestsCount) ?? (cabins ?? [])[0] ?? null;
+    (cabins ?? []).find((c) => Number(c.capacity) >= (guest.adults + guest.children6_10)) ?? (cabins ?? [])[0] ?? null;
 
 
   const range = useMemo(() => {
@@ -366,10 +505,13 @@ function BookingFlow() {
   const dateKey = date ? format(date, "yyyy-MM-dd") : null;
   const effectiveNights = slot === "24h" ? nights : 1;
   const unitPrice = Number(slot === "half_day" ? cabin.price_half_day : cabin.price_24h);
-  const price =
-    slot === "half_day"
-      ? unitPrice * guest.guestsCount
-      : unitPrice * guest.guestsCount * effectiveNights;
+  const adultTotal = slot === "half_day"
+    ? unitPrice * guest.adults
+    : unitPrice * guest.adults * effectiveNights;
+  const childrenTotal = slot === "half_day"
+    ? CHILDREN_6_10_PRICE * guest.children6_10
+    : CHILDREN_6_10_PRICE * guest.children6_10 * effectiveNights;
+  const price = adultTotal + childrenTotal;
 
 
   const stayDays = (start: string, count: number) => {
@@ -378,9 +520,10 @@ function BookingFlow() {
       new Date(base + i * 86400000).toISOString().slice(0, 10),
     );
   };
-  const isRangeTaken = (start: string | null, s: "half_day" | "24h", count: number) =>
+  // Full exclusivity: any booked slot on any day = taken
+  const isRangeTaken = (start: string | null, _s: "half_day" | "24h", count: number) =>
     !!start &&
-    stayDays(start, count).some((d) => (booked ?? []).some((b) => b.date === d && b.slot === s));
+    stayDays(start, count).some((d) => (booked ?? []).some((b) => b.date === d));
 
   const taken = isRangeTaken(dateKey, slot, effectiveNights);
   const cabinName = t("book.anyCabin");
@@ -404,11 +547,21 @@ function BookingFlow() {
       toast.error(t("common.error"));
       return;
     }
-    if (guest.guestsCount > fleetMaxCapacity) {
-      setErrors((prev) => ({ ...prev, guestsCount: t("cabin.capacity", { n: fleetMaxCapacity }) }));
+    const totalCountable = guest.adults + guest.children6_10;
+    if (totalCountable > fleetMaxCapacity) {
+      setErrors((prev) => ({ ...prev, adults: t("cabin.capacity", { n: fleetMaxCapacity }) }));
       toast.error(t("cabin.capacity", { n: fleetMaxCapacity }));
       return;
     }
+
+    // Turnstile verification
+    if (!TURNSTILE_DISABLED) {
+      if (!turnstile.token) {
+        toast.error("Complétez la vérification anti-bot.");
+        return;
+      }
+    }
+
     setErrors({});
     setStep(3);
   };
@@ -416,7 +569,19 @@ function BookingFlow() {
   const confirm = async () => {
     if (!dateKey) return;
     const result = await create({
-      data: { date: dateKey, slot, nights: effectiveNights, ...guest },
+      data: {
+        date: dateKey,
+        slot,
+        nights: effectiveNights,
+        cin: guest.cin,
+        fullName: guest.fullName,
+        phone: guest.phone,
+        dateOfBirth: guest.dateOfBirth,
+        guestsCount: guest.adults + guest.children6_10 + guest.childrenUnder5,
+        adults: guest.adults,
+        children6_10: guest.children6_10,
+        childrenUnder5: guest.childrenUnder5,
+      },
     });
 
     if (!result.ok) {
@@ -495,7 +660,9 @@ function BookingFlow() {
                 dateKey={dateKey}
                 slot={slot}
                 nights={effectiveNights}
-                guestsCount={guest.guestsCount}
+                adults={guest.adults}
+                children6_10={guest.children6_10}
+                childrenUnder5={guest.childrenUnder5}
                 price={price}
                 t={t}
                 lang={lang}
@@ -566,33 +733,44 @@ function BookingFlow() {
                     })}
                   </div>
 
-                  <div className="mt-5 rounded-2xl border border-border bg-card p-5 ">
-                    <div className="grid gap-5 sm:grid-cols-2">
-                      {slot === "24h" ? (
-                        <Field label={t("book.nights")}>
-                          <input
-                            type="number"
-                            min={1}
-                            max={30}
-                            className={`${inputClass} num`}
-                            value={nights}
-                            onChange={(e) => setNights(clamp(Number(e.target.value), 1, 30))}
-                          />
-                        </Field>
-                      ) : null}
-                      <Field label={t("book.guests")}>
+                  {/* Guest counters */}
+                  <div className="mt-5 rounded-2xl border border-border bg-card p-5 space-y-3">
+                    <p className="text-sm font-medium text-primary flex items-center gap-2">
+                      <Users className="h-4 w-4" /> Composition du groupe
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">{t("book.childrenNote")}</p>
+                    <CountStepper
+                      label={t("book.adults")}
+                      value={guest.adults}
+                      min={1}
+                      max={fleetMaxCapacity}
+                      onChange={(v) => updateGuest("adults", v)}
+                    />
+                    <CountStepper
+                      label={t("book.children6_10")}
+                      value={guest.children6_10}
+                      onChange={(v) => updateGuest("children6_10", v)}
+                      highlight="amber"
+                    />
+                    <CountStepper
+                      label={t("book.childrenUnder5")}
+                      sublabel="Gratuit"
+                      value={guest.childrenUnder5}
+                      onChange={(v) => updateGuest("childrenUnder5", v)}
+                      highlight="coral"
+                    />
+                    {slot === "24h" ? (
+                      <Field label={t("book.nights")}>
                         <input
                           type="number"
                           min={1}
-                          max={fleetMaxCapacity}
+                          max={30}
                           className={`${inputClass} num`}
-                          value={guest.guestsCount}
-                          onChange={(e) =>
-                            updateGuest("guestsCount", clamp(Number(e.target.value), 1, fleetMaxCapacity))
-                          }
+                          value={nights}
+                          onChange={(e) => setNights(clamp(Number(e.target.value), 1, 30))}
                         />
                       </Field>
-                    </div>
+                    ) : null}
                     {slot === "24h" ? (
                       <p className="mt-3 text-[11px] text-muted-foreground">{t("book.nightsNote")}</p>
                     ) : null}
@@ -668,36 +846,30 @@ function BookingFlow() {
                         </Field>
                       </div>
 
-                      <div className="grid gap-5 sm:grid-cols-2">
-                        <Field label={t("book.dob")} error={errors.dateOfBirth}>
-                          <input
-                            type="date"
-                            className={[inputClass, "num", errors.dateOfBirth ? inputErrorClass : ""].join(" ")}
-                            value={guest.dateOfBirth}
-                            max={format(new Date(), "yyyy-MM-dd")}
-                            autoComplete="bday"
-                            onChange={(e) => updateGuest("dateOfBirth", e.target.value)}
-                            aria-invalid={!!errors.dateOfBirth}
-                            required
-                          />
-                        </Field>
-                        <Field label={t("book.guests")} error={errors.guestsCount}>
-                          <input
-                            type="number"
-                            min={1}
-                            max={fleetMaxCapacity}
-                            className={[inputClass, "num", errors.guestsCount ? inputErrorClass : ""].join(" ")}
-                            value={guest.guestsCount}
-                            onChange={(e) =>
-                              updateGuest("guestsCount", clamp(Number(e.target.value), 1, fleetMaxCapacity))
-                            }
-                            aria-invalid={!!errors.guestsCount}
-                            required
-                          />
-                        </Field>
-                      </div>
+                      <Field label={t("book.dob")} error={errors.dateOfBirth}>
+                        <input
+                          type="date"
+                          className={[inputClass, "num", errors.dateOfBirth ? inputErrorClass : ""].join(" ")}
+                          value={guest.dateOfBirth}
+                          max={format(new Date(), "yyyy-MM-dd")}
+                          autoComplete="bday"
+                          onChange={(e) => updateGuest("dateOfBirth", e.target.value)}
+                          aria-invalid={!!errors.dateOfBirth}
+                          required
+                        />
+                      </Field>
                     </div>
                   </div>
+
+                  {/* Turnstile widget */}
+                  {!TURNSTILE_DISABLED && (
+                    <div className="mt-4 rounded-2xl border border-border bg-muted p-4">
+                      <div ref={turnstile.containerRef} className="min-h-22.5" />
+                      {turnstile.loadError ? (
+                        <p className="mt-3 text-xs text-destructive">{turnstile.loadError}</p>
+                      ) : null}
+                    </div>
+                  )}
 
                   <div className="mt-6 flex gap-4">
                     <button type="button" onClick={() => setStep(1)} className="btn-outline-pill flex flex-1 items-center justify-center gap-2">
@@ -727,7 +899,13 @@ function BookingFlow() {
                       <Row label={t("book.guest")} value={guest.fullName} />
                       <Row label="CIN" value={guest.cin} mono />
                       <Row label={t("book.phone")} value={guest.phone} mono />
-                      <Row label={t("book.guests")} value={String(guest.guestsCount)} mono />
+                      <Row label={t("book.adults")} value={String(guest.adults)} mono />
+                      {guest.children6_10 > 0 && (
+                        <Row label="Enfants 6–10 ans" value={`${guest.children6_10} × 50 DT`} mono />
+                      )}
+                      {guest.childrenUnder5 > 0 && (
+                        <Row label="Enfants ≤5 ans" value={`${guest.childrenUnder5} (gratuit)`} mono />
+                      )}
                     </dl>
                   </div>
 
@@ -755,12 +933,13 @@ function BookingFlow() {
                         <span className="num mt-2 block text-[11px]">
                           {t("book.priceDetail", {
                             price: formatPrice(unitPrice, lang),
-                            guests: guest.guestsCount,
+                            guests: guest.adults,
                             nights: effectiveNights,
                           })}
+                          {guest.children6_10 > 0 && ` + ${guest.children6_10} enfant(s) 6–10`}
                         </span>
                       ) : (
-                        <span className="mt-2 block text-[11px]">Forfait demi-journée</span>
+                        <span className="mt-2 block text-[11px]">Forfait {t("slot.half_day")}</span>
                       )}
                     </div>
                     <span className="num text-3xl font-semibold">{formatPrice(price, lang)}</span>
