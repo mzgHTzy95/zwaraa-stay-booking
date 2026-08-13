@@ -132,7 +132,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     <div className="h-full bg-background">
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-4">
-          <span className="flex items-center gap-2 font-[family-name:var(--font-display)] text-lg text-primary">
+          <span className="flex items-center gap-2 font-display text-lg text-primary">
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-coral text-sm text-coral-foreground">
               Z
             </span>
@@ -520,7 +520,7 @@ function Dashboard() {
         <button
           type="button"
           onClick={() => supabase.auth.signOut()}
-          className="btn-outline-pill flex-shrink-0 border-border/70 py-1.75"
+          className="btn-outline-pill shrink-0 border-border/70 py-1.75"
         >
           {t("admin.signOut")}
         </button>
@@ -598,7 +598,9 @@ function Dashboard() {
             )}
           </div>
         </section>
-      ) : (
+      ) : null}
+
+      {tab === "cabins" ? (
         <section className="mt-10 space-y-8">
           <AddCabinCard onSaved={refresh} />
           <div className="grid gap-5 sm:grid-cols-2">
@@ -607,7 +609,7 @@ function Dashboard() {
             ))}
           </div>
         </section>
-      )}
+      ) : null}
 
       {editing ? (
         <EditReservation

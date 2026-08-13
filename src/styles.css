@@ -406,7 +406,7 @@
 
 /* ---------- page frame / hero card ---------- */
 .page-frame {
-  padding: 18px 18px 0;
+  padding: 18px;
 }
 .hero-card {
   position: relative;
@@ -422,6 +422,9 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
 .hero-overlay {
   position: absolute;
@@ -884,7 +887,7 @@ footer.site-footer ul a:hover {
 }
 @media (max-width: 640px) {
   .page-frame {
-    padding: 10px 10px 0;
+    padding: 10px;
   }
   .wrap {
     padding: 0 16px;

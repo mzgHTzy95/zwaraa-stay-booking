@@ -269,7 +269,7 @@ function SummaryCard({
   childrenUnder5: number;
   price: number;
   t: (key: string, vars?: Record<string, string | number>) => string;
-  lang: "fr" | "ar";
+  lang: "fr" | "ar" | "en";
 }) {
   const photo = cabin?.photos?.[0] as string | undefined;
   const totalGuests = adults + children6_10 + childrenUnder5;
@@ -345,14 +345,14 @@ function SummaryCard({
           </div>
         ) : null}
 
-        <div className="mt-5 border-t border-dashed border-border pt-4">
+        {/* <div className="mt-5 border-t border-dashed border-border pt-4">
           <div className="flex items-baseline justify-between">
             <span className="text-sm font-medium text-muted-foreground">{t("book.total")}</span>
             <span className="num text-2xl font-semibold text-primary">
               {dateKey ? formatPrice(price, lang) : "—"}
             </span>
           </div>
-        </div>
+        </div> */}
 
         <div className="mt-5 space-y-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground">
           <p className="flex items-center gap-1.5">
@@ -611,7 +611,7 @@ function BookingFlow() {
 
   const PAY_METHODS: { id: PayMethod; Icon: typeof CreditCard; label: string }[] = [
     // { id: "card", Icon: CreditCard, label: t("book.payMethod.card") },
-    { id: "d17", Icon: Smartphone, label: t("book.payMethod.d17") },
+    // { id: "d17", Icon: Smartphone, label: t("book.payMethod.d17") },
     // { id: "bank", Icon: Landmark, label: t("book.payMethod.bank") },
     { id: "cash", Icon: Banknote, label: t("book.payMethod.cash") },
   ];
@@ -663,7 +663,7 @@ function BookingFlow() {
                 adults={guest.adults}
                 children6_10={guest.children6_10}
                 childrenUnder5={guest.childrenUnder5}
-                price={price}
+                // price={price}
                 t={t}
                 lang={lang}
               />
@@ -692,7 +692,7 @@ function BookingFlow() {
                   <div className="mt-5 grid gap-3 sm:grid-cols-2">
                     {(["half_day", "24h"] as const).map((s) => {
                       const active = slot === s;
-                      const p = Number(s === "half_day" ? cabin.price_half_day : cabin.price_24h);
+                      // const p = Number(s === "half_day" ? cabin.price_half_day : cabin.price_24h);
                       const busy = isRangeTaken(dateKey, s, s === "24h" ? nights : 1);
                       const SlotIcon = s === "half_day" ? Sun : Moon;
                       return (
@@ -719,7 +719,7 @@ function BookingFlow() {
                           <span className={["num block text-[11px]", active ? "opacity-85" : "text-muted-foreground"].join(" ")}>
                             {s === "half_day" ? t("slot.hoursHalf") : t("slot.hours24")}
                           </span>
-                          <span className="num mt-1 block text-lg font-semibold">{formatPrice(p, lang)}</span>
+                          {/* <span className="num mt-1 block text-lg font-semibold">{formatPrice(p, lang)}</span> */}
                           <span className={["mt-0.5 block text-[11px]", active ? "" : "text-muted-foreground"].join(" ")}>
                             {s === "24h" ? t("cabin.perPerson") : t("cabin.perPersonHalf")}
                           </span>
@@ -926,7 +926,7 @@ function BookingFlow() {
                     {slot === "24h" ? <PackList /> : null}
                   </div>
 
-                  <div className="mt-5 flex items-center justify-between rounded-xl border border-coral bg-coral px-5 py-5 text-coral-foreground">
+                  {/* <div className="mt-5 flex items-center justify-between rounded-xl border border-coral bg-coral px-5 py-5 text-coral-foreground">
                     <div>
                       <span className="text-xs font-semibold uppercase tracking-wider">{t("book.total")}</span>
                       {slot === "24h" ? (
@@ -943,7 +943,7 @@ function BookingFlow() {
                       )}
                     </div>
                     <span className="num text-3xl font-semibold">{formatPrice(price, lang)}</span>
-                  </div>
+                  </div> */}
 
                   <div className="mt-8 flex gap-4">
                     <button type="button" onClick={() => setStep(2)} className="btn-outline-pill flex flex-1 items-center justify-center gap-2">
@@ -1092,7 +1092,7 @@ function BookingFlow() {
 
                       <button type="submit" className="mt-6 flex w-full items-center justify-center gap-2 btn-pill btn-coral py-4 text-base">
                         <Lock className="h-4 w-4" />
-                        {t("book.pay", { amount: formatPrice(reservation.total, lang) })}
+                        {/* {t("book.pay", { amount: formatPrice(reservation.total, lang) })} */}
                       </button>
                     </form>
                   )}
