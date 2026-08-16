@@ -18,9 +18,11 @@ import {
   IdCard,
   Landmark,
   Lock,
+  MessageCircle,
   Minus,
   Moon,
   Plus,
+  ShieldCheck,
   Smartphone,
   Sun,
   Users,
@@ -31,6 +33,7 @@ import { useI18n, formatPrice } from "@/lib/i18n";
 import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { Calendar } from "@/components/ui/calendar";
 import { PackList } from "@/components/site/pack";
+import { Lightbox, type LightboxPhoto } from "@/components/site/lightbox";
 
 
 const searchSchema = z.object({
@@ -85,6 +88,76 @@ const FIELD_ERROR_FR: Record<keyof Guest, string> = {
 };
 
 const CHILDREN_6_10_PRICE = 50;
+
+// Common countries for guests booking Zwaraa — Tunisia first as the default,
+// then nearby Maghreb countries, then countries guests are likely to travel
+// from. Add more entries here if you get bookings from elsewhere often.
+const PHONE_COUNTRIES = [
+  { code: "TN", name: "Tunisie", dial: "+216", flag: "🇹🇳" },
+  { code: "DZ", name: "Algérie", dial: "+213", flag: "🇩🇿" },
+  { code: "LY", name: "Libye", dial: "+218", flag: "🇱🇾" },
+  { code: "MA", name: "Maroc", dial: "+212", flag: "🇲🇦" },
+  { code: "FR", name: "France", dial: "+33", flag: "🇫🇷" },
+  { code: "IT", name: "Italie", dial: "+39", flag: "🇮🇹" },
+  { code: "DE", name: "Allemagne", dial: "+49", flag: "🇩🇪" },
+  { code: "BE", name: "Belgique", dial: "+32", flag: "🇧🇪" },
+  { code: "CH", name: "Suisse", dial: "+41", flag: "🇨🇭" },
+  { code: "GB", name: "Royaume-Uni", dial: "+44", flag: "🇬🇧" },
+  { code: "ES", name: "Espagne", dial: "+34", flag: "🇪🇸" },
+  { code: "NL", name: "Pays-Bas", dial: "+31", flag: "🇳🇱" },
+  { code: "QA", name: "Qatar", dial: "+974", flag: "🇶🇦" },
+  { code: "AE", name: "Émirats arabes unis", dial: "+971", flag: "🇦🇪" },
+  { code: "SA", name: "Arabie saoudite", dial: "+966", flag: "🇸🇦" },
+  { code: "KW", name: "Koweït", dial: "+965", flag: "🇰🇼" },
+  { code: "EG", name: "Égypte", dial: "+20", flag: "🇪🇬" },
+  { code: "TR", name: "Turquie", dial: "+90", flag: "🇹🇷" },
+  { code: "CA", name: "Canada", dial: "+1", flag: "🇨🇦" },
+  { code: "US", name: "États-Unis", dial: "+1", flag: "🇺🇸" },
+] as const;
+
+const DEFAULT_PHONE_COUNTRY = PHONE_COUNTRIES[0].dial; // Tunisia
+
+// --- Draft persistence (Step 1 & 2 data only — never card details) -------
+// Uses sessionStorage (not localStorage) so it clears when the tab closes,
+// while still surviving accidental refreshes or back/forward navigation.
+const DRAFT_KEY = "zwaraa-booking-draft-v1";
+
+type BookingDraft = {
+  date: string | null; // ISO string
+  slot: "half_day" | "24h";
+  nights: number;
+  phoneCountry: string;
+  guest: Guest;
+  step: number;
+};
+
+function loadDraft(): BookingDraft | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(DRAFT_KEY);
+    return raw ? (JSON.parse(raw) as BookingDraft) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveDraft(draft: BookingDraft) {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  } catch {
+    /* storage full/unavailable — silently skip, not critical */
+  }
+}
+
+function clearDraft() {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.removeItem(DRAFT_KEY);
+  } catch {
+    /* ignore */
+  }
+}
 
 function clamp(value: number, min: number, max: number) {
   if (Number.isNaN(value)) return min;
@@ -198,48 +271,57 @@ function WaveDivider({ className = "" }: { className?: string }) {
 /** Horizontal connected stepper — circles joined by a fill-line. */
 function ConnectedStepper({ step, steps }: { step: number; steps: string[] }) {
   return (
-    <ol className="mt-6 flex items-start" aria-label="Étapes de réservation">
-      {steps.map((label, i) => {
-        const n = i + 1;
-        const state = n < step ? "done" : n === step ? "current" : "upcoming";
-        return (
-          <li key={label} className="flex flex-1 items-center last:flex-none">
-            <div className="flex flex-col items-center gap-1.5">
-              <span
-                aria-current={state === "current" ? "step" : undefined}
-                className={[
-                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-all",
-                  state === "done"
-                    ? "bg-forest text-forest-foreground"
-                    : state === "current"
-                    ? "scale-110 bg-coral text-coral-foreground shadow-md"
-                    : "border border-border bg-card text-muted-foreground",
-                ].join(" ")}
-              >
-                {state === "done" ? <Check className="h-4 w-4" /> : n}
-              </span>
-              <span
-                className={[
-                  "num text-center text-[10px] leading-tight",
-                  state === "upcoming" ? "text-muted-foreground" : "font-medium text-primary",
-                ].join(" ")}
-              >
-                {label}
-              </span>
-            </div>
-            {n < steps.length && (
-              <span
-                aria-hidden="true"
-                className={[
-                  "mx-2 mt-4 h-0.5 flex-1 rounded-full transition-colors duration-500",
-                  state === "done" ? "bg-forest" : "bg-border",
-                ].join(" ")}
-              />
-            )}
-          </li>
-        );
-      })}
-    </ol>
+    <div>
+      <ol className="mt-6 flex items-start" aria-label="Étapes de réservation">
+        {steps.map((label, i) => {
+          const n = i + 1;
+          const state = n < step ? "done" : n === step ? "current" : "upcoming";
+          return (
+            <li key={label} className="flex flex-1 items-center last:flex-none">
+              <div className="flex flex-col items-center gap-1.5">
+                <span
+                  aria-current={state === "current" ? "step" : undefined}
+                  className={[
+                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-all",
+                    state === "done"
+                      ? "bg-forest text-forest-foreground"
+                      : state === "current"
+                      ? "scale-110 bg-coral text-coral-foreground shadow-md"
+                      : "border border-border bg-card text-muted-foreground",
+                  ].join(" ")}
+                >
+                  {state === "done" ? <Check className="h-4 w-4" /> : n}
+                </span>
+                {/* Text labels: only the current step's label shows on very
+                    small screens (avoids 4 labels cramming into no space);
+                    all labels show from sm breakpoint up. */}
+                <span
+                  className={[
+                    "num text-center text-[10px] leading-tight",
+                    state === "upcoming" ? "text-muted-foreground" : "font-medium text-primary",
+                    state === "current" ? "block" : "hidden sm:block",
+                  ].join(" ")}
+                >
+                  {label}
+                </span>
+              </div>
+              {n < steps.length && (
+                <span
+                  aria-hidden="true"
+                  className={[
+                    "mx-2 mt-4 h-0.5 flex-1 rounded-full transition-colors duration-500",
+                    state === "done" ? "bg-forest" : "bg-border",
+                  ].join(" ")}
+                />
+              )}
+            </li>
+          );
+        })}
+      </ol>
+      <p className="mt-2 text-center text-xs text-muted-foreground sm:hidden">
+        Étape {step}/{steps.length} — {steps[step - 1]}
+      </p>
+    </div>
   );
 }
 
@@ -254,7 +336,7 @@ function SummaryCard({
   adults,
   children6_10,
   childrenUnder5,
-  price,
+  // price,
   t,
   lang,
 }: {
@@ -267,7 +349,7 @@ function SummaryCard({
   adults: number;
   children6_10: number;
   childrenUnder5: number;
-  price: number;
+  // price: number;
   t: (key: string, vars?: Record<string, string | number>) => string;
   lang: "fr" | "ar" | "en";
 }) {
@@ -285,7 +367,7 @@ function SummaryCard({
         )}
         <div
           aria-hidden="true"
-          className="absolute left-4 top-3 h-0 w-0 border-x-[13px] border-b-[11px] border-x-transparent border-b-coral drop-shadow-sm"
+          className="absolute left-4 top-3 h-0 w-0 border-x-13 border-b-11 border-x-transparent border-b-coral drop-shadow-sm"
         />
       </div>
 
@@ -417,31 +499,133 @@ function useTurnstile(siteKey: string, disabled: boolean) {
   return { containerRef, token, ready, loadError, reset };
 }
 
+/** Photo showcase — shows the cabin's real photos + included-offer highlights
+ *  so the booking flow isn't purely forms/text. Placed once, above the step
+ *  content, using the cabin already resolved for this booking. */
+function OfferShowcase({
+  cabin,
+  included,
+  t,
+}: {
+  cabin: any;
+  included: string[];
+  t: (key: string, vars?: Record<string, string | number>) => string;
+}) {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const photos: string[] = (cabin?.photos ?? []).filter(Boolean);
+  if (photos.length === 0) return null;
+
+  const [main, ...rest] = photos;
+  const thumbs = rest.slice(0, 3);
+
+  const lightboxPhotos: LightboxPhoto[] = photos.map((src, i) => ({
+    id: `offer-photo-${i}`,
+    src,
+    alt: `Photo ${i + 1}`,
+  }));
+
+  return (
+    <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="grid grid-cols-3 gap-1 sm:grid-cols-4">lkjlkjlklklklklklkklk
+        <button
+          type="button"
+          onClick={() => setActiveIndex(0)}
+          className="relative col-span-3 h-48 overflow-hidden sm:col-span-2 sm:h-56 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+        >
+          <img src={main} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 hover:scale-105" />
+        </button>
+        <div className="col-span-3 grid grid-cols-3 gap-1 sm:col-span-2 sm:grid-rows-2">
+          {thumbs.length > 0 ? (
+            thumbs.map((src, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setActiveIndex(i + 1)}
+                className="relative h-16 overflow-hidden sm:h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+              >
+                <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 hover:scale-105" />
+              </button>
+            ))
+          ) : (
+            <button
+              type="button"
+              onClick={() => setActiveIndex(0)}
+              className="relative col-span-3 h-16 overflow-hidden sm:h-full"
+            >
+              <img src={main} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            </button>
+          )}
+          <Link
+            to="/gallery"
+            className="relative flex h-16 items-center justify-center overflow-hidden bg-foreground/85 text-xs font-medium text-white transition-colors hover:bg-foreground sm:h-full"
+          >
+            {t("book.seeGallery")}
+          </Link>
+        </div>
+      </div>
+
+      {included?.length ? (
+        <div className="flex flex-wrap gap-2 border-t border-border p-4">
+          {included.map((item) => (
+            <span
+              key={item}
+              className="inline-flex items-center rounded-full bg-forest/10 border border-forest/20 px-3 py-1 text-[11px] font-medium text-forest"
+            >
+              {item}
+            </span>
+          ))}
+        </div>
+      ) : null}
+kljlkjlkjklj
+      <Lightbox
+        photos={lightboxPhotos}
+        index={activeIndex}
+        onClose={() => setActiveIndex(null)}
+        onNavigate={setActiveIndex}
+      />
+    </div>
+  );
+}
+
 function BookingFlow() {
   const search = Route.useSearch();
   const { t, lang } = useI18n();
   const navigate = useNavigate();
   const siteKey = import.meta.env["VITE_TURNSTILE_SITEKEY"] ?? "";
-  // const TURNSTILE_DISABLED = !siteKey;
-  const TURNSTILE_DISABLED = true;
+  const TURNSTILE_DISABLED = !siteKey;
 
-  const [step, setStep] = useState(1);
-  const [date, setDate] = useState<Date | undefined>(
-    search.date ? new Date(`${search.date}T00:00:00`) : undefined,
+  // Restore a saved draft once (if any) — computed lazily so it only reads
+  // sessionStorage a single time, on mount.
+  const draftRef = useRef<BookingDraft | null>(
+    typeof window !== "undefined" ? loadDraft() : null,
   );
-  const [slot, setSlot] = useState<"half_day" | "24h">(search.slot ?? "half_day");
-  const [nights, setNights] = useState(Math.min(30, Math.max(1, search.nights ?? 1)));
+  const draft = draftRef.current;
+
+  // Cap restored step at 2 — steps 3/4 depend on a server-created
+  // reservation record that isn't part of the local draft, so resuming
+  // straight into Review/Payment would show stale/incorrect state.
+  const [step, setStep] = useState(() => Math.min(draft?.step ?? 1, 2));
+
+  const [date, setDate] = useState<Date | undefined>(() => {
+    if (search.date) return new Date(`${search.date}T00:00:00`);
+    if (draft?.date) return new Date(draft.date);
+    return undefined;
+  });
+  const [slot, setSlot] = useState<"half_day" | "24h">(search.slot ?? draft?.slot ?? "half_day");
+  const [nights, setNights] = useState(
+    Math.min(30, Math.max(1, search.nights ?? draft?.nights ?? 1)),
+  );
   const [payMethod, setPayMethod] = useState<PayMethod>("card");
 
-  const [guest, setGuest] = useState<Guest>({
-    cin: "",
-    fullName: "",
-    phone: "",
-    dateOfBirth: "",
-    adults: Math.max(1, search.guests ?? 2),
-    children6_10: 0,
-    childrenUnder5: 0,
-  });
+  const [guest, setGuest] = useState<Guest>(() => ({
+    cin: draft?.guest?.cin ?? "",
+    fullName: draft?.guest?.fullName ?? "",
+    phone: draft?.guest?.phone ?? "",
+    dateOfBirth: draft?.guest?.dateOfBirth ?? "",
+    adults: draft?.guest?.adults ?? Math.max(1, search.guests ?? 2),
+    children6_10: draft?.guest?.children6_10 ?? 0,
+    childrenUnder5: draft?.guest?.childrenUnder5 ?? 0,
+  }));
 
   const [errors, setErrors] = useState<Partial<Record<keyof Guest, string>>>({});
   const [reservation, setReservation] = useState<{ id: string; reference: string; total: number } | null>(
@@ -449,6 +633,7 @@ function BookingFlow() {
   );
   const [card, setCard] = useState({ number: "", name: "", expiry: "", cvv: "" });
   const [d17Phone, setD17Phone] = useState("");
+  const [phoneCountry, setPhoneCountry] = useState(draft?.phoneCountry ?? DEFAULT_PHONE_COUNTRY);
   const [processing, setProcessing] = useState(false);
 
   // Turnstile for booking form (Step 2)
@@ -490,6 +675,26 @@ function BookingFlow() {
   useEffect(() => {
     stepRef.current?.focus();
   }, [step]);
+
+  // Let the person know their progress was restored, once, on mount.
+  useEffect(() => {
+    if (draft?.guest?.fullName || draft?.date) {
+      toast.info("Vos informations précédentes ont été restaurées.");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist Step 1 & 2 data as it changes — never card/payment details.
+  useEffect(() => {
+    saveDraft({
+      date: date ? date.toISOString() : null,
+      slot,
+      nights,
+      phoneCountry,
+      guest,
+      step,
+    });
+  }, [date, slot, nights, phoneCountry, guest, step]);
 
   if (!cabin) {
     return (
@@ -575,7 +780,7 @@ function BookingFlow() {
         nights: effectiveNights,
         cin: guest.cin,
         fullName: guest.fullName,
-        phone: guest.phone,
+        phone: `${phoneCountry}${guest.phone}`,
         dateOfBirth: guest.dateOfBirth,
         guestsCount: guest.adults + guest.children6_10 + guest.childrenUnder5,
         adults: guest.adults,
@@ -600,6 +805,7 @@ function BookingFlow() {
     await new Promise((r) => setTimeout(r, 1600));
     try {
       await pay({ data: { reservationId: reservation.id, cardNumber: card.number || d17Phone || "SIMULATED" } });
+      clearDraft();
       navigate({ to: "/receipt/$reference", params: { reference: reservation.reference } });
     } catch {
       setProcessing(false);
@@ -643,6 +849,7 @@ function BookingFlow() {
               Modifier <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
+          <OfferShowcase cabin={cabin} included={included ?? []} t={t} />
 
           <div className="mt-6 flex items-center gap-3">
             <h1 className="text-3xl text-primary">{t("book.title")}</h1>
@@ -832,17 +1039,33 @@ function BookingFlow() {
                           />
                         </Field>
                         <Field label={t("book.phone")} error={errors.phone}>
-                          <input
-                            className={[inputClass, "num", errors.phone ? inputErrorClass : ""].join(" ")}
-                            value={guest.phone}
-                            inputMode="tel"
-                            autoComplete="tel"
-                            placeholder="22334455"
-                            maxLength={12}
-                            onChange={(e) => updateGuest("phone", onlyDigits(e.target.value, 12))}
-                            aria-invalid={!!errors.phone}
-                            required
-                          />
+                          <div className="flex gap-2">
+                            <select
+                              value={phoneCountry}
+                              onChange={(e) => setPhoneCountry(e.target.value)}
+                              aria-label="Indicatif pays"
+                              className={`${inputClass} num px-2 text-center`}
+                              style={{ flex: "0 0 5.5rem", minWidth: 0 }}
+                            >
+                              {PHONE_COUNTRIES.map((c) => (
+                                <option key={c.code} value={c.dial}>
+                                  {c.code} {c.dial}
+                                </option>
+                              ))}
+                            </select>
+                            <input
+                              className={[inputClass, "num", errors.phone ? inputErrorClass : ""].join(" ")}
+                              style={{ flex: "1 1 0%", minWidth: 0 }}
+                              value={guest.phone}
+                              inputMode="tel"
+                              autoComplete="tel-national"
+                              placeholder="22334455"
+                              maxLength={12}
+                              onChange={(e) => updateGuest("phone", onlyDigits(e.target.value, 12))}
+                              aria-invalid={!!errors.phone}
+                              required
+                            />
+                          </div>
                         </Field>
                       </div>
 
@@ -874,7 +1097,7 @@ function BookingFlow() {
                   <div className="mt-6 flex gap-4">
                     <button type="button" onClick={() => setStep(1)} className="btn-outline-pill flex flex-1 items-center justify-center gap-2">
                       <ArrowLeft className="h-4 w-4" /> {t("book.back")}
-                    </button>
+                    </button> 
                     <button type="submit" className="btn-pill btn-coral flex flex-1 items-center justify-center gap-2">
                       {t("book.continue")} <ArrowRight className="h-4 w-4" />
                     </button>
@@ -898,7 +1121,7 @@ function BookingFlow() {
                       ) : null}
                       <Row label={t("book.guest")} value={guest.fullName} />
                       <Row label="CIN" value={guest.cin} mono />
-                      <Row label={t("book.phone")} value={guest.phone} mono />
+                      <Row label={t("book.phone")} value={`${phoneCountry} ${guest.phone}`} mono />
                       <Row label={t("book.adults")} value={String(guest.adults)} mono />
                       {guest.children6_10 > 0 && (
                         <Row label="Enfants 6–10 ans" value={`${guest.children6_10} × 50 DT`} mono />
@@ -971,6 +1194,24 @@ function BookingFlow() {
                     </div>
                   ) : (
                     <form onSubmit={doPay} className="mt-6 space-y-5">
+                      {/* Trust signals — shown right before payment, when hesitation is highest */}
+                      <div className="grid gap-3 rounded-xl border border-border bg-muted/50 p-4 sm:grid-cols-3">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <ShieldCheck className="h-4 w-4 shrink-0 text-forest" />
+                          Paiement sécurisé — données jamais partagées
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <CalendarDays className="h-4 w-4 shrink-0 text-primary" />
+                          Annulation gratuite jusqu'à 48h avant
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <MessageCircle className="h-4 w-4 shrink-0 text-coral" />
+                          <Link to="/" className="underline hover:text-foreground">
+                            Besoin d'aide ? Contactez-nous
+                          </Link>
+                        </div>
+                      </div>
+
                       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                         {PAY_METHODS.map((m) => (
                           <button

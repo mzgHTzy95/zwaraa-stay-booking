@@ -46,7 +46,7 @@ const inputClass =
   "w-full rounded-xl border border-input bg-card px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all";
 
 // Toggle to temporarily disable Turnstile while developing or testing.
-const TURNSTILE_DISABLED = true;
+const TURNSTILE_DISABLED = false;
 
 function AdminPage() {
   const { t } = useI18n();
@@ -323,8 +323,7 @@ function LoginCard() {
         >
           {t("admin.signIn")}
         </button>
-        {/* <div className="rounded-2xl border border-border bg-muted p-4">
-          <div ref={widgetContainerRef} className="min-h-[90px]" />
+          <div ref={widgetContainerRef} className="min-h-22.5 p-2 flex justify-center items-center" />
           {!turnstileReady && !turnstileLoadError ? (
             <p className="mt-3 text-xs text-muted-foreground">
               {t("admin.turnstileLoading")}
@@ -338,7 +337,6 @@ function LoginCard() {
           {turnstileError && !turnstileLoadError ? (
             <p className="mt-3 text-xs text-destructive">{turnstileError}</p>
           ) : null}
-        </div> */}
         {exists === false ? (
           <div className="rounded-xl border border-border/60 bg-secondary p-4">
             <p className="text-xs text-muted-foreground">

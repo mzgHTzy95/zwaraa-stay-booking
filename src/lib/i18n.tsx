@@ -106,6 +106,11 @@ const fr: Dict = {
 "home.galleryTeaser.body":
   "Bungalows, activités, repas et nature — explorez notre galerie complète en photos et vidéos.",
 "home.galleryTeaser.cta": "Voir la galerie",
+"home.galleryTeaser.chipBoat": "Balade en barque",
+"home.galleryTeaser.chipInterior": "Intérieur du bungalow",
+// Big single word used in Option 2 (photo-filled headline) — keep it short,
+// this gets rendered at huge font size.
+"home.galleryTeaser.headlineWord": "GALERIE",
 
   "pack.title": "Formule 24 h — prix par personne",
   "pack.note": "Le tarif 24 heures s'entend par personne et par jour.",
@@ -559,7 +564,9 @@ const ar: Dict = {
   "home.galleryTeaser.title": "اكتشف الزوارع بالتصاور",
   "home.galleryTeaser.body":
     "بنغالوهات، أنشطة، ماكلة وطبيعة — تفرّج على تجربتنا كاملة بالتصاور والفيديوهات.",
-  "home.galleryTeaser.cta": "شوف التصاور",
+"home.galleryTeaser.chipBoat": "نزهة بالقارب",
+"home.galleryTeaser.chipInterior": "داخل البنغالو",
+"home.galleryTeaser.headlineWord": "المعرض",
 
   "gallery.category.bungalow": "بنغالو",
   "gallery.category.activity": "نشاط",

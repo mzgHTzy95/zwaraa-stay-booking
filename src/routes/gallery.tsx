@@ -401,7 +401,7 @@ function Gallery() {
       <SiteHeader />
 
       {/* Hero band — full-bleed photo */}
-      <div className="relative h-[340px] sm:h-[420px] overflow-hidden">
+      <div className="relative h-85 sm:h-105 overflow-hidden">
         <img
           src={heroLagoon}
           alt=""
@@ -410,7 +410,7 @@ function Gallery() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/85 via-foreground/35 to-foreground/10" />
         <div className="relative z-10 flex h-full items-end">
-          <div className="wrap max-w-5xl pb-10">
+          <div className="max-w-5xl pb-10 m-auto mb-10">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white backdrop-blur-sm">
               <Waves className="h-3.5 w-3.5" />
               {t("gallery.about.kicker")}

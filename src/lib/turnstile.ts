@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 const turnstileSecret =
-  process.env["TURNSTILE_SECRET"] || process.env["VITE_TURNSTILE_SECRET"];
+  process.env["TURNSTILE_SECRET"];
 
 const turnstileResponseSchema = z.object({
   success: z.boolean(),
