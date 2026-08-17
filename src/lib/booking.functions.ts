@@ -107,6 +107,7 @@ const reservationInput = z.object({
   adults: z.number().int().min(1).max(20).default(1),
   children6_10: z.number().int().min(0).max(20).default(0),
   childrenUnder5: z.number().int().min(0).max(20).default(0),
+  turnstileToken: z.string().optional(),
 });
 
 const CHILDREN_6_10_PRICE = 50; // fixed price per child aged 6-10
@@ -114,6 +115,14 @@ const CHILDREN_6_10_PRICE = 50; // fixed price per child aged 6-10
 export const createReservation = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => reservationInput.parse(data))
   .handler(async ({ data }) => {
+    if (process.env["TURNSTILE_SECRET"]) {
+      const { verifyTurnstileToken } = await import("@/lib/turnstile");
+      const check = await verifyTurnstileToken(data.turnstileToken ?? "");
+      if (!check.ok) {
+        return { ok: false as const, reason: "turnstile" as const };
+      }
+    }
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const { data: cabins, error: cabinError } = await supabaseAdmin

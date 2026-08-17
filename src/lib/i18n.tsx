@@ -205,6 +205,7 @@ const fr: Dict = {
     "Aucun compte administrateur n'existe encore. Créez-le maintenant (une seule fois).",
   "admin.signOut": "Déconnexion",
   "admin.reservations": "Réservations",
+  "admin.archiveTab": "Archive",
   "admin.cabinsTab": "Bungalows",
   "admin.revenue": "Recettes encaissées",
   "admin.count": "Réservations",
@@ -444,6 +445,7 @@ const en: Dict = {
     "No admin account exists yet. Create one now (one-time only).",
   "admin.signOut": "Sign out",
   "admin.reservations": "Bookings",
+  "admin.archiveTab": "Archive",
   "admin.cabinsTab": "Bungalows",
   "admin.revenue": "Collected revenue",
   "admin.count": "Bookings",
@@ -711,6 +713,7 @@ const ar: Dict = {
   "admin.signOut": "خروج",
 
   "admin.reservations": "الحجوزات",
+  "admin.archiveTab": "الأرشيف",
   "admin.cabinsTab": "البنغالوهات",
   "admin.revenue": "المداخيل",
   "admin.count": "الحجوزات",

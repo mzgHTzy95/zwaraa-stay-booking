@@ -6,7 +6,8 @@ import { getReceipt } from "@/lib/booking.functions";
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { WaveDivider } from "@/components/site/ornaments";
-import { Download } from "lucide-react";
+import { toast } from "sonner";
+import { Copy, Download, Share2 } from "lucide-react";
 
 export const Route = createFileRoute("/receipt/$reference")({
   head: () => ({
@@ -247,24 +248,49 @@ function Receipt() {
               </div>
 
               {/* Action buttons */}
-              <div className="mt-8 flex gap-4 print:hidden">
+              <div className="mt-8 grid grid-cols-2 gap-3 sm:flex sm:gap-4 print:hidden">
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(data.reference);
+                    toast.success(lang === "ar" ? "تم نسخ المرجع!" : "Référence copiée !");
+                  }}
+                  className="btn-outline-pill flex items-center justify-center gap-2 py-3 text-xs"
+                >
+                  <Copy className="h-4 w-4" />
+                  {lang === "ar" ? "نسخ المرجع" : "Copier la réf."}
+                </button>
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(
+                    `Réservation Zwaraa — Réf: ${data.reference}\nDate: ${data.reservation_date}`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-outline-pill border-forest text-forest hover:bg-forest/5 flex items-center justify-center gap-2 py-3 text-xs"
+                >
+                  <Share2 className="h-4 w-4" />
+                  WhatsApp
+                </a>
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="btn-outline-pill flex-1"
+                  className="btn-outline-pill flex items-center justify-center gap-2 py-3 text-xs"
                 >
                   {t("receipt.print")}
                 </button>
                 <button
                   type="button"
                   onClick={downloadReceipt}
-                  className="btn-outline-pill flex-[1.5] border-forest text-forest hover:bg-forest/5 flex items-center justify-center gap-2"
+                  className="btn-outline-pill border-forest text-forest hover:bg-forest/5 flex items-center justify-center gap-2 py-3 text-xs"
                 >
                   <Download className="h-4 w-4" />
                   {t("receipt.download")}
                 </button>
-                <Link to="/" className="btn-pill btn-coral flex-1">
-                  {t("receipt.home")}
+              </div>
+
+              <div className="mt-4 text-center print:hidden">
+                <Link to="/" className="inline-block text-xs font-medium text-muted-foreground hover:text-primary transition-colors">
+                  ← {t("receipt.home")}
                 </Link>
               </div>
             </div>

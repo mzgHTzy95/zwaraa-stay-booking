@@ -13,6 +13,7 @@ import {
   CalendarDays,
   Check,
   CheckCircle2,
+  ChevronDown,
   CreditCard,
   Home,
   IdCard,
@@ -34,6 +35,7 @@ import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { Calendar } from "@/components/ui/calendar";
 import { PackList } from "@/components/site/pack";
 import { Lightbox, type LightboxPhoto } from "@/components/site/lightbox";
+import { cabinGallery } from "@/lib/images";
 
 
 const searchSchema = z.object({
@@ -427,15 +429,6 @@ function SummaryCard({
           </div>
         ) : null}
 
-        {/* <div className="mt-5 border-t border-dashed border-border pt-4">
-          <div className="flex items-baseline justify-between">
-            <span className="text-sm font-medium text-muted-foreground">{t("book.total")}</span>
-            <span className="num text-2xl font-semibold text-primary">
-              {dateKey ? formatPrice(price, lang) : "—"}
-            </span>
-          </div>
-        </div> */}
-
         <div className="mt-5 space-y-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground">
           <p className="flex items-center gap-1.5">
             <Lock className="h-3.5 w-3.5" /> Paiement simulé — aucune charge réelle
@@ -465,6 +458,9 @@ function useTurnstile(siteKey: string, disabled: boolean) {
       if (!win.turnstile || !containerRef.current) return;
       widgetIdRef.current = win.turnstile.render(containerRef.current, {
         sitekey: siteKey,
+        // Fully invisible unless Cloudflare genuinely can't verify silently
+        // — no checkbox, no visible challenge, auto-verifies in background.
+        appearance: "interaction-only",
         callback: (t: string) => { setToken(t); },
         "expired-callback": () => { setToken(""); },
         "error-callback": () => { setToken(""); },
@@ -501,7 +497,11 @@ function useTurnstile(siteKey: string, disabled: boolean) {
 
 /** Photo showcase — shows the cabin's real photos + included-offer highlights
  *  so the booking flow isn't purely forms/text. Placed once, above the step
- *  content, using the cabin already resolved for this booking. */
+ *  content, using the cabin already resolved for this booking.
+ *  IMPORTANT: uses cabinGallery() (same helper the rest of the app uses) so
+ *  it always has photos to show — including bundled fallback images when the
+ *  cabins.photos column is empty/null in the DB — instead of silently
+ *  rendering nothing. */
 function OfferShowcase({
   cabin,
   included,
@@ -512,7 +512,9 @@ function OfferShowcase({
   t: (key: string, vars?: Record<string, string | number>) => string;
 }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const photos: string[] = (cabin?.photos ?? []).filter(Boolean);
+  if (!cabin) return null;
+
+  const photos: string[] = cabinGallery(cabin.slug, cabin.photos).filter(Boolean);
   if (photos.length === 0) return null;
 
   const [main, ...rest] = photos;
@@ -526,7 +528,7 @@ function OfferShowcase({
 
   return (
     <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card">
-      <div className="grid grid-cols-3 gap-1 sm:grid-cols-4">lkjlkjlklklklklklkklk
+      <div className="grid grid-cols-3 gap-1 sm:grid-cols-4">
         <button
           type="button"
           onClick={() => setActiveIndex(0)}
@@ -576,7 +578,7 @@ function OfferShowcase({
           ))}
         </div>
       ) : null}
-kljlkjlkjklj
+
       <Lightbox
         photos={lightboxPhotos}
         index={activeIndex}
@@ -786,12 +788,21 @@ function BookingFlow() {
         adults: guest.adults,
         children6_10: guest.children6_10,
         childrenUnder5: guest.childrenUnder5,
+        turnstileToken: turnstile.token,
       },
     });
 
     if (!result.ok) {
-      toast.error(result.reason === "taken" ? t("book.taken") : t("common.error"));
-      if (result.reason === "taken") setStep(1);
+      if (result.reason === "taken") {
+        toast.error(t("book.taken"));
+        setStep(1);
+      } else if (result.reason === "turnstile") {
+        toast.error("Vérification de sécurité échouée, veuillez réessayer.");
+        turnstile.reset();
+        setStep(2);
+      } else {
+        toast.error(t("common.error"));
+      }
       return;
     }
     setReservation({ id: result.id, reference: result.reference, total: result.total });
@@ -816,9 +827,6 @@ function BookingFlow() {
   const steps = [t("book.step1"), t("book.step2"), t("book.step3"), t("book.step4")];
 
   const PAY_METHODS: { id: PayMethod; Icon: typeof CreditCard; label: string }[] = [
-    // { id: "card", Icon: CreditCard, label: t("book.payMethod.card") },
-    // { id: "d17", Icon: Smartphone, label: t("book.payMethod.d17") },
-    // { id: "bank", Icon: Landmark, label: t("book.payMethod.bank") },
     { id: "cash", Icon: Banknote, label: t("book.payMethod.cash") },
   ];
 
@@ -870,13 +878,24 @@ function BookingFlow() {
                 adults={guest.adults}
                 children6_10={guest.children6_10}
                 childrenUnder5={guest.childrenUnder5}
-                // price={price}
                 t={t}
                 lang={lang}
               />
             </aside>
 
             <div className="order-1">
+              {/* Invisible Turnstile container — mounted immediately on page load (Step 1)
+                  so Cloudflare auto-verifies silently in the background while the user picks dates & guests.
+                  By the time they submit Step 2, the token is already ready. */}
+              {!TURNSTILE_DISABLED && (
+                <div className="empty:hidden">
+                  <div ref={turnstile.containerRef} />
+                  {turnstile.loadError ? (
+                    <p className="mb-3 text-xs text-destructive">{turnstile.loadError}</p>
+                  ) : null}
+                </div>
+              )}
+
               {/* ── STEP 1: Date & slot ── */}
               {step === 1 && (
                 <section ref={stepRef as React.RefObject<HTMLElement>} tabIndex={-1} className="animate-rise outline-none">
@@ -899,7 +918,6 @@ function BookingFlow() {
                   <div className="mt-5 grid gap-3 sm:grid-cols-2">
                     {(["half_day", "24h"] as const).map((s) => {
                       const active = slot === s;
-                      // const p = Number(s === "half_day" ? cabin.price_half_day : cabin.price_24h);
                       const busy = isRangeTaken(dateKey, s, s === "24h" ? nights : 1);
                       const SlotIcon = s === "half_day" ? Sun : Moon;
                       return (
@@ -926,7 +944,6 @@ function BookingFlow() {
                           <span className={["num block text-[11px]", active ? "opacity-85" : "text-muted-foreground"].join(" ")}>
                             {s === "half_day" ? t("slot.hoursHalf") : t("slot.hours24")}
                           </span>
-                          {/* <span className="num mt-1 block text-lg font-semibold">{formatPrice(p, lang)}</span> */}
                           <span className={["mt-0.5 block text-[11px]", active ? "" : "text-muted-foreground"].join(" ")}>
                             {s === "24h" ? t("cabin.perPerson") : t("cabin.perPersonHalf")}
                           </span>
@@ -1039,23 +1056,31 @@ function BookingFlow() {
                           />
                         </Field>
                         <Field label={t("book.phone")} error={errors.phone}>
-                          <div className="flex gap-2">
-                            <select
-                              value={phoneCountry}
-                              onChange={(e) => setPhoneCountry(e.target.value)}
-                              aria-label="Indicatif pays"
-                              className={`${inputClass} num px-2 text-center`}
-                              style={{ flex: "0 0 5.5rem", minWidth: 0 }}
-                            >
-                              {PHONE_COUNTRIES.map((c) => (
-                                <option key={c.code} value={c.dial}>
-                                  {c.code} {c.dial}
-                                </option>
-                              ))}
-                            </select>
+                          <div
+                            className={[
+                              "flex items-stretch overflow-hidden rounded-xl border bg-card transition-all",
+                              errors.phone
+                                ? "border-destructive focus-within:border-destructive focus-within:ring-2 focus-within:ring-destructive/20"
+                                : "border-input focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20",
+                            ].join(" ")}
+                          >
+                            <div className="relative flex shrink-0 items-center border-e border-border">
+                              <select
+                                value={phoneCountry}
+                                onChange={(e) => setPhoneCountry(e.target.value)}
+                                aria-label="Indicatif pays"
+                                className="num h-full appearance-none bg-transparent py-3 ps-3 pe-7 text-sm text-primary outline-none cursor-pointer"
+                              >
+                                {PHONE_COUNTRIES.map((c) => (
+                                  <option key={c.code} value={c.dial}>
+                                    {c.code} {c.dial}
+                                  </option>
+                                ))}
+                              </select>
+                              <ChevronDown className="pointer-events-none absolute end-2 h-3.5 w-3.5 text-muted-foreground" />
+                            </div>
                             <input
-                              className={[inputClass, "num", errors.phone ? inputErrorClass : ""].join(" ")}
-                              style={{ flex: "1 1 0%", minWidth: 0 }}
+                              className="num min-w-0 flex-1 border-0 bg-transparent px-3 py-3 text-sm outline-none"
                               value={guest.phone}
                               inputMode="tel"
                               autoComplete="tel-national"
@@ -1084,20 +1109,10 @@ function BookingFlow() {
                     </div>
                   </div>
 
-                  {/* Turnstile widget */}
-                  {!TURNSTILE_DISABLED && (
-                    <div className="mt-4 rounded-2xl border border-border bg-muted p-4">
-                      <div ref={turnstile.containerRef} className="min-h-22.5" />
-                      {turnstile.loadError ? (
-                        <p className="mt-3 text-xs text-destructive">{turnstile.loadError}</p>
-                      ) : null}
-                    </div>
-                  )}
-
                   <div className="mt-6 flex gap-4">
                     <button type="button" onClick={() => setStep(1)} className="btn-outline-pill flex flex-1 items-center justify-center gap-2">
                       <ArrowLeft className="h-4 w-4" /> {t("book.back")}
-                    </button> 
+                    </button>
                     <button type="submit" className="btn-pill btn-coral flex flex-1 items-center justify-center gap-2">
                       {t("book.continue")} <ArrowRight className="h-4 w-4" />
                     </button>
@@ -1148,25 +1163,6 @@ function BookingFlow() {
                     </div>
                     {slot === "24h" ? <PackList /> : null}
                   </div>
-
-                  {/* <div className="mt-5 flex items-center justify-between rounded-xl border border-coral bg-coral px-5 py-5 text-coral-foreground">
-                    <div>
-                      <span className="text-xs font-semibold uppercase tracking-wider">{t("book.total")}</span>
-                      {slot === "24h" ? (
-                        <span className="num mt-2 block text-[11px]">
-                          {t("book.priceDetail", {
-                            price: formatPrice(unitPrice, lang),
-                            guests: guest.adults,
-                            nights: effectiveNights,
-                          })}
-                          {guest.children6_10 > 0 && ` + ${guest.children6_10} enfant(s) 6–10`}
-                        </span>
-                      ) : (
-                        <span className="mt-2 block text-[11px]">Forfait {t("slot.half_day")}</span>
-                      )}
-                    </div>
-                    <span className="num text-3xl font-semibold">{formatPrice(price, lang)}</span>
-                  </div> */}
 
                   <div className="mt-8 flex gap-4">
                     <button type="button" onClick={() => setStep(2)} className="btn-outline-pill flex flex-1 items-center justify-center gap-2">
@@ -1333,7 +1329,6 @@ function BookingFlow() {
 
                       <button type="submit" className="mt-6 flex w-full items-center justify-center gap-2 btn-pill btn-coral py-4 text-base">
                         <Lock className="h-4 w-4" />
-                        {/* {t("book.pay", { amount: formatPrice(reservation.total, lang) })} */}
                       </button>
                     </form>
                   )}
@@ -1343,6 +1338,47 @@ function BookingFlow() {
           </div>
         </div>
       </div>
+
+      {/* Mobile sticky navigation action bar (without price) */}
+      <div className="fixed bottom-0 inset-x-0 z-40 flex items-center justify-between gap-3 border-t border-border/80 bg-card/95 px-4 py-3 backdrop-blur-xl sm:hidden shadow-lg">
+        <div className="flex flex-col min-w-0">
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            Étape {step}/4
+          </span>
+          <span className="truncate text-xs font-semibold text-primary">
+            {steps[step - 1]}
+          </span>
+        </div>
+        {step === 1 && (
+          <button
+            type="button"
+            disabled={!dateKey || taken}
+            onClick={() => setStep(2)}
+            className="btn-pill btn-coral px-5 py-2.5 text-xs font-medium shrink-0 flex items-center gap-1.5 disabled:opacity-50"
+          >
+            {t("book.continue")} <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        )}
+        {step === 2 && (
+          <button
+            type="button"
+            onClick={(e) => submitGuest(e as any)}
+            className="btn-pill btn-coral px-5 py-2.5 text-xs font-medium shrink-0 flex items-center gap-1.5"
+          >
+            {t("book.continue")} <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        )}
+        {step === 3 && (
+          <button
+            type="button"
+            onClick={confirm}
+            className="btn-pill btn-coral px-5 py-2.5 text-xs font-medium shrink-0 flex items-center gap-1.5"
+          >
+            {t("book.confirmPay")} <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+
       <SiteFooter />
     </div>
   );

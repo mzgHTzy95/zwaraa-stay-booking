@@ -11,7 +11,7 @@ const turnstileResponseSchema = z.object({
   "error-codes": z.array(z.string()).optional(),
 });
 
-async function verifyTurnstileToken(token: string) {
+export async function verifyTurnstileToken(token: string) {
   if (!turnstileSecret) {
     throw new Error("Missing TURNSTILE_SECRET environment variable");
   }

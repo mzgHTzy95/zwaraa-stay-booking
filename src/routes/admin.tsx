@@ -16,7 +16,7 @@ import { verifyTurnstile } from "@/lib/turnstile";
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { LanguageSwitch } from "@/components/site/chrome";
 import { InstallAdminButton } from "@/components/site/install-button";
-import { Check, Plus, X } from "lucide-react";
+import { Check, ChevronDown, FileText, Plus, Search, SlidersHorizontal, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -402,10 +402,29 @@ const STATUS_CONFIG: Record<
   },
 };
 
+function getEffectiveReservationStatus(r: ReservationRow): ReservationRow["status"] {
+  if (r.status === "cancelled" || r.status === "completed") {
+    return r.status;
+  }
+  if (!r.reservation_date) return r.status;
+
+  const startDate = new Date(`${r.reservation_date}T00:00:00`);
+  const days = r.slot === "half_day" ? 1 : Math.max(1, Number(r.nights ?? 1));
+  const endDate = new Date(startDate.getTime() + days * 86400000);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (today.getTime() >= endDate.getTime()) {
+    return "completed";
+  }
+  return r.status;
+}
+
 function Dashboard() {
   const { t, lang } = useI18n();
   const qc = useQueryClient();
-  const [tab, setTab] = useState<"reservations" | "calendar" | "cabins">(
+  const [tab, setTab] = useState<"reservations" | "archive" | "calendar" | "cabins">(
     "reservations",
   );
   const [query, setQuery] = useState("");
@@ -420,7 +439,27 @@ function Dashboard() {
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as unknown as ReservationRow[];
+      const rows = (data as unknown as ReservationRow[]) ?? [];
+
+      const expiredIds: string[] = [];
+      const updatedRows = rows.map((r) => {
+        const effective = getEffectiveReservationStatus(r);
+        if (effective === "completed" && r.status !== "completed") {
+          expiredIds.push(r.id);
+          return { ...r, status: "completed" as const };
+        }
+        return { ...r, status: effective };
+      });
+
+      if (expiredIds.length > 0) {
+        supabase
+          .from("reservations")
+          .update({ status: "completed" })
+          .in("id", expiredIds)
+          .then();
+      }
+
+      return updatedRows;
     },
   });
 
@@ -452,7 +491,16 @@ function Dashboard() {
     };
   }, [reservations]);
 
-  const filtered = (reservations ?? []).filter((r) => {
+  const activeReservations = useMemo(
+    () => (reservations ?? []).filter((r) => r.status !== "confirmed"),
+    [reservations],
+  );
+  const archiveReservations = useMemo(
+    () => (reservations ?? []).filter((r) => r.status === "confirmed"),
+    [reservations],
+  );
+
+  const filtered = activeReservations.filter((r) => {
     const q = query.trim().toLowerCase();
     const matchQ =
       !q ||
@@ -461,6 +509,17 @@ function Dashboard() {
       r.reference.toLowerCase().includes(q) ||
       r.phone.includes(q);
     return matchQ && (status === "all" || r.status === status);
+  });
+
+  const archiveFiltered = archiveReservations.filter((r) => {
+    const q = query.trim().toLowerCase();
+    return (
+      !q ||
+      r.full_name.toLowerCase().includes(q) ||
+      r.cin.toLowerCase().includes(q) ||
+      r.reference.toLowerCase().includes(q) ||
+      r.phone.includes(q)
+    );
   });
 
   const refresh = () => {
@@ -495,13 +554,13 @@ function Dashboard() {
       {/* Top nav */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="min-w-0 flex flex-wrap items-center gap-1 overflow-x-auto rounded-xl border border-border bg-card p-1">
-          {(["reservations", "calendar", "cabins"] as const).map((k) => (
+          {(["reservations", "archive", "calendar", "cabins"] as const).map((k) => (
             <button
               key={k}
               type="button"
               onClick={() => setTab(k)}
               className={[
-                "whitespace-nowrap rounded-lg px-4 py-2 text-sm transition-all",
+                "whitespace-nowrap rounded-lg px-4 py-2 text-sm transition-all flex items-center gap-2",
                 tab === k
                   ? "bg-coral text-coral-foreground font-medium shadow-sm"
                   : "text-muted-foreground hover:text-primary",
@@ -509,9 +568,11 @@ function Dashboard() {
             >
               {k === "reservations"
                 ? t("admin.reservations")
-                : k === "calendar"
-                  ? t("admin.calendarTab")
-                  : t("admin.cabinsTab")}
+                : k === "archive"
+                  ? t("admin.archiveTab")
+                  : k === "calendar"
+                    ? t("admin.calendarTab")
+                    : t("admin.cabinsTab")}
             </button>
           ))}
         </div>
@@ -545,29 +606,49 @@ function Dashboard() {
         />
       ) : null}
 
-      {tab === "reservations" ? (
-        <section className="mt-10">
-          <div className="flex flex-col gap-3 sm:flex-row">
+      {(tab === "reservations" || tab === "archive") && (
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row items-stretch sm:items-center bg-card/60 backdrop-blur-md p-2.5 rounded-2xl border border-border/80 shadow-sm">
+          <div className="relative flex-1">
+            <Search className="absolute start-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70 pointer-events-none" />
             <input
-              className={inputClass}
+              className="w-full rounded-xl border border-border/60 bg-background ps-10 pe-9 py-2.5 text-sm outline-none focus:border-coral focus:ring-2 focus:ring-coral/15 hover:border-border transition-all placeholder:text-muted-foreground/50"
               placeholder={t("admin.search")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <select
-              className={`${inputClass} sm:w-56`}
-              value={status}
-              onChange={(e) => setStatus(e.target.value as typeof status)}
-            >
-              <option value="all">{t("admin.all")}</option>
-              <option value="pending">{t("status.pending")}</option>
-              <option value="confirmed">{t("status.confirmed")}</option>
-              <option value="cancelled">{t("status.cancelled")}</option>
-              <option value="completed">{t("status.completed")}</option>
-            </select>
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="absolute end-2.5 top-1/2 -translate-y-1/2 rounded-lg p-1 text-muted-foreground/60 hover:bg-muted hover:text-foreground transition-colors"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
 
-          <div className="mt-5 space-y-3">
+          {tab === "reservations" && (
+            <div className="relative sm:w-56">
+              <SlidersHorizontal className="absolute start-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70 pointer-events-none" />
+              <select
+                className="w-full appearance-none rounded-xl border border-border/60 bg-background ps-10 pe-9 py-2.5 text-sm outline-none focus:border-coral focus:ring-2 focus:ring-coral/15 hover:border-border transition-all text-foreground cursor-pointer"
+                value={status}
+                onChange={(e) => setStatus(e.target.value as typeof status)}
+              >
+                <option value="all">{t("admin.all")}</option>
+                <option value="pending">{t("status.pending")}</option>
+                <option value="cancelled">{t("status.cancelled")}</option>
+                <option value="completed">{t("status.completed")}</option>
+              </select>
+              <ChevronDown className="absolute end-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60 pointer-events-none" />
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === "reservations" ? (
+        <section className="mt-6">
+          <div className="space-y-3">
             {filtered.length === 0 ? (
               <div className="rounded-2xl border border-border bg-card p-10 text-center text-muted-foreground ">
                 {t("admin.empty")}
@@ -580,21 +661,112 @@ function Dashboard() {
                   cabinName={cabinName(r.cabin_id)}
                   onEdit={() => setEditing(r)}
                   onQuickStatus={quickStatus}
-                  onDelete={async () => {
-                    if (!window.confirm(t("admin.deleteConfirm"))) return;
-                    const { error } = await supabase
-                      .from("reservations")
-                      .delete()
-                      .eq("id", r.id);
-                    if (error) toast.error(error.message);
-                    else refresh();
-                  }}
-
                   lang={lang}
                 />
               ))
             )}
           </div>
+        </section>
+      ) : null}
+
+      {tab === "archive" ? (
+        <section className="mt-6">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 className="text-xl font-medium text-foreground flex items-center gap-2">
+                <FileText className="h-5 w-5 text-coral" />
+                Logs des Réservations Confirmées ({archiveFiltered.length})
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Historique d'audit des réservations confirmées.
+              </p>
+            </div>
+          </div>
+
+          {archiveFiltered.length === 0 ? (
+            <div className="rounded-2xl border border-border bg-card p-10 text-center text-muted-foreground">
+              Aucune réservation archivée.
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
+              <table className="w-full text-start text-sm">
+                <thead className="border-b border-border/80 bg-muted/40 text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="px-4 py-3 text-start">Référence</th>
+                    <th className="px-4 py-3 text-start">Client</th>
+                    <th className="px-4 py-3 text-start">Bungalow</th>
+                    <th className="px-4 py-3 text-start">Date & Formule</th>
+                    <th className="px-4 py-3 text-start">Prix</th>
+                    <th className="px-4 py-3 text-start">Paiement</th>
+                    <th className="px-4 py-3 text-start">Statut</th>
+                    <th className="px-4 py-3 text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60 font-sans">
+                  {archiveFiltered.map((r) => {
+                    const sc = STATUS_CONFIG[r.status];
+                    return (
+                      <tr key={r.id} className="hover:bg-muted/20 transition-colors">
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          <span className="num font-mono text-xs font-medium text-primary">
+                            {r.reference}
+                          </span>
+                          <div className="text-[10px] text-muted-foreground">
+                            {new Date(r.created_at).toLocaleDateString()}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3.5">
+                          <p className="font-medium text-foreground">{r.full_name}</p>
+                          <p className="num text-xs text-muted-foreground">
+                            {r.phone} · {r.cin}
+                          </p>
+                        </td>
+                        <td className="px-4 py-3.5 font-medium text-foreground">
+                          {cabinName(r.cabin_id)}
+                        </td>
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          <p className="num font-medium text-foreground">{r.reservation_date}</p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {t(`slot.${r.slot}`)}
+                            {r.slot === "24h" ? ` · ${r.nights ?? 1}j` : ""}
+                            {` · ${r.guests_count} pers.`}
+                          </p>
+                        </td>
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          <span className="num font-semibold text-primary">
+                            {formatPrice(r.total_price, lang as "fr" | "ar")}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          <span
+                            className={`text-xs ${r.payment_status === "paid" ? "text-forest font-medium" : "text-amber"}`}
+                          >
+                            {t(`pay.${r.payment_status}`)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          <span
+                            className={`num inline-block rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${sc.bg} ${sc.color}`}
+                          >
+                            {t(`status.${r.status}`)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3.5 text-end whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => setEditing(r)}
+                            className="rounded-lg border border-input px-3 py-1.5 text-xs text-primary hover:border-primary transition-colors"
+                          >
+                            {t("admin.edit")}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
       ) : null}
 
@@ -628,14 +800,12 @@ function ReservationCard({
   cabinName,
   onEdit,
   onQuickStatus,
-  onDelete,
   lang,
 }: {
   r: ReservationRow;
   cabinName: string;
   onEdit: () => void;
   onQuickStatus: (id: string, status: ReservationRow["status"]) => void;
-  onDelete: () => void;
   lang: string;
 }) {
   const { t } = useI18n();
@@ -709,15 +879,6 @@ function ReservationCard({
               <Check className="h-3.5 w-3.5" /> {t("admin.confirm")}
             </button>
           )}
-          {r.status !== "completed" && r.status !== "cancelled" && (
-            <button
-              type="button"
-              onClick={() => onQuickStatus(r.id, "completed")}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
-            >
-              <Check className="h-3.5 w-3.5" /> {t("admin.complete")}
-            </button>
-          )}
           {r.status !== "cancelled" && (
             <button
               type="button"
@@ -730,20 +891,13 @@ function ReservationCard({
 
           <span className="text-border">|</span>
 
-          {/* Edit / Delete */}
+          {/* Edit */}
           <button
             type="button"
             onClick={onEdit}
             className="rounded-lg border border-input px-3 py-1.5 text-xs text-primary hover:border-primary transition-colors"
           >
             {t("admin.edit")}
-          </button>
-          <button
-            type="button"
-            onClick={onDelete}
-            className="rounded-lg border border-destructive/30 px-3 py-1.5 text-xs text-destructive hover:bg-destructive/5 transition-colors"
-          >
-            {t("admin.delete")}
           </button>
         </div>
       </div>
