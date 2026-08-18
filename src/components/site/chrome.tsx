@@ -5,44 +5,60 @@ import { Heart, Languages, Menu, Waves } from "lucide-react";
 export function LanguageSwitch({ variant = "solid" }: { variant?: "hero" | "solid" }) {
   const { lang, setLang } = useI18n();
   const isHero = variant === "hero";
+
+  const languages = [
+    { code: "fr", label: "FR" },
+    { code: "ar", label: "عربي" },
+    { code: "en", label: "EN" },
+  ] as const;
+
+  if (isHero) {
+    return (
+      <div className="inline-flex items-center gap-0.5 rounded-full border border-white/25 bg-black/30 p-0.5 sm:p-1 backdrop-blur-md text-xs shadow-tight">
+        <Languages className="h-3.5 w-3.5 text-white/90 ms-1.5 me-0.5 shrink-0 hidden sm:inline" />
+        {languages.map((l) => {
+          const active = lang === l.code;
+          return (
+            <button
+              key={l.code}
+              type="button"
+              onClick={() => setLang(l.code)}
+              className={[
+                "rounded-full px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs transition-all leading-none",
+                active
+                  ? "bg-white text-primary font-bold shadow-tight"
+                  : "text-white/80 hover:text-white hover:bg-white/10 font-medium",
+              ].join(" ")}
+            >
+              {l.label}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
-    <div className={isHero ? "lang-pill" : "flex items-center gap-1 text-xs"}>
-      {isHero && <span className="ic"><Languages size={15}/></span>}
-      <button
-        type="button"
-        onClick={() => setLang("fr")}
-        className={
-          lang === "fr"
-            ? (isHero ? "font-bold text-white" : "rounded-full bg-coral px-3 py-1 font-medium text-coral-foreground")
-            : (isHero ? "text-white/70 hover:text-white" : "rounded-full px-3 py-1 text-muted-foreground hover:text-primary hover:bg-muted transition-colors")
-        }
-      >
-        FR
-      </button>
-      <span className={isHero ? "text-white/40" : "text-muted"}>/</span>
-      <button
-        type="button"
-        onClick={() => setLang("ar")}
-        className={
-          lang === "ar"
-            ? (isHero ? "font-bold text-white" : "rounded-full bg-coral px-3 py-1 font-medium text-coral-foreground")
-            : (isHero ? "text-white/70 hover:text-white" : "rounded-full px-3 py-1 text-muted-foreground hover:text-primary hover:bg-muted transition-colors")
-        }
-      >
-        عربي
-      </button>
-      <span className={isHero ? "text-white/40" : "text-muted"}>/</span>
-      <button
-        type="button"
-        onClick={() => setLang("en")}
-        className={
-          lang === "en"
-            ? (isHero ? "font-bold text-white" : "rounded-full bg-coral px-3 py-1 font-medium text-coral-foreground")
-            : (isHero ? "text-white/70 hover:text-white" : "rounded-full px-3 py-1 text-muted-foreground hover:text-primary hover:bg-muted transition-colors")
-        }
-      >
-        EN
-      </button>
+    <div className="inline-flex items-center gap-0.5 rounded-full border border-border/80 bg-card/90 p-0.5 sm:p-1 text-xs shadow-tight backdrop-blur-md">
+      <Languages className="h-3.5 w-3.5 text-muted-foreground ms-1.5 me-0.5 shrink-0 hidden sm:inline" />
+      {languages.map((l) => {
+        const active = lang === l.code;
+        return (
+          <button
+            key={l.code}
+            type="button"
+            onClick={() => setLang(l.code)}
+            className={[
+              "rounded-full px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs transition-all leading-none",
+              active
+                ? "bg-coral text-coral-foreground font-semibold shadow-tight"
+                : "text-muted-foreground hover:text-primary hover:bg-muted/70 font-medium",
+            ].join(" ")}
+          >
+            {l.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -63,7 +79,7 @@ export function SiteHeader({ variant = "solid" }: { variant?: "hero" | "solid" }
             <li><a href="#cabins">{t("nav.cabins")}</a></li>
           </ul>
         </nav>
-        <div className="nav-right">
+        <div className="nav-right flex items-center gap-2">
           <LanguageSwitch variant="hero" />
           <button className="menu-toggle" aria-label="Menu"><Menu size={22} /></button>
         </div>
@@ -73,19 +89,19 @@ export function SiteHeader({ variant = "solid" }: { variant?: "hero" | "solid" }
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-3.5">
-        <Link to="/" className="flex items-center gap-2 leading-tight">
-           <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-coral text-white font-[family-name:var(--font-display)] text-lg">Z</div>
-          <div>
-            <span className="block font-[family-name:var(--font-display)] text-lg text-primary">
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 sm:gap-4 px-3.5 sm:px-5 py-3 sm:py-3.5">
+        <Link to="/" className="flex items-center gap-2 leading-tight min-w-0">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-coral text-white font-[family-name:var(--font-display)] text-lg">Z</div>
+          <div className="min-w-0">
+            <span className="block font-[family-name:var(--font-display)] text-base sm:text-lg text-primary truncate">
               {t("brand.name")}
             </span>
-            <span className="block text-[11px] tracking-wide text-muted-foreground">
+            <span className="block text-[10px] sm:text-[11px] tracking-wide text-muted-foreground truncate">
               {t("brand.tagline")}
             </span>
           </div>
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 shrink-0">
           <LanguageSwitch />
         </div>
       </div>

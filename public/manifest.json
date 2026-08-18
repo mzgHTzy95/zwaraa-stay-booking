@@ -1,13 +1,15 @@
 {
-  "name": "Zwaraa Admin",
-  "short_name": "Zwaraa Admin",
-  "description": "Espace d'administration des réservations Zwaraa.",
-  "start_url": "/admin",
+  "name": "Zwaraa — Bungalows sur la Lagune",
+  "short_name": "Zwaraa",
+  "description": "Bungalows sur pilotis au-dessus de la lagune de Nefza.",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#FFF9EF",
   "theme_color": "#0E8CA8",
+  "lang": "fr",
+  "categories": ["travel", "lifestyle"],
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
@@ -37,6 +39,14 @@
       "src": "/icons/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Réserver",
+      "url": "/book",
+      "description": "Réserver un bungalow"
     }
   ]
 }

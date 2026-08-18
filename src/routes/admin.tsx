@@ -131,24 +131,24 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="h-full bg-background">
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-4">
-          <span className="flex items-center gap-2 font-display text-lg text-primary">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-coral text-sm text-coral-foreground">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 sm:gap-3 px-3.5 sm:px-5 py-3 sm:py-4">
+          <span className="flex items-center gap-1.5 sm:gap-2 font-display text-base sm:text-lg text-primary truncate">
+            <span className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-xl bg-coral text-xs sm:text-sm text-coral-foreground">
               Z
             </span>
-            {t("brand.name")}{" "}
+            <span>{t("brand.name")}</span>
             <span className="hidden text-sm text-muted-foreground sm:inline">
               · {t("admin.title")}
             </span>
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <InstallAdminButton />
             <LanguageSwitch />
           </div>
         </div>
       </header>
       <div className="page-frame pb-24">
-        <main className="wrap max-w-6xl pt-10">{children}</main>
+        <main className="wrap max-w-6xl pt-6 sm:pt-10">{children}</main>
       </div>
     </div>
   );
@@ -552,15 +552,15 @@ function Dashboard() {
   return (
     <Shell>
       {/* Top nav */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="min-w-0 flex flex-wrap items-center gap-1 overflow-x-auto rounded-xl border border-border bg-card p-1">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0 flex-1 flex items-center gap-1 overflow-x-auto rounded-2xl border border-border bg-card p-1.5 scrollbar-none scroll-smooth">
           {(["reservations", "archive", "calendar", "cabins"] as const).map((k) => (
             <button
               key={k}
               type="button"
               onClick={() => setTab(k)}
               className={[
-                "whitespace-nowrap rounded-lg px-4 py-2 text-sm transition-all flex items-center gap-2",
+                "shrink-0 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs sm:text-sm transition-all flex items-center gap-2",
                 tab === k
                   ? "bg-coral text-coral-foreground font-medium shadow-sm"
                   : "text-muted-foreground hover:text-primary",
@@ -579,7 +579,7 @@ function Dashboard() {
         <button
           type="button"
           onClick={() => supabase.auth.signOut()}
-          className="btn-outline-pill shrink-0 border-border/70 py-1.75"
+          className="btn-outline-pill shrink-0 border-border/70 py-1.75 self-end sm:self-auto text-xs sm:text-sm"
         >
           {t("admin.signOut")}
         </button>
@@ -688,84 +688,166 @@ function Dashboard() {
               Aucune réservation archivée.
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
-              <table className="w-full text-start text-sm">
-                <thead className="border-b border-border/80 bg-muted/40 text-[11px] uppercase tracking-wider text-muted-foreground">
-                  <tr>
-                    <th className="px-4 py-3 text-start">Référence</th>
-                    <th className="px-4 py-3 text-start">Client</th>
-                    <th className="px-4 py-3 text-start">Bungalow</th>
-                    <th className="px-4 py-3 text-start">Date & Formule</th>
-                    <th className="px-4 py-3 text-start">Prix</th>
-                    <th className="px-4 py-3 text-start">Paiement</th>
-                    <th className="px-4 py-3 text-start">Statut</th>
-                    <th className="px-4 py-3 text-end">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/60 font-sans">
-                  {archiveFiltered.map((r) => {
-                    const sc = STATUS_CONFIG[r.status];
-                    return (
-                      <tr key={r.id} className="hover:bg-muted/20 transition-colors">
-                        <td className="px-4 py-3.5 whitespace-nowrap">
-                          <span className="num font-mono text-xs font-medium text-primary">
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
+                <table className="w-full text-start text-sm">
+                  <thead className="border-b border-border/80 bg-muted/40 text-[11px] uppercase tracking-wider text-muted-foreground">
+                    <tr>
+                      <th className="px-4 py-3 text-start">Référence</th>
+                      <th className="px-4 py-3 text-start">Client</th>
+                      <th className="px-4 py-3 text-start">Bungalow</th>
+                      <th className="px-4 py-3 text-start">Date & Formule</th>
+                      <th className="px-4 py-3 text-start">Prix</th>
+                      <th className="px-4 py-3 text-start">Paiement</th>
+                      <th className="px-4 py-3 text-start">Statut</th>
+                      <th className="px-4 py-3 text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/60 font-sans">
+                    {archiveFiltered.map((r) => {
+                      const sc = STATUS_CONFIG[r.status];
+                      return (
+                        <tr key={r.id} className="hover:bg-muted/20 transition-colors">
+                          <td className="px-4 py-3.5 whitespace-nowrap">
+                            <span className="num font-mono text-xs font-medium text-primary">
+                              {r.reference}
+                            </span>
+                            <div className="text-[10px] text-muted-foreground">
+                              {new Date(r.created_at).toLocaleDateString()}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3.5">
+                            <p className="font-medium text-foreground">{r.full_name}</p>
+                            <p className="num text-xs text-muted-foreground">
+                              {r.phone} · {r.cin}
+                            </p>
+                          </td>
+                          <td className="px-4 py-3.5 font-medium text-foreground">
+                            {cabinName(r.cabin_id)}
+                          </td>
+                          <td className="px-4 py-3.5 whitespace-nowrap">
+                            <p className="num font-medium text-foreground">{r.reservation_date}</p>
+                            <p className="text-[11px] text-muted-foreground">
+                              {t(`slot.${r.slot}`)}
+                              {r.slot === "24h" ? ` · ${r.nights ?? 1}j` : ""}
+                              {` · ${r.guests_count} pers.`}
+                            </p>
+                          </td>
+                          <td className="px-4 py-3.5 whitespace-nowrap">
+                            <span className="num font-semibold text-primary">
+                              {formatPrice(r.total_price, lang as "fr" | "ar")}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3.5 whitespace-nowrap">
+                            <span
+                              className={`text-xs ${r.payment_status === "paid" ? "text-forest font-medium" : "text-amber"}`}
+                            >
+                              {t(`pay.${r.payment_status}`)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3.5 whitespace-nowrap">
+                            <span
+                              className={`num inline-block rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${sc.bg} ${sc.color}`}
+                            >
+                              {t(`status.${r.status}`)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3.5 text-end whitespace-nowrap">
+                            <button
+                              type="button"
+                              onClick={() => setEditing(r)}
+                              className="rounded-lg border border-input px-3 py-1.5 text-xs text-primary hover:border-primary transition-colors"
+                            >
+                              {t("admin.edit")}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card List View */}
+              <div className="block md:hidden space-y-3">
+                {archiveFiltered.map((r) => {
+                  const sc = STATUS_CONFIG[r.status];
+                  return (
+                    <div
+                      key={r.id}
+                      className="rounded-2xl border border-border bg-card p-4 shadow-tight space-y-3"
+                    >
+                      <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-2.5">
+                        <div>
+                          <span className="num font-mono text-xs font-semibold text-primary">
                             {r.reference}
                           </span>
-                          <div className="text-[10px] text-muted-foreground">
+                          <span className="block text-[10px] text-muted-foreground">
                             {new Date(r.created_at).toLocaleDateString()}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3.5">
-                          <p className="font-medium text-foreground">{r.full_name}</p>
-                          <p className="num text-xs text-muted-foreground">
-                            {r.phone} · {r.cin}
-                          </p>
-                        </td>
-                        <td className="px-4 py-3.5 font-medium text-foreground">
-                          {cabinName(r.cabin_id)}
-                        </td>
-                        <td className="px-4 py-3.5 whitespace-nowrap">
-                          <p className="num font-medium text-foreground">{r.reservation_date}</p>
-                          <p className="text-[11px] text-muted-foreground">
-                            {t(`slot.${r.slot}`)}
-                            {r.slot === "24h" ? ` · ${r.nights ?? 1}j` : ""}
-                            {` · ${r.guests_count} pers.`}
-                          </p>
-                        </td>
-                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          </span>
+                        </div>
+                        <span
+                          className={`num rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${sc.bg} ${sc.color}`}
+                        >
+                          {t(`status.${r.status}`)}
+                        </span>
+                      </div>
+
+                      <div className="space-y-1 text-xs">
+                        <div className="flex justify-between items-start">
+                          <span className="text-muted-foreground">Client:</span>
+                          <span className="font-medium text-foreground text-end">
+                            {r.full_name} ({r.cin})
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground">Téléphone:</span>
+                          <a href={`tel:${r.phone}`} className="num text-primary underline">
+                            {r.phone}
+                          </a>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground">Bungalow:</span>
+                          <span className="font-medium text-foreground">{cabinName(r.cabin_id)}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground">Date:</span>
+                          <span className="num font-medium text-foreground">
+                            {r.reservation_date} ({t(`slot.${r.slot}`)}
+                            {r.slot === "24h" ? ` · ${r.nights ?? 1}j` : ""})
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground">Prix:</span>
                           <span className="num font-semibold text-primary">
                             {formatPrice(r.total_price, lang as "fr" | "ar")}
                           </span>
-                        </td>
-                        <td className="px-4 py-3.5 whitespace-nowrap">
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground">Paiement:</span>
                           <span
-                            className={`text-xs ${r.payment_status === "paid" ? "text-forest font-medium" : "text-amber"}`}
+                            className={`font-medium ${r.payment_status === "paid" ? "text-forest" : "text-amber"}`}
                           >
                             {t(`pay.${r.payment_status}`)}
                           </span>
-                        </td>
-                        <td className="px-4 py-3.5 whitespace-nowrap">
-                          <span
-                            className={`num inline-block rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${sc.bg} ${sc.color}`}
-                          >
-                            {t(`status.${r.status}`)}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3.5 text-end whitespace-nowrap">
-                          <button
-                            type="button"
-                            onClick={() => setEditing(r)}
-                            className="rounded-lg border border-input px-3 py-1.5 text-xs text-primary hover:border-primary transition-colors"
-                          >
-                            {t("admin.edit")}
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-border/50 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => setEditing(r)}
+                          className="rounded-lg border border-input px-3.5 py-1.5 text-xs text-primary font-medium hover:border-primary transition-colors"
+                        >
+                          {t("admin.edit")}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           )}
         </section>
       ) : null}

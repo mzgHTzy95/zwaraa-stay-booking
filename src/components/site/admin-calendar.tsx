@@ -70,43 +70,43 @@ export function OccupancyCalendar({
   const dayRows = byDate[selected] ?? [];
 
   return (
-    <section className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div className="rounded-2xl border border-border bg-card p-5 ">
-        <div className="flex items-center justify-between">
-          <h3 className="flex items-center gap-2 text-base font-medium text-primary">
-            <CalendarDays className="h-4 w-4" /> {t("admin.occupancy")}
+    <section className="mt-6 sm:mt-10 grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px] w-full min-w-0">
+      <div className="rounded-2xl border border-border bg-card p-3.5 sm:p-5 min-w-0 overflow-hidden shadow-sm">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <h3 className="flex items-center gap-2 text-sm sm:text-base font-medium text-primary">
+            <CalendarDays className="h-4 w-4 shrink-0 text-coral" /> {t("admin.occupancy")}
           </h3>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between sm:justify-end gap-1.5">
             <button
               type="button"
               aria-label={t("admin.prevMonth")}
               onClick={() => setOffset((o) => o - 1)}
-              className="rounded-full border border-input p-1.5 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+              className="rounded-full border border-input p-1 sm:p-1.5 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="w-36 text-center text-sm capitalize text-primary">
+            <span className="w-28 sm:w-36 text-center text-xs sm:text-sm capitalize font-medium text-primary">
               {format(month, "LLLL yyyy", { locale })}
             </span>
             <button
               type="button"
               aria-label={t("admin.nextMonth")}
               onClick={() => setOffset((o) => o + 1)}
-              className="rounded-full border border-input p-1.5 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+              className="rounded-full border border-input p-1 sm:p-1.5 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-7 gap-1.5 text-center text-[11px] text-muted-foreground">
+        <div className="mt-4 grid grid-cols-7 gap-1 text-center text-[10px] sm:text-[11px] font-medium text-muted-foreground">
           {["L", "M", "M", "J", "V", "S", "D"].map((d, i) => (
             <span key={i}>{d}</span>
           ))}
         </div>
-        <div className="mt-1.5 grid grid-cols-7 gap-1.5">
+        <div className="mt-1 grid grid-cols-7 gap-1 min-w-0">
           {cells.map((d, i) => {
-            if (!d) return <span key={`e${i}`} />;
+            if (!d) return <span key={`e${i}`} className="min-w-0" />;
             const key = iso(d);
             const used = (byDate[key] ?? []).length;
             const free = Math.max(0, totalUnits - used);
@@ -122,13 +122,13 @@ export function OccupancyCalendar({
                 type="button"
                 onClick={() => setSelected(key)}
                 className={[
-                  "num rounded-lg border p-1.5 text-xs transition-colors",
+                  "num min-w-0 rounded-lg border p-1 sm:p-1.5 text-xs transition-colors flex flex-col items-center justify-center",
                   tone,
-                  selected === key ? "ring-2 ring-primary/50" : "",
+                  selected === key ? "ring-2 ring-primary/50 font-bold" : "",
                 ].join(" ")}
               >
-                <span className="block font-medium">{d.getDate()}</span>
-                <span className="block text-[9px] opacity-80">
+                <span className="block text-[11px] sm:text-xs font-medium leading-none">{d.getDate()}</span>
+                <span className="block text-[8px] sm:text-[9px] opacity-80 leading-tight mt-0.5">
                   {used}/{totalUnits}
                 </span>
               </button>
@@ -137,24 +137,24 @@ export function OccupancyCalendar({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-5">
+      <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 min-w-0 shadow-sm">
         <h3 className="text-base font-medium text-primary">{t("admin.dayDetails")}</h3>
         <p className="num mt-0.5 text-xs text-muted-foreground">
           {selected} · {t("admin.freeUnits", { n: Math.max(0, totalUnits - dayRows.length) })}
         </p>
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 space-y-2.5 max-h-[380px] overflow-y-auto">
           {dayRows.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("admin.noBookingsDay")}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">{t("admin.noBookingsDay")}</p>
           ) : (
             dayRows.map((r) => (
-              <div key={`${r.id}-${selected}`} className="rounded-md border border-border/70 bg-background p-3">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm font-medium text-primary">{r.full_name}</span>
-                  <span className="num text-[11px] text-muted-foreground">{r.reference}</span>
+              <div key={`${r.id}-${selected}`} className="rounded-xl border border-border/70 bg-background p-3 space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs sm:text-sm font-medium text-primary truncate">{r.full_name}</span>
+                  <span className="num text-[10px] sm:text-[11px] text-muted-foreground shrink-0">{r.reference}</span>
                 </div>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  {t("admin.assigned")}: <span className="text-forest">{cabinName(r.cabin_id)}</span> ·{" "}
-                  {t(`slot.${r.slot}`)} · {r.guests_count}
+                <p className="text-[11px] text-muted-foreground">
+                  {t("admin.assigned")}: <span className="text-forest font-medium">{cabinName(r.cabin_id)}</span> ·{" "}
+                  {t(`slot.${r.slot}`)} · {r.guests_count} pers.
                 </p>
               </div>
             ))
