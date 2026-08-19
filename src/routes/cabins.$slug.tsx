@@ -6,19 +6,28 @@ import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { PlankPhoto, WaveDivider } from "@/components/site/ornaments";
 import { cabinGallery } from "@/lib/images";
 import { PackList } from "@/components/site/pack";
-import { ArrowLeft, CalendarCheck, MapPin, Moon, Sun, Users } from "lucide-react";
-
+import {
+  ArrowLeft,
+  CalendarCheck,
+  MapPin,
+  Moon,
+  Sun,
+  Users,
+} from "lucide-react";
 
 export const Route = createFileRoute("/cabins/$slug")({
   head: () => ({
     meta: [
-      { title: "Bungalow sur la lagune — Zwaraa, Nefza" },
+      { title: "Bungalow sur la lagune — Reve-z, Nefza" },
       {
         name: "description",
         content:
-          "Photos, capacité, formule incluse et tarifs demi-journée ou 24 heures de ce bungalow sur pilotis à Zwaraa.",
+          "Photos, capacité, formule incluse et tarifs demi-journée ou 24 heures de ce bungalow sur pilotis à Reve-z.",
       },
-      { property: "og:title", content: "Bungalow sur la lagune — Zwaraa, Nefza" },
+      {
+        property: "og:title",
+        content: "Bungalow sur la lagune — Reve-z, Nefza",
+      },
       {
         property: "og:description",
         content: "Découvrez ce bungalow sur pilotis et réservez votre créneau.",
@@ -31,8 +40,6 @@ export const Route = createFileRoute("/cabins/$slug")({
 function CabinDetail() {
   const { slug } = Route.useParams();
   const { t, lang } = useI18n();
-
-
 
   const { data: cabin, isLoading } = useQuery({
     queryKey: ["cabin", slug],
@@ -47,8 +54,6 @@ function CabinDetail() {
       return data;
     },
   });
-
-
 
   if (isLoading) {
     return (
@@ -75,14 +80,9 @@ function CabinDetail() {
     );
   }
 
-
-
-
   const photos = cabinGallery(cabin.slug, cabin.photos);
-  const included = lang === "ar" ? cabin.included_package_ar : cabin.included_package;
-
-
-
+  const included =
+    lang === "ar" ? cabin.included_package_ar : cabin.included_package;
 
   return (
     <div className="min-h-screen">
@@ -156,7 +156,6 @@ function CabinDetail() {
           <PackList />
         </section>
 
-
         <WaveDivider />
 
         {/* Gallery page: pricing is fleet-wide, booking happens from the search form */}
@@ -167,17 +166,29 @@ function CabinDetail() {
                 <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">
                   <Sun size={13} className="text-amber" /> {t("slot.half_day")}
                 </dt>
-                <dd className="num mt-1 text-xl font-semibold">{formatPrice(cabin.price_half_day, lang)}</dd>
-                <dd className="text-[11px] text-muted-foreground">{t("cabin.perPersonHalf")}</dd>
-                <dd className="num text-[11px] text-muted-foreground">{t("slot.hoursHalf")}</dd>
+                <dd className="num mt-1 text-xl font-semibold">
+                  {formatPrice(cabin.price_half_day, lang)}
+                </dd>
+                <dd className="text-[11px] text-muted-foreground">
+                  {t("cabin.perPersonHalf")}
+                </dd>
+                <dd className="num text-[11px] text-muted-foreground">
+                  {t("slot.hoursHalf")}
+                </dd>
               </div>
               <div>
                 <dt className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground">
                   <Moon size={13} className="text-primary" /> {t("slot.24h")}
                 </dt>
-                <dd className="num mt-1 text-xl font-semibold">{formatPrice(cabin.price_24h, lang)}</dd>
-                <dd className="text-[11px] text-muted-foreground">{t("cabin.perPerson")}</dd>
-                <dd className="num text-[11px] text-muted-foreground">{t("slot.hours24")}</dd>
+                <dd className="num mt-1 text-xl font-semibold">
+                  {formatPrice(cabin.price_24h, lang)}
+                </dd>
+                <dd className="text-[11px] text-muted-foreground">
+                  {t("cabin.perPerson")}
+                </dd>
+                <dd className="num text-[11px] text-muted-foreground">
+                  {t("slot.hours24")}
+                </dd>
               </div>
             </dl>
             <Link
@@ -187,13 +198,13 @@ function CabinDetail() {
             >
               <CalendarCheck size={16} /> {t("cabin.reserve")}
             </Link>
-
           </div>
 
-          <p className="mt-4 text-xs text-muted-foreground">{t("gallery.note")}</p>
+          <p className="mt-4 text-xs text-muted-foreground">
+            {t("gallery.note")}
+          </p>
         </section>
       </article>
-
 
       <SiteFooter />
     </div>

@@ -91,9 +91,9 @@ export function SiteHeader({ variant = "solid" }: { variant?: "hero" | "solid" }
     <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 sm:gap-4 px-3.5 sm:px-5 py-3 sm:py-3.5">
         <Link to="/" className="flex items-center gap-2 leading-tight min-w-0">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-coral text-white font-[family-name:var(--font-display)] text-lg">Z</div>
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-coral text-white font-display text-lg">Z</div>
           <div className="min-w-0">
-            <span className="block font-[family-name:var(--font-display)] text-base sm:text-lg text-primary truncate">
+            <span className="block font-display text-base sm:text-lg text-primary truncate">
               {t("brand.name")}
             </span>
             <span className="block text-[10px] sm:text-[11px] tracking-wide text-muted-foreground truncate">
@@ -120,7 +120,7 @@ export function SiteFooter() {
           <p className="mt-2">{t("brand.location")}</p>
         </div>
         <div>
-          <h5>Zwaraa</h5>
+          <h5>Reve-z</h5>
           <ul>
             <li><a href="#cabins">{t("nav.cabins")}</a></li>
           </ul>
@@ -130,7 +130,6 @@ export function SiteFooter() {
           <ul>
             <li><a href="#">Conditions</a></li>
             <li><a href="#">Confidentialité</a></li>
-            <li><Link to="/admin">{t("nav.admin")}</Link></li>
           </ul>
         </div>
       </div>

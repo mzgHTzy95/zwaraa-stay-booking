@@ -6,7 +6,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Zwaraa design system — lagoon turquoise, golden amber, coral pink,
+ * Reve-z design system — lagoon turquoise, golden amber, coral pink,
  * forest green, deep teal-black on warm white.
  * Structure: framed-card layout with rounded corners & pill buttons.
  */
@@ -313,7 +313,7 @@
   animation: fade-in 0.3s ease both;
 }
 
-/* ---------- feature ("Ce qui rend Zwaraa unique") ---------- */
+/* ---------- feature ("Ce qui rend Reve-z unique") ---------- */
 .feature {
   padding: 80px 0;
   background: var(--secondary);

@@ -13,7 +13,7 @@ export type Lang = "fr" | "ar" | "en";
 type Dict = Record<string, string>;
 
 const fr: Dict = {
-  "brand.name": "Zwaraa",
+  "brand.name": "Reve-z",
   "brand.tagline": "Halq El Oued Ezzouaraa",
   "brand.location": "Nefza, Béja — Tunisie",
   "nav.cabins": "Bungalows",
@@ -69,48 +69,48 @@ const fr: Dict = {
   "search.book": "Réserver cette date",
   "search.capacityWarn":
     "Nombre de personnes supérieur à la capacité d'un bungalow ({n}).",
-  
+
   "gallery.category.bungalow": "Bungalow",
   "gallery.category.activity": "Activité",
   "gallery.category.food": "Repas",
   "gallery.category.nature": "Nature",
-  "gallery.about.kicker": "L'expérience Zwaraa",
-"gallery.about.title": "Une immersion totale dans la nature tunisienne",
-"gallery.about.body":
-  "Situé à Nefza, au nord-ouest de la Tunisie, Zwaraa offre une expérience unique : dormir dans un bungalow sur pilotis, directement sur l'eau. Que ce soit pour une demi-journée ou une nuit complète, chaque séjour inclut des repas locaux et des balades en barque pour découvrir la beauté sauvage de la région.",
-"gallery.about.statLagoon": "Vue lagune",
-"gallery.about.statBungalows": "Bungalows",
-"gallery.included.title": "Ce qui est inclus dans votre séjour",
-"gallery.included.meals.title": "Repas locaux inclus",
-"gallery.included.meals.body":
-  "Chaque réservation comprend des repas préparés avec des produits locaux, servis directement dans votre bungalow ou en bord de lagune.",
-"gallery.included.boat.title": "Balade en barque",
-"gallery.included.boat.body":
-  "Explorez la lagune à bord d'une barque traditionnelle, encadrée par nos guides locaux — comprise dans chaque formule.",
-"gallery.included.lagoon.title": "Accès 360° à la lagune",
-"gallery.included.lagoon.body":
-  "Votre bungalow sur pilotis vous donne un accès direct à l'eau douce de la lagune, entre le fleuve et la Méditerranée.",
-"gallery.included.booking.title": "Réservation simple et sûre",
-"gallery.included.booking.body":
-  "Réservez et payez en ligne en quelques minutes, avec confirmation immédiate — sans frais cachés.",
+  "gallery.about.kicker": "L'expérience Reve-z",
+  "gallery.about.title": "Une immersion totale dans la nature tunisienne",
+  "gallery.about.body":
+    "Situé à Nefza, au nord-ouest de la Tunisie, Reve-z offre une expérience unique : dormir dans un bungalow sur pilotis, directement sur l'eau. Que ce soit pour une demi-journée ou une nuit complète, chaque séjour inclut des repas locaux et des balades en barque pour découvrir la beauté sauvage de la région.",
+  "gallery.about.statLagoon": "Vue lagune",
+  "gallery.about.statBungalows": "Bungalows",
+  "gallery.included.title": "Ce qui est inclus dans votre séjour",
+  "gallery.included.meals.title": "Repas locaux inclus",
+  "gallery.included.meals.body":
+    "Chaque réservation comprend des repas préparés avec des produits locaux, servis directement dans votre bungalow ou en bord de lagune.",
+  "gallery.included.boat.title": "Balade en barque",
+  "gallery.included.boat.body":
+    "Explorez la lagune à bord d'une barque traditionnelle, encadrée par nos guides locaux — comprise dans chaque formule.",
+  "gallery.included.lagoon.title": "Accès 360° à la lagune",
+  "gallery.included.lagoon.body":
+    "Votre bungalow sur pilotis vous donne un accès direct à l'eau douce de la lagune, entre le fleuve et la Méditerranée.",
+  "gallery.included.booking.title": "Réservation simple et sûre",
+  "gallery.included.booking.body":
+    "Réservez et payez en ligne en quelques minutes, avec confirmation immédiate — sans frais cachés.",
   "gallery.filter.all": "Tout",
-"gallery.filter.empty": "Aucune photo dans cette catégorie pour le moment.",
-"gallery.reserveThis": "Réserver ce bungalow",
-// {current} and {total} are interpolated — keep the exact placeholder names
-"lightbox.position": "Photo {current} sur {total}",
-"lightbox.play": "Lecture automatique",
-"lightbox.pause": "Mettre en pause",
+  "gallery.filter.empty": "Aucune photo dans cette catégorie pour le moment.",
+  "gallery.reserveThis": "Réserver ce bungalow",
+  // {current} and {total} are interpolated — keep the exact placeholder names
+  "lightbox.position": "Photo {current} sur {total}",
+  "lightbox.play": "Lecture automatique",
+  "lightbox.pause": "Mettre en pause",
 
-"home.galleryTeaser.kicker": "Galerie",
-"home.galleryTeaser.title": "Découvrez Zwaraa en images",
-"home.galleryTeaser.body":
-  "Bungalows, activités, repas et nature — explorez notre galerie complète en photos et vidéos.",
-"home.galleryTeaser.cta": "Voir la galerie",
-"home.galleryTeaser.chipBoat": "Balade en barque",
-"home.galleryTeaser.chipInterior": "Intérieur du bungalow",
-// Big single word used in Option 2 (photo-filled headline) — keep it short,
-// this gets rendered at huge font size.
-"home.galleryTeaser.headlineWord": "GALERIE",
+  "home.galleryTeaser.kicker": "Galerie",
+  "home.galleryTeaser.title": "Découvrez Reve-z en images",
+  "home.galleryTeaser.body":
+    "Bungalows, activités, repas et nature — explorez notre galerie complète en photos et vidéos.",
+  "home.galleryTeaser.cta": "Voir la galerie",
+  "home.galleryTeaser.chipBoat": "Balade en barque",
+  "home.galleryTeaser.chipInterior": "Intérieur du bungalow",
+  // Big single word used in Option 2 (photo-filled headline) — keep it short,
+  // this gets rendered at huge font size.
+  "home.galleryTeaser.headlineWord": "GALERIE",
 
   "pack.title": "Formule 24 h — prix par personne",
   "pack.note": "Le tarif 24 heures s'entend par personne et par jour.",
@@ -163,14 +163,16 @@ const fr: Dict = {
   "book.payMethod.cash": "Espèces (sur place)",
   "book.payMethod.d17Phone": "Numéro D17",
   "book.payMethod.bankNote":
-    "Effectuez un virement à l'ordre de Zwaraa — RIB : 12 345 678 901 234 567 890 12. Indiquez votre référence de réservation.",
+    "Effectuez un virement à l'ordre de Reve-z — RIB : 12 345 678 901 234 567 890 12. Indiquez votre référence de réservation.",
   "book.payMethod.cashNote":
     "Réglez en espèces à votre arrivée. Votre réservation est confirmée dès maintenant.",
   "book.adults": "Adultes",
   "book.children6_10": "Enfants 6–10 ans",
   "book.childrenUnder5": "Enfants – 5 ans",
-  "book.childrenNote": "Enfants de 6 à 10 ans : 50 DT · 5 ans et moins : gratuit",
-  "receipt.downloadWarning": "Téléchargez ou imprimez ce reçu — vous devrez le présenter à votre arrivée au bungalow.",
+  "book.childrenNote":
+    "Enfants de 6 à 10 ans : 50 DT · 5 ans et moins : gratuit",
+  "receipt.downloadWarning":
+    "Téléchargez ou imprimez ce reçu — vous devrez le présenter à votre arrivée au bungalow.",
   "gallery.title": "Galerie des bungalows",
   "gallery.subtitle": "Découvrez l'intérieur de chaque bungalow sur pilotis.",
   "admin.notifications": "Notifications",
@@ -188,7 +190,8 @@ const fr: Dict = {
   "receipt.download": "Télécharger le reçu",
   "receipt.home": "Retour à l'accueil",
   "receipt.saveModalTitle": "Enregistrez votre reçu",
-  "receipt.saveModalBody": "Nous téléchargeons automatiquement une image de votre reçu. Sauvegardez-la — vous devrez la présenter à votre arrivée au bungalow.",
+  "receipt.saveModalBody":
+    "Nous téléchargeons automatiquement une image de votre reçu. Sauvegardez-la — vous devrez la présenter à votre arrivée au bungalow.",
   "receipt.saveModalDownload": "Télécharger à nouveau",
   "receipt.saveModalClose": "J'ai sauvegardé",
   "admin.title": "Administration",
@@ -258,7 +261,7 @@ const fr: Dict = {
 };
 
 const en: Dict = {
-  "brand.name": "Zwaraa",
+  "brand.name": "Reve-z",
   "brand.tagline": "Halq El Oued Ezzouaraa",
   "brand.location": "Nefza, Béja — Tunisia",
   "nav.cabins": "Bungalows",
@@ -297,8 +300,7 @@ const en: Dict = {
   "gallery.note":
     "All bungalows offer the same packages and rates. You book a date: an available bungalow is automatically assigned to you.",
   "search.title": "Check availability",
-  "search.subtitle":
-    "Choose a date, a package, and the number of guests.",
+  "search.subtitle": "Choose a date, a package, and the number of guests.",
   "search.date": "Check-in date",
   "search.pack": "Package",
   "search.guests": "Guests",
@@ -310,19 +312,20 @@ const en: Dict = {
   "search.free": "{n} bungalow(s) still available",
   "search.full": "Fully booked — please choose another date",
   "search.pickDate": "Select a date on the calendar.",
-  "search.autoAssign": "An available bungalow will be automatically assigned to you.",
+  "search.autoAssign":
+    "An available bungalow will be automatically assigned to you.",
   "search.book": "Book this date",
   "search.capacityWarn":
     "Number of guests exceeds the capacity of one bungalow ({n}).",
-  
+
   "gallery.category.bungalow": "Bungalow",
   "gallery.category.activity": "Activity",
   "gallery.category.food": "Meals",
   "gallery.category.nature": "Nature",
-  "gallery.about.kicker": "The Zwaraa Experience",
+  "gallery.about.kicker": "The Reve-z Experience",
   "gallery.about.title": "A total immersion in Tunisian nature",
   "gallery.about.body":
-    "Located in Nefza, in northwestern Tunisia, Zwaraa offers a unique experience: sleeping in a stilt bungalow directly on the water. Whether for a half-day or a full night, every stay includes local meals and boat rides to discover the wild beauty of the region.",
+    "Located in Nefza, in northwestern Tunisia, Reve-z offers a unique experience: sleeping in a stilt bungalow directly on the water. Whether for a half-day or a full night, every stay includes local meals and boat rides to discover the wild beauty of the region.",
   "gallery.about.statLagoon": "Lagoon view",
   "gallery.about.statBungalows": "Bungalows",
   "gallery.included.title": "What's included in your stay",
@@ -347,7 +350,7 @@ const en: Dict = {
   "lightbox.pause": "Pause",
 
   "home.galleryTeaser.kicker": "Gallery",
-  "home.galleryTeaser.title": "Discover Zwaraa in pictures",
+  "home.galleryTeaser.title": "Discover Reve-z in pictures",
   "home.galleryTeaser.body":
     "Bungalows, activities, meals, and nature — explore our full photo and video gallery.",
   "home.galleryTeaser.cta": "View the gallery",
@@ -403,14 +406,15 @@ const en: Dict = {
   "book.payMethod.cash": "Cash (on site)",
   "book.payMethod.d17Phone": "D17 number",
   "book.payMethod.bankNote":
-    "Make a bank transfer to Zwaraa — RIB: 12 345 678 901 234 567 890 12. Include your booking reference.",
+    "Make a bank transfer to Reve-z — RIB: 12 345 678 901 234 567 890 12. Include your booking reference.",
   "book.payMethod.cashNote":
     "Pay in cash upon arrival. Your booking is confirmed now.",
   "book.adults": "Adults",
   "book.children6_10": "Children 6–10 years old",
   "book.childrenUnder5": "Children under 5",
   "book.childrenNote": "Children 6–10 years old: 50 TND · 5 and under: free",
-  "receipt.downloadWarning": "Download or print this receipt — you must present it upon arrival at the bungalow.",
+  "receipt.downloadWarning":
+    "Download or print this receipt — you must present it upon arrival at the bungalow.",
   "gallery.title": "Bungalow gallery",
   "gallery.subtitle": "Discover the interior of each stilt bungalow.",
   "admin.notifications": "Notifications",
@@ -428,7 +432,8 @@ const en: Dict = {
   "receipt.download": "Download receipt",
   "receipt.home": "Back to home",
   "receipt.saveModalTitle": "Save your receipt",
-  "receipt.saveModalBody": "We automatically download an image of your receipt. Save it — you must present it upon arrival at the bungalow.",
+  "receipt.saveModalBody":
+    "We automatically download an image of your receipt. Save it — you must present it upon arrival at the bungalow.",
   "receipt.saveModalDownload": "Download again",
   "receipt.saveModalClose": "I have saved it",
   "admin.title": "Administration",
@@ -566,9 +571,9 @@ const ar: Dict = {
   "home.galleryTeaser.title": "اكتشف الزوارع بالتصاور",
   "home.galleryTeaser.body":
     "بنغالوهات، أنشطة، ماكلة وطبيعة — تفرّج على تجربتنا كاملة بالتصاور والفيديوهات.",
-"home.galleryTeaser.chipBoat": "نزهة بالقارب",
-"home.galleryTeaser.chipInterior": "داخل البنغالو",
-"home.galleryTeaser.headlineWord": "المعرض",
+  "home.galleryTeaser.chipBoat": "نزهة بالقارب",
+  "home.galleryTeaser.chipInterior": "داخل البنغالو",
+  "home.galleryTeaser.headlineWord": "المعرض",
 
   "gallery.category.bungalow": "بنغالو",
   "gallery.category.activity": "نشاط",
@@ -663,8 +668,7 @@ const ar: Dict = {
   "book.payMethod.bankNote":
     "حوّل المبلغ باسم الزوارع — RIB: 12 345 678 901 234 567 890 12. وما تنساش تذكر رقم الحجز.",
 
-  "book.payMethod.cashNote":
-    "خلّص كاش وقت توصل. الحجز متاعك مؤكّد توّا.",
+  "book.payMethod.cashNote": "خلّص كاش وقت توصل. الحجز متاعك مؤكّد توّا.",
 
   "book.adults": "كبار",
   "book.children6_10": "صغار من 6 لـ10 سنين",
@@ -783,8 +787,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("fr");
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("zwaraa-lang");
-    if (stored === "ar" || stored === "fr" || stored === "en") setLangState(stored);
+    const stored = window.localStorage.getItem("Reve-z-lang");
+    if (stored === "ar" || stored === "fr" || stored === "en")
+      setLangState(stored);
   }, []);
 
   useEffect(() => {
@@ -794,7 +799,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
-    window.localStorage.setItem("zwaraa-lang", l);
+    window.localStorage.setItem("Reve-z-lang", l);
   }, []);
 
   const t = useCallback(

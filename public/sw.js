@@ -1,4 +1,4 @@
-const CACHE_NAME = "zwaraa-v1";
+const CACHE_NAME = "Reve-z-v1";
 const STATIC_ASSETS = [
   "/",
   "/admin",
@@ -18,7 +18,7 @@ self.addEventListener("install", (event) => {
     caches
       .open(CACHE_NAME)
       .then((cache) => cache.addAll(STATIC_ASSETS).catch(() => {}))
-      .then(() => self.skipWaiting())
+      .then(() => self.skipWaiting()),
   );
 });
 
@@ -28,9 +28,11 @@ self.addEventListener("activate", (event) => {
     caches
       .keys()
       .then((keys) =>
-        Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+        Promise.all(
+          keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)),
+        ),
       )
-      .then(() => self.clients.claim())
+      .then(() => self.clients.claim()),
   );
 });
 
@@ -58,7 +60,7 @@ self.addEventListener("fetch", (event) => {
           caches.open(CACHE_NAME).then((c) => c.put(request, clone));
           return res;
         })
-        .catch(() => caches.match(request).then((r) => r || caches.match("/")))
+        .catch(() => caches.match(request).then((r) => r || caches.match("/"))),
     );
     return;
   }
@@ -78,14 +80,12 @@ self.addEventListener("fetch", (event) => {
             const clone = res.clone();
             caches.open(CACHE_NAME).then((c) => c.put(request, clone));
             return res;
-          })
-      )
+          }),
+      ),
     );
     return;
   }
 
   // Everything else: network-first
-  event.respondWith(
-    fetch(request).catch(() => caches.match(request))
-  );
+  event.respondWith(fetch(request).catch(() => caches.match(request)));
 });

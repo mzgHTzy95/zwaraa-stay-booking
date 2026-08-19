@@ -1,6 +1,6 @@
-# Zwaraa Lagoon Stays
+# Reve-z Lagoon Stays
 
-Build a web app for a cabin resort reservation site called "Zwaraa" (حلق الواد الزوارع),
+Build a web app for a cabin resort reservation site called "Reve-z" (حلق الواد الزوارع),
 
 a lagoon-side cabin stay in Nefza, Tunisia. It has ONE type of accommodation — sleeping
 
@@ -108,41 +108,41 @@ should render right-to-left. Use French as the default language.
 
    Step 2 — reservation form with these exact fields:
 
-     - CIN (national ID number)
+   - CIN (national ID number)
 
-     - Full name (nom et prénom)
+   - Full name (nom et prénom)
 
-     - Phone number
+   - Phone number
 
-     - Date of birth
+   - Date of birth
 
-     - Number of people
+   - Number of people
 
    Step 3 — review screen: cabin, date, slot, included package, total price
 
    Step 4 — SIMULATED payment screen:
 
-     - Do NOT integrate a real payment provider yet.
+   - Do NOT integrate a real payment provider yet.
 
-     - Build a fake card payment form (card number, expiry, CVV — accept any input,
+   - Build a fake card payment form (card number, expiry, CVV — accept any input,
 
-       no real validation against a payment network)
+     no real validation against a payment network)
 
-     - On submit, show a short, tasteful loading/processing animation (1-2 seconds)
+   - On submit, show a short, tasteful loading/processing animation (1-2 seconds)
 
-     - Then show a success state
+   - Then show a success state
 
    Step 5 — Bill / receipt page:
 
-     - Show a clean receipt/invoice-style summary: reservation ID, cabin, date,
+   - Show a clean receipt/invoice-style summary: reservation ID, cabin, date,
 
-       slot, guest name, total amount, "Paid" status
+     slot, guest name, total amount, "Paid" status
 
-     - Add a subtle success animation on this page (e.g. a checkmark that draws
+   - Add a subtle success animation on this page (e.g. a checkmark that draws
 
-       itself in, or the receipt sliding/fading in) — tasteful and quick, not
+     itself in, or the receipt sliding/fading in) — tasteful and quick, not
 
-       flashy or slow
+     flashy or slow
 
 4. ADMIN DASHBOARD (separate route, e.g. /admin, protected)
 
@@ -166,17 +166,17 @@ Use this structure (adapt to whatever backend/database the builder provides):
 
 Cabin: id, name, capacity, description, photos[], included_package, price_half_day,
 
-  price_24h, is_active
+price_24h, is_active
 
 Reservation: id, cabin_id, reservation_date, slot (half_day | 24h), cin, full_name,
 
-  phone, date_of_birth, guests_count, status (pending | confirmed | cancelled |
+phone, date_of_birth, guests_count, status (pending | confirmed | cancelled |
 
-  completed), total_price, payment_status (unpaid | paid), created_at
+completed), total_price, payment_status (unpaid | paid), created_at
 
 Transaction (simulated): id, reservation_id, amount, status (success | failed),
 
-  simulated (always true for now), created_at
+simulated (always true for now), created_at
 
 === FUNCTIONAL NOTES ===
 

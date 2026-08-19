@@ -1,7 +1,7 @@
 {
-  "name": "Zwaraa Admin",
-  "short_name": "Zwaraa Admin",
-  "description": "Espace d'administration des réservations Zwaraa.",
+  "name": "Reve-z Admin",
+  "short_name": "Reve-z Admin",
+  "description": "Espace d'administration des réservations Reve-z.",
   "start_url": "/admin",
   "scope": "/",
   "display": "standalone",

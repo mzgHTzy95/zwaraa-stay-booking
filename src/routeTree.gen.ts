@@ -11,8 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AdminGalleryRouteImport } from './routes/admin-gallery'
-import { Route as AdminTestimonialsRouteImport } from './routes/admin-testimonials'
 import { Route as BookRouteImport } from './routes/book'
 import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as CabinsSlugRouteImport } from './routes/cabins.$slug'
@@ -26,16 +24,6 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminGalleryRoute = AdminGalleryRouteImport.update({
-  id: '/admin-gallery',
-  path: '/admin-gallery',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminTestimonialsRoute = AdminTestimonialsRouteImport.update({
-  id: '/admin-testimonials',
-  path: '/admin-testimonials',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookRoute = BookRouteImport.update({
@@ -62,8 +50,6 @@ const ReceiptReferenceRoute = ReceiptReferenceRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/admin-gallery': typeof AdminGalleryRoute
-  '/admin-testimonials': typeof AdminTestimonialsRoute
   '/book': typeof BookRoute
   '/gallery': typeof GalleryRoute
   '/cabins/$slug': typeof CabinsSlugRoute
@@ -72,8 +58,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/admin-gallery': typeof AdminGalleryRoute
-  '/admin-testimonials': typeof AdminTestimonialsRoute
   '/book': typeof BookRoute
   '/gallery': typeof GalleryRoute
   '/cabins/$slug': typeof CabinsSlugRoute
@@ -83,8 +67,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/admin-gallery': typeof AdminGalleryRoute
-  '/admin-testimonials': typeof AdminTestimonialsRoute
   '/book': typeof BookRoute
   '/gallery': typeof GalleryRoute
   '/cabins/$slug': typeof CabinsSlugRoute
@@ -95,8 +77,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
-    | '/admin-gallery'
-    | '/admin-testimonials'
     | '/book'
     | '/gallery'
     | '/cabins/$slug'
@@ -105,8 +85,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
-    | '/admin-gallery'
-    | '/admin-testimonials'
     | '/book'
     | '/gallery'
     | '/cabins/$slug'
@@ -115,8 +93,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
-    | '/admin-gallery'
-    | '/admin-testimonials'
     | '/book'
     | '/gallery'
     | '/cabins/$slug'
@@ -126,8 +102,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
-  AdminGalleryRoute: typeof AdminGalleryRoute
-  AdminTestimonialsRoute: typeof AdminTestimonialsRoute
   BookRoute: typeof BookRoute
   GalleryRoute: typeof GalleryRoute
   CabinsSlugRoute: typeof CabinsSlugRoute
@@ -148,20 +122,6 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin-gallery': {
-      id: '/admin-gallery'
-      path: '/admin-gallery'
-      fullPath: '/admin-gallery'
-      preLoaderRoute: typeof AdminGalleryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin-testimonials': {
-      id: '/admin-testimonials'
-      path: '/admin-testimonials'
-      fullPath: '/admin-testimonials'
-      preLoaderRoute: typeof AdminTestimonialsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/book': {
@@ -198,8 +158,6 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
-  AdminGalleryRoute: AdminGalleryRoute,
-  AdminTestimonialsRoute: AdminTestimonialsRoute,
   BookRoute: BookRoute,
   GalleryRoute: GalleryRoute,
   CabinsSlugRoute: CabinsSlugRoute,

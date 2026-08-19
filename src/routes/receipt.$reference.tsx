@@ -12,12 +12,12 @@ import { Copy, Download, Share2 } from "lucide-react";
 export const Route = createFileRoute("/receipt/$reference")({
   head: () => ({
     meta: [
-      { title: "Reçu de réservation — Zwaraa" },
+      { title: "Reçu de réservation — Reve-z" },
       {
         name: "description",
-        content: "Reçu de votre réservation de bungalow à Zwaraa, Nefza.",
+        content: "Reçu de votre réservation de bungalow à Reve-z, Nefza.",
       },
-      { property: "og:title", content: "Reçu de réservation — Zwaraa" },
+      { property: "og:title", content: "Reçu de réservation — Reve-z" },
       {
         property: "og:description",
         content: "Détail et statut de paiement de votre réservation.",
@@ -176,7 +176,7 @@ function Receipt() {
                 {/* Receipt header */}
                 <div className="flex items-start justify-between border-b border-border pb-4 mb-4">
                   <div>
-                    <p className="font-display text-xl text-primary">Zwaraa</p>
+                    <p className="font-display text-xl text-primary">Reve-z</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
                       Halq El Oued Ezzouaraa · Nefza
                     </p>
@@ -243,7 +243,7 @@ function Receipt() {
 
                 {/* Footer watermark */}
                 <p className="mt-5 text-center text-[10px] text-muted-foreground/60">
-                  zwaraa.tn · Bungalows sur pilotis, lagune de Nefza
+                  Reve-z.tn · Bungalows sur pilotis, lagune de Nefza
                 </p>
               </div>
 
@@ -253,7 +253,9 @@ function Receipt() {
                   type="button"
                   onClick={() => {
                     navigator.clipboard.writeText(data.reference);
-                    toast.success(lang === "ar" ? "تم نسخ المرجع!" : "Référence copiée !");
+                    toast.success(
+                      lang === "ar" ? "تم نسخ المرجع!" : "Référence copiée !",
+                    );
                   }}
                   className="btn-outline-pill flex items-center justify-center gap-2 py-3 text-xs"
                 >
@@ -262,7 +264,7 @@ function Receipt() {
                 </button>
                 <a
                   href={`https://wa.me/?text=${encodeURIComponent(
-                    `Réservation Zwaraa — Réf: ${data.reference}\nDate: ${data.reservation_date}`
+                    `Réservation Reve-z — Réf: ${data.reference}\nDate: ${data.reservation_date}`,
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -289,7 +291,10 @@ function Receipt() {
               </div>
 
               <div className="mt-4 text-center print:hidden">
-                <Link to="/" className="inline-block text-xs font-medium text-muted-foreground hover:text-primary transition-colors">
+                <Link
+                  to="/"
+                  className="inline-block text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
+                >
                   ← {t("receipt.home")}
                 </Link>
               </div>

@@ -16,17 +16,25 @@ import { verifyTurnstile } from "@/lib/turnstile";
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { LanguageSwitch } from "@/components/site/chrome";
 import { InstallAdminButton } from "@/components/site/install-button";
-import { Check, ChevronDown, FileText, Plus, Search, SlidersHorizontal, X } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  FileText,
+  Plus,
+  Search,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Administration — Zwaraa" },
+      { title: "Administration — Reve-z" },
       {
         name: "description",
-        content: "Espace d'administration des réservations Zwaraa.",
+        content: "Espace d'administration des réservations Reve-z.",
       },
-      { property: "og:title", content: "Administration — Zwaraa" },
+      { property: "og:title", content: "Administration — Reve-z" },
       {
         property: "og:description",
         content: "Gestion des réservations et des tarifs.",
@@ -323,20 +331,21 @@ function LoginCard() {
         >
           {t("admin.signIn")}
         </button>
-          <div ref={widgetContainerRef} className="min-h-22.5 p-2 flex justify-center items-center" />
-          {!turnstileReady && !turnstileLoadError ? (
-            <p className="mt-3 text-xs text-muted-foreground">
-              {t("admin.turnstileLoading")}
-            </p>
-          ) : null}
-          {turnstileLoadError ? (
-            <p className="mt-3 text-xs text-destructive">
-              {turnstileLoadError}
-            </p>
-          ) : null}
-          {turnstileError && !turnstileLoadError ? (
-            <p className="mt-3 text-xs text-destructive">{turnstileError}</p>
-          ) : null}
+        <div
+          ref={widgetContainerRef}
+          className="min-h-22.5 p-2 flex justify-center items-center"
+        />
+        {!turnstileReady && !turnstileLoadError ? (
+          <p className="mt-3 text-xs text-muted-foreground">
+            {t("admin.turnstileLoading")}
+          </p>
+        ) : null}
+        {turnstileLoadError ? (
+          <p className="mt-3 text-xs text-destructive">{turnstileLoadError}</p>
+        ) : null}
+        {turnstileError && !turnstileLoadError ? (
+          <p className="mt-3 text-xs text-destructive">{turnstileError}</p>
+        ) : null}
         {exists === false ? (
           <div className="rounded-xl border border-border/60 bg-secondary p-4">
             <p className="text-xs text-muted-foreground">
@@ -402,7 +411,9 @@ const STATUS_CONFIG: Record<
   },
 };
 
-function getEffectiveReservationStatus(r: ReservationRow): ReservationRow["status"] {
+function getEffectiveReservationStatus(
+  r: ReservationRow,
+): ReservationRow["status"] {
   if (r.status === "cancelled" || r.status === "completed") {
     return r.status;
   }
@@ -424,9 +435,9 @@ function getEffectiveReservationStatus(r: ReservationRow): ReservationRow["statu
 function Dashboard() {
   const { t, lang } = useI18n();
   const qc = useQueryClient();
-  const [tab, setTab] = useState<"reservations" | "archive" | "calendar" | "cabins">(
-    "reservations",
-  );
+  const [tab, setTab] = useState<
+    "reservations" | "archive" | "calendar" | "cabins"
+  >("reservations");
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"all" | ReservationRow["status"]>("all");
   const [editing, setEditing] = useState<ReservationRow | null>(null);
@@ -554,27 +565,29 @@ function Dashboard() {
       {/* Top nav */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0 flex-1 flex items-center gap-1 overflow-x-auto rounded-2xl border border-border bg-card p-1.5 scrollbar-none scroll-smooth">
-          {(["reservations", "archive", "calendar", "cabins"] as const).map((k) => (
-            <button
-              key={k}
-              type="button"
-              onClick={() => setTab(k)}
-              className={[
-                "shrink-0 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs sm:text-sm transition-all flex items-center gap-2",
-                tab === k
-                  ? "bg-coral text-coral-foreground font-medium shadow-sm"
-                  : "text-muted-foreground hover:text-primary",
-              ].join(" ")}
-            >
-              {k === "reservations"
-                ? t("admin.reservations")
-                : k === "archive"
-                  ? t("admin.archiveTab")
-                  : k === "calendar"
-                    ? t("admin.calendarTab")
-                    : t("admin.cabinsTab")}
-            </button>
-          ))}
+          {(["reservations", "archive", "calendar", "cabins"] as const).map(
+            (k) => (
+              <button
+                key={k}
+                type="button"
+                onClick={() => setTab(k)}
+                className={[
+                  "shrink-0 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs sm:text-sm transition-all flex items-center gap-2",
+                  tab === k
+                    ? "bg-coral text-coral-foreground font-medium shadow-sm"
+                    : "text-muted-foreground hover:text-primary",
+                ].join(" ")}
+              >
+                {k === "reservations"
+                  ? t("admin.reservations")
+                  : k === "archive"
+                    ? t("admin.archiveTab")
+                    : k === "calendar"
+                      ? t("admin.calendarTab")
+                      : t("admin.cabinsTab")}
+              </button>
+            ),
+          )}
         </div>
         <button
           type="button"
@@ -708,7 +721,10 @@ function Dashboard() {
                     {archiveFiltered.map((r) => {
                       const sc = STATUS_CONFIG[r.status];
                       return (
-                        <tr key={r.id} className="hover:bg-muted/20 transition-colors">
+                        <tr
+                          key={r.id}
+                          className="hover:bg-muted/20 transition-colors"
+                        >
                           <td className="px-4 py-3.5 whitespace-nowrap">
                             <span className="num font-mono text-xs font-medium text-primary">
                               {r.reference}
@@ -718,7 +734,9 @@ function Dashboard() {
                             </div>
                           </td>
                           <td className="px-4 py-3.5">
-                            <p className="font-medium text-foreground">{r.full_name}</p>
+                            <p className="font-medium text-foreground">
+                              {r.full_name}
+                            </p>
                             <p className="num text-xs text-muted-foreground">
                               {r.phone} · {r.cin}
                             </p>
@@ -727,7 +745,9 @@ function Dashboard() {
                             {cabinName(r.cabin_id)}
                           </td>
                           <td className="px-4 py-3.5 whitespace-nowrap">
-                            <p className="num font-medium text-foreground">{r.reservation_date}</p>
+                            <p className="num font-medium text-foreground">
+                              {r.reservation_date}
+                            </p>
                             <p className="text-[11px] text-muted-foreground">
                               {t(`slot.${r.slot}`)}
                               {r.slot === "24h" ? ` · ${r.nights ?? 1}j` : ""}
@@ -802,14 +822,23 @@ function Dashboard() {
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-muted-foreground">Téléphone:</span>
-                          <a href={`tel:${r.phone}`} className="num text-primary underline">
+                          <span className="text-muted-foreground">
+                            Téléphone:
+                          </span>
+                          <a
+                            href={`tel:${r.phone}`}
+                            className="num text-primary underline"
+                          >
                             {r.phone}
                           </a>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-muted-foreground">Bungalow:</span>
-                          <span className="font-medium text-foreground">{cabinName(r.cabin_id)}</span>
+                          <span className="text-muted-foreground">
+                            Bungalow:
+                          </span>
+                          <span className="font-medium text-foreground">
+                            {cabinName(r.cabin_id)}
+                          </span>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-muted-foreground">Date:</span>
@@ -825,7 +854,9 @@ function Dashboard() {
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-muted-foreground">Paiement:</span>
+                          <span className="text-muted-foreground">
+                            Paiement:
+                          </span>
                           <span
                             className={`font-medium ${r.payment_status === "paid" ? "text-forest" : "text-amber"}`}
                           >

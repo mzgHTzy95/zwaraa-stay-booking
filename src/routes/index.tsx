@@ -9,7 +9,13 @@ import { AvailabilitySearch } from "@/components/site/availability-search";
 import { useParallax } from "@/hooks/use-parallax";
 
 import type { ExpandCabin, OriginRect } from "@/components/site/cabin-expand";
-import { cabinCover, cabinGallery, galleryBoat, galleryInterior, heroLagoon } from "@/lib/images";
+import {
+  cabinCover,
+  cabinGallery,
+  galleryBoat,
+  galleryInterior,
+  heroLagoon,
+} from "@/lib/images";
 import {
   ArrowRight,
   Camera,
@@ -23,15 +29,15 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Zwaraa — Bungalows sur pilotis, lagune de Nefza" },
+      { title: "Reve-z — Bungalows sur pilotis, lagune de Nefza" },
       {
         name: "description",
         content:
-          "Réservez un bungalow sur l'eau à Zwaraa, Nefza : demi-journée ou 24 heures, repas et tour en barque compris.",
+          "Réservez un bungalow sur l'eau à Reve-z, Nefza : demi-journée ou 24 heures, repas et tour en barque compris.",
       },
       {
         property: "og:title",
-        content: "Zwaraa — Bungalows sur pilotis, lagune de Nefza",
+        content: "Reve-z — Bungalows sur pilotis, lagune de Nefza",
       },
       {
         property: "og:description",
@@ -101,20 +107,7 @@ function GalleryTeaser() {
 }
 
 /* ------------------------------------------------------------------ */
-/* DEV PREVIEW LABEL — remove this component once you've picked one    */
-/* ------------------------------------------------------------------ */
-function OptionLabel({ n, name }: { n: number; name: string }) {
-  return (
-    <span className="absolute top-3 left-3 z-20 rounded-full bg-foreground/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white">
-      Option {n} — {name}
-    </span>
-  );
-}
- 
- 
-
-/* ------------------------------------------------------------------ */
-/* OPTION 1 — Scrolling photo marquee                                  */
+/* Scrolling photo marquee                                  */
 /* ------------------------------------------------------------------ */
 function useMarqueeImages() {
   const { data: cabins, isLoading: cabinsLoading } = useQuery({
@@ -128,7 +121,7 @@ function useMarqueeImages() {
       return data ?? [];
     },
   });
- 
+
   const { data: extraPhotos, isLoading: extraLoading } = useQuery({
     queryKey: ["gallery-photos-marquee"],
     queryFn: async () => {
@@ -140,7 +133,7 @@ function useMarqueeImages() {
       return data ?? [];
     },
   });
- 
+
   const fallback = [
     cabinCover("lagune"),
     cabinCover("sable"),
@@ -150,22 +143,26 @@ function useMarqueeImages() {
     galleryInterior,
     heroLagoon,
   ];
- 
-  const fromCabins = (cabins ?? []).flatMap((c) => cabinGallery(c.slug, c.photos));
-  const fromExtra = (extraPhotos ?? []).map((p) =>
-    p.media_type === "video" ? p.poster_url || p.image_url : p.thumb_url || p.image_url
+
+  const fromCabins = (cabins ?? []).flatMap((c) =>
+    cabinGallery(c.slug, c.photos),
   );
- 
+  const fromExtra = (extraPhotos ?? []).map((p) =>
+    p.media_type === "video"
+      ? p.poster_url || p.image_url
+      : p.thumb_url || p.image_url,
+  );
+
   const combined = [...fromCabins, ...fromExtra].filter(Boolean) as string[];
   const images = combined.length >= 10 ? combined : [...combined, ...fallback];
- 
+
   return { images, isLoading: cabinsLoading || extraLoading };
 }
- 
+
 function GalleryTeaserMarquee() {
   const { t } = useI18n();
   const { images, isLoading } = useMarqueeImages();
- 
+
   // IMPORTANT: only lock in the shuffled order once the real data has
   // finished loading. Locking earlier (while queries are still in flight)
   // would freeze the marquee on the small fallback set forever, since
@@ -182,7 +179,7 @@ function GalleryTeaserMarquee() {
   const shuffled = shuffledRef.current ?? images;
   // Tripled so the loop stays seamless even on very wide screens.
   const strip = [...shuffled, ...shuffled, ...shuffled];
- 
+
   // Keep scroll SPEED constant (px/sec) regardless of how many images ended
   // up in the set — a fixed animation duration would make a small set crawl
   // almost imperceptibly slowly and a large set fly by too fast.
@@ -190,16 +187,15 @@ function GalleryTeaserMarquee() {
   const singleSetWidth = shuffled.length * approxTileWidth;
   const pxPerSecond = 45;
   const durationSec = Math.max(18, Math.round(singleSetWidth / pxPerSecond));
- 
+
   return (
     <section className="relative overflow-hidden bg-foreground py-20">
-      <OptionLabel n={1} name="Marquee" />
       <style>{`
         @keyframes gtMarquee { from { transform: translateX(0); } to { transform: translateX(-33.3333%); } }
         .gt-marquee-track { animation-name: gtMarquee; animation-timing-function: linear; animation-iteration-count: infinite; will-change: transform; }
         .gt-marquee-track:hover { animation-play-state: paused; }
       `}</style>
- 
+
       <div
         className="absolute inset-0 flex items-center opacity-70"
         style={{
@@ -214,29 +210,37 @@ function GalleryTeaserMarquee() {
           style={{ animationDuration: `${durationSec}s` }}
         >
           {strip.map((src, i) => (
-            <div key={i} className="h-40 w-64 flex-shrink-0 overflow-hidden rounded-xl">
+            <div
+              key={i}
+              className="h-40 w-64 shrink-0 overflow-hidden rounded-xl"
+            >
               <img src={src} alt="" className="h-full w-full object-cover" />
             </div>
           ))}
         </div>
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/60 to-foreground/60" />
- 
+
       <div className="wrap relative z-10 flex flex-col items-center text-center gap-4">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white">
           <Camera className="h-3.5 w-3.5" />
           {t("home.galleryTeaser.kicker")}
         </span>
         <h2 className="text-3xl text-white">{t("home.galleryTeaser.title")}</h2>
-        <p className="max-w-md text-sm text-white/80">{t("home.galleryTeaser.body")}</p>
-        <Link to="/gallery" className="btn-pill btn-coral mt-2 inline-flex items-center gap-2 py-3 px-6">
+        <p className="max-w-md text-sm text-white/80">
+          {t("home.galleryTeaser.body")}
+        </p>
+        <Link
+          to="/gallery"
+          className="btn-pill btn-coral mt-2 inline-flex items-center gap-2 py-3 px-6"
+        >
           {t("home.galleryTeaser.cta")} <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     </section>
   );
 }
- 
+
 /* ------------------------------------------------------------------ */
 /* OPTION 2 — Photo-filled headline                                    */
 /* ------------------------------------------------------------------ */
@@ -244,7 +248,6 @@ function GalleryTeaserHeadline() {
   const { t } = useI18n();
   return (
     <section className="relative bg-card py-20">
-      <OptionLabel n={2} name="Photo headline" />
       <div className="wrap flex flex-col items-center text-center gap-3">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
           <Camera className="h-3.5 w-3.5" />
@@ -264,14 +267,17 @@ function GalleryTeaserHeadline() {
         <p className="max-w-md text-sm text-muted-foreground -mt-2">
           {t("home.galleryTeaser.body")}
         </p>
-        <Link to="/gallery" className="btn-pill btn-coral mt-4 inline-flex items-center gap-2 py-3 px-6">
+        <Link
+          to="/gallery"
+          className="btn-pill btn-coral mt-4 inline-flex items-center gap-2 py-3 px-6"
+        >
           {t("home.galleryTeaser.cta")} <ArrowRight className="h-4 w-4" />
         </Link>
       </div>
     </section>
   );
 }
- 
+
 /* ------------------------------------------------------------------ */
 /* OPTION 4 — Diagonal color-wash split                                */
 /* ------------------------------------------------------------------ */
@@ -279,28 +285,36 @@ function GalleryTeaserDiagonal() {
   const { t } = useI18n();
   return (
     <section className="relative overflow-hidden bg-background py-20">
-      <OptionLabel n={4} name="Diagonal wash" />
       <div className="wrap grid gap-8 md:grid-cols-2 items-center">
         <div>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-coral/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-coral">
             <Camera className="h-3.5 w-3.5" />
             {t("home.galleryTeaser.kicker")}
           </span>
-          <h2 className="mt-3 text-3xl text-primary">{t("home.galleryTeaser.title")}</h2>
+          <h2 className="mt-3 text-3xl text-primary">
+            {t("home.galleryTeaser.title")}
+          </h2>
           <p className="mt-3 max-w-sm text-sm text-muted-foreground">
             {t("home.galleryTeaser.body")}
           </p>
-          <Link to="/gallery" className="btn-pill btn-coral mt-6 inline-flex w-fit items-center gap-2 py-3 px-6">
+          <Link
+            to="/gallery"
+            className="btn-pill btn-coral mt-6 inline-flex w-fit items-center gap-2 py-3 px-6"
+          >
             {t("home.galleryTeaser.cta")} <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
- 
+
         <div className="relative h-64 sm:h-80">
           <div
             className="absolute inset-0 overflow-hidden"
             style={{ clipPath: "polygon(22% 0, 100% 0, 100% 100%, 0% 100%)" }}
           >
-            <img src={galleryBoat} alt="" className="h-full w-full object-cover" />
+            <img
+              src={galleryBoat}
+              alt=""
+              className="h-full w-full object-cover"
+            />
             <div className="absolute inset-0 bg-coral/40 mix-blend-multiply" />
           </div>
           <div
@@ -312,7 +326,6 @@ function GalleryTeaserDiagonal() {
     </section>
   );
 }
- 
 
 function Home() {
   const { t, lang } = useI18n();
@@ -403,7 +416,7 @@ function Home() {
           </div>
           <div className="story-body">
             <p>
-              Situé à Nefza, au nord-ouest de la Tunisie, Zwaraa offre une
+              Situé à Nefza, au nord-ouest de la Tunisie, Reve-z offre une
               expérience unique : dormir dans un bungalow sur pilotis,
               directement sur l'eau.
             </p>
@@ -483,13 +496,13 @@ function Home() {
         </div>
       </section>
 
-            {/* <GalleryTeaserHeadline /> */}
+      {/* <GalleryTeaserHeadline /> */}
       <GalleryTeaserMarquee />
 
       <section className="feature">
         <div className="wrap feature-inner">
           <div className="feature-list">
-            <h2>Ce qui rend Zwaraa unique</h2>
+            <h2>Ce qui rend Reve-z unique</h2>
             <div className="feature-item">
               <h4>Un lieu, pas une chaîne</h4>
               <p>

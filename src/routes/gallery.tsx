@@ -13,16 +13,17 @@ import { ArrowRight, Play, Quote, Star, Utensils, Waves } from "lucide-react";
 export const Route = createFileRoute("/gallery")({
   head: () => ({
     meta: [
-      { title: "Galerie — Zwaraa, Nefza" },
+      { title: "Galerie — Reve-z, Nefza" },
       {
         name: "description",
         content:
-          "Découvrez en images et en vidéo les bungalows, les activités, les repas et la nature de Zwaraa dans la lagune de Nefza, Tunisie.",
+          "Découvrez en images et en vidéo les bungalows, les activités, les repas et la nature de Reve-z dans la lagune de Nefza, Tunisie.",
       },
-      { property: "og:title", content: "Galerie — Zwaraa, Nefza" },
+      { property: "og:title", content: "Galerie — Reve-z, Nefza" },
       {
         property: "og:description",
-        content: "Photos et vidéos des bungalows, activités et paysages de Zwaraa, Tunisie.",
+        content:
+          "Photos et vidéos des bungalows, activités et paysages de Reve-z, Tunisie.",
       },
     ],
   }),
@@ -70,7 +71,9 @@ function shuffle<T>(arr: T[]): T[] {
 // Assigns sizes to media tiles only, walking the already-shuffled sequence
 // so "large" tiles (including the About/Included content cards) stay spaced
 // out instead of clustering.
-function assignMediaSizes(tiles: (Omit<MediaItem, "size"> | ContentTile)[]): GridTile[] {
+function assignMediaSizes(
+  tiles: (Omit<MediaItem, "size"> | ContentTile)[],
+): GridTile[] {
   let sinceLastBig = 0;
   return tiles.map((tile) => {
     sinceLastBig++;
@@ -86,7 +89,15 @@ function assignMediaSizes(tiles: (Omit<MediaItem, "size"> | ContentTile)[]): Gri
   });
 }
 
-function MediaTile({ item, index, onOpen }: { item: MediaItem; index: number; onOpen: () => void }) {
+function MediaTile({
+  item,
+  index,
+  onOpen,
+}: {
+  item: MediaItem;
+  index: number;
+  onOpen: () => void;
+}) {
   const { ref, inView } = useInView<HTMLButtonElement>();
 
   return (
@@ -94,7 +105,11 @@ function MediaTile({ item, index, onOpen }: { item: MediaItem; index: number; on
       ref={ref}
       type="button"
       onClick={onOpen}
-      aria-label={item.caption ? `${item.categoryLabel} — ${item.caption}` : item.categoryLabel}
+      aria-label={
+        item.caption
+          ? `${item.categoryLabel} — ${item.caption}`
+          : item.categoryLabel
+      }
       className={[
         "group relative block w-full overflow-hidden rounded-xl text-left transition-all duration-700",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
@@ -123,7 +138,9 @@ function MediaTile({ item, index, onOpen }: { item: MediaItem; index: number; on
           {item.categoryLabel}
         </span>
         {item.caption && (
-          <span className="truncate text-xs font-medium text-white">{item.caption}</span>
+          <span className="truncate text-xs font-medium text-white">
+            {item.caption}
+          </span>
         )}
       </div>
     </button>
@@ -146,7 +163,9 @@ function AboutTile({ size }: { size: TileSize }) {
         <Waves className="h-3.5 w-3.5" />
         {t("gallery.about.kicker")}
       </span>
-      <h2 className="mt-2 text-xl text-primary leading-snug">{t("gallery.about.title")}</h2>
+      <h2 className="mt-2 text-xl text-primary leading-snug">
+        {t("gallery.about.title")}
+      </h2>
       <p className="mt-2 text-xs leading-relaxed text-muted-foreground line-clamp-4">
         {t("gallery.about.body")}
       </p>
@@ -183,12 +202,16 @@ function IncludedTile({ size }: { size: TileSize }) {
     >
       <div className="flex items-center gap-1.5 mb-2">
         <Utensils className="h-3.5 w-3.5 text-coral" />
-        <h2 className="text-sm font-medium text-foreground">{t("gallery.included.title")}</h2>
+        <h2 className="text-sm font-medium text-foreground">
+          {t("gallery.included.title")}
+        </h2>
       </div>
       <ul className="space-y-1.5">
         {rows.map((key) => (
           <li key={key} className="text-xs text-muted-foreground leading-snug">
-            <span className="font-medium text-foreground">{t(`gallery.included.${key}.title`)}</span>
+            <span className="font-medium text-foreground">
+              {t(`gallery.included.${key}.title`)}
+            </span>
           </li>
         ))}
       </ul>
@@ -220,7 +243,9 @@ function TestimonialTile({
       ].join(" ")}
     >
       <Quote className="h-4 w-4 text-coral mb-2" />
-      <p className="text-xs leading-relaxed text-foreground line-clamp-4">{quote}</p>
+      <p className="text-xs leading-relaxed text-foreground line-clamp-4">
+        {quote}
+      </p>
       <div className="mt-3 flex items-center justify-between">
         <p className="text-[11px] font-medium text-muted-foreground">
           {authorName}
@@ -255,7 +280,9 @@ function StickyReserveButton({ hidden }: { hidden: boolean }) {
       to="/book"
       className={[
         "fixed bottom-5 inset-x-0 z-40 mx-auto w-fit transition-all duration-300",
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none",
+        visible
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-4 pointer-events-none",
       ].join(" ")}
     >
       <span className="btn-pill btn-coral inline-flex items-center gap-2 py-2.5 px-5 text-sm shadow-soft">
@@ -309,25 +336,28 @@ function Gallery() {
   });
 
   const isLoading = cabinsLoading || photosLoading || testimonialsLoading;
-  const categoryLabel = (category: Category) => t(`gallery.category.${category}`);
+  const categoryLabel = (category: Category) =>
+    t(`gallery.category.${category}`);
 
   const mediaRaw = useMemo<Omit<MediaItem, "size">[]>(() => {
     const bungalowItems = (cabins ?? []).flatMap((cabin) => {
       const name = lang === "ar" ? cabin.name_ar : cabin.name;
-      return cabinGallery(cabin.slug, cabin.photos).map((src: string, i: number) => ({
-        kind: "media" as const,
-        id: `cabin-${cabin.id}-${i}`,
-        src,
-        gridThumb: src,
-        thumbSrc: src,
-        blurSrc: null,
-        alt: `${name} — ${i + 1}`,
-        caption: name,
-        category: "bungalow" as const,
-        mediaType: "image" as const,
-        categoryLabel: categoryLabel("bungalow"),
-        bookingHref: `/book?cabin=${cabin.slug}`,
-      }));
+      return cabinGallery(cabin.slug, cabin.photos).map(
+        (src: string, i: number) => ({
+          kind: "media" as const,
+          id: `cabin-${cabin.id}-${i}`,
+          src,
+          gridThumb: src,
+          thumbSrc: src,
+          blurSrc: null,
+          alt: `${name} — ${i + 1}`,
+          caption: name,
+          category: "bungalow" as const,
+          mediaType: "image" as const,
+          categoryLabel: categoryLabel("bungalow"),
+          bookingHref: `/book?cabin=${cabin.slug}`,
+        }),
+      );
     });
 
     const extra = (extraPhotos ?? [])
@@ -361,10 +391,20 @@ function Gallery() {
   const contentTilesRaw = useMemo<ContentTile[]>(() => {
     const tiles: ContentTile[] = [
       { kind: "content", id: "content-about", variant: "about", size: "large" },
-      { kind: "content", id: "content-included", variant: "included", size: "large" },
+      {
+        kind: "content",
+        id: "content-included",
+        variant: "included",
+        size: "large",
+      },
     ];
     (testimonials ?? []).forEach((tItem) => {
-      tiles.push({ kind: "content", id: `testimonial-${tItem.id}`, variant: "testimonial", size: "wide" });
+      tiles.push({
+        kind: "content",
+        id: `testimonial-${tItem.id}`,
+        variant: "testimonial",
+        size: "wide",
+      });
     });
     return tiles;
   }, [testimonials]);
@@ -387,11 +427,14 @@ function Gallery() {
 
   const lightboxPhotos = useMemo(
     () => gridTiles.filter((t): t is MediaItem => t.kind === "media"),
-    [gridTiles]
+    [gridTiles],
   );
 
   const testimonialById = useMemo(() => {
-    const map = new Map<string, (typeof testimonials extends (infer U)[] | undefined ? U : never)>();
+    const map = new Map<
+      string,
+      typeof testimonials extends (infer U)[] | undefined ? U : never
+    >();
     (testimonials ?? []).forEach((tItem) => map.set(tItem.id, tItem));
     return map;
   }, [testimonials]);
@@ -415,8 +458,12 @@ function Gallery() {
               <Waves className="h-3.5 w-3.5" />
               {t("gallery.about.kicker")}
             </span>
-            <h1 className="mt-3 text-3xl sm:text-4xl text-white">{t("gallery.title")}</h1>
-            <p className="mt-2 text-sm text-white/85 max-w-xl">{t("gallery.subtitle")}</p>
+            <h1 className="mt-3 text-3xl sm:text-4xl text-white">
+              {t("gallery.title")}
+            </h1>
+            <p className="mt-2 text-sm text-white/85 max-w-xl">
+              {t("gallery.subtitle")}
+            </p>
           </div>
         </div>
       </div>
@@ -428,7 +475,9 @@ function Gallery() {
               <span className="block h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
             </div>
           ) : gridTiles.length === 0 ? (
-            <p className="py-16 text-center text-sm text-muted-foreground">{t("common.error")}</p>
+            <p className="py-16 text-center text-sm text-muted-foreground">
+              {t("common.error")}
+            </p>
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 auto-rows-[150px] [grid-auto-flow:dense] sm:auto-rows-[170px]">
               {(() => {
@@ -446,8 +495,10 @@ function Gallery() {
                       />
                     );
                   }
-                  if (tile.variant === "about") return <AboutTile key={tile.id} size={tile.size} />;
-                  if (tile.variant === "included") return <IncludedTile key={tile.id} size={tile.size} />;
+                  if (tile.variant === "about")
+                    return <AboutTile key={tile.id} size={tile.size} />;
+                  if (tile.variant === "included")
+                    return <IncludedTile key={tile.id} size={tile.size} />;
                   const testimonialId = tile.id.replace("testimonial-", "");
                   const data = testimonialById.get(testimonialId);
                   if (!data) return null;
@@ -469,8 +520,13 @@ function Gallery() {
           {/* CTA */}
           <div className="mt-16 rounded-2xl border border-coral/30 bg-coral/5 p-8 text-center">
             <h2 className="text-2xl text-primary">{t("cabins.title")}</h2>
-            <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto">{t("gallery.note")}</p>
-            <Link to="/book" className="btn-pill btn-coral mt-6 inline-flex items-center gap-2 py-3 px-6">
+            <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto">
+              {t("gallery.note")}
+            </p>
+            <Link
+              to="/book"
+              className="btn-pill btn-coral mt-6 inline-flex items-center gap-2 py-3 px-6"
+            >
               {t("cabin.reserve")} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
