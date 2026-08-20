@@ -847,7 +847,11 @@ function BookingFlow() {
         adults: guest.adults,
         children6_10: guest.children6_10,
         childrenUnder5: guest.childrenUnder5,
-        turnstileToken: turnstile.token,
+        // Only send a token when Turnstile is actually enabled — sending an
+        // empty string while it's disabled (see TURNSTILE_DISABLED above)
+        // would make server-side verification fail every time, since an
+        // empty token is never valid against Cloudflare's siteverify.
+        ...(TURNSTILE_DISABLED ? {} : { turnstileToken: turnstile.token }),
       },
     });
 
