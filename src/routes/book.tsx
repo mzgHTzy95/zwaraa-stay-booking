@@ -22,6 +22,7 @@ import {
   MessageCircle,
   Minus,
   Moon,
+  Phone,
   Plus,
   ShieldCheck,
   Smartphone,
@@ -29,11 +30,7 @@ import {
   Users,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  createReservation,
-  getBookedSlots,
-  payReservation,
-} from "@/lib/booking.functions";
+import { createReservation, getBookedSlots, payReservation } from "@/lib/booking.functions";
 import { useI18n, formatPrice } from "@/lib/i18n";
 import { SiteHeader, SiteFooter } from "@/components/site/chrome";
 import { Calendar } from "@/components/ui/calendar";
@@ -41,31 +38,26 @@ import { PackList } from "@/components/site/pack";
 import { Lightbox, type LightboxPhoto } from "@/components/site/lightbox";
 import { cabinGallery } from "@/lib/images";
 
+
 const searchSchema = z.object({
-  date: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
-    .optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   slot: z.enum(["half_day", "24h"]).optional(),
   guests: z.number().int().optional(),
   nights: z.number().int().optional(),
 });
 
+
 export const Route = createFileRoute("/book")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
-      { title: "Réserver un bungalow — Reve-z" },
+      { title: "Réserver un bungalow — Zwaraa" },
       {
         name: "description",
-        content:
-          "Choisissez votre date et votre créneau, puis finalisez votre réservation à Reve-z.",
+        content: "Choisissez votre date et votre créneau, puis finalisez votre réservation à Zwaraa.",
       },
-      { property: "og:title", content: "Réserver un bungalow — Reve-z" },
-      {
-        property: "og:description",
-        content: "Réservation en ligne des bungalows de Reve-z, Nefza.",
-      },
+      { property: "og:title", content: "Réserver un bungalow — Zwaraa" },
+      { property: "og:description", content: "Réservation en ligne des bungalows de Zwaraa, Nefza." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -73,15 +65,9 @@ export const Route = createFileRoute("/book")({
 });
 
 const guestSchema = z.object({
-  cin: z
-    .string()
-    .trim()
-    .regex(/^\d{8}$/, "cin"),
+  cin: z.string().trim().regex(/^\d{8}$/, "cin"),
   fullName: z.string().trim().min(3).max(120),
-  phone: z
-    .string()
-    .trim()
-    .regex(/^\d{8,12}$/, "phone"),
+  phone: z.string().trim().regex(/^\d{8,12}$/, "phone"),
   dateOfBirth: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "dob")
@@ -106,38 +92,47 @@ const FIELD_ERROR_FR: Record<keyof Guest, string> = {
 
 const CHILDREN_6_10_PRICE = 50;
 
-// Common countries for guests booking Reve-z — Tunisia first as the default,
+// Common countries for guests booking Zwaraa — Tunisia first as the default,
 // then nearby Maghreb countries, then countries guests are likely to travel
 // from. Add more entries here if you get bookings from elsewhere often.
 const PHONE_COUNTRIES = [
-  { code: "TN", name: "Tunisie", dial: "+216", flag: "🇹🇳" },
-  { code: "DZ", name: "Algérie", dial: "+213", flag: "🇩🇿" },
-  { code: "LY", name: "Libye", dial: "+218", flag: "🇱🇾" },
-  { code: "MA", name: "Maroc", dial: "+212", flag: "🇲🇦" },
-  { code: "FR", name: "France", dial: "+33", flag: "🇫🇷" },
-  { code: "IT", name: "Italie", dial: "+39", flag: "🇮🇹" },
-  { code: "DE", name: "Allemagne", dial: "+49", flag: "🇩🇪" },
-  { code: "BE", name: "Belgique", dial: "+32", flag: "🇧🇪" },
-  { code: "CH", name: "Suisse", dial: "+41", flag: "🇨🇭" },
-  { code: "GB", name: "Royaume-Uni", dial: "+44", flag: "🇬🇧" },
-  { code: "ES", name: "Espagne", dial: "+34", flag: "🇪🇸" },
-  { code: "NL", name: "Pays-Bas", dial: "+31", flag: "🇳🇱" },
-  { code: "QA", name: "Qatar", dial: "+974", flag: "🇶🇦" },
-  { code: "AE", name: "Émirats arabes unis", dial: "+971", flag: "🇦🇪" },
-  { code: "SA", name: "Arabie saoudite", dial: "+966", flag: "🇸🇦" },
-  { code: "KW", name: "Koweït", dial: "+965", flag: "🇰🇼" },
-  { code: "EG", name: "Égypte", dial: "+20", flag: "🇪🇬" },
-  { code: "TR", name: "Turquie", dial: "+90", flag: "🇹🇷" },
-  { code: "CA", name: "Canada", dial: "+1", flag: "🇨🇦" },
-  { code: "US", name: "États-Unis", dial: "+1", flag: "🇺🇸" },
+  { code: "TN", name: "Tunisie", dial: "+216", flag: "🇹🇳", len: 8 },
+  { code: "DZ", name: "Algérie", dial: "+213", flag: "🇩🇿", len: 9 },
+  { code: "LY", name: "Libye", dial: "+218", flag: "🇱🇾", len: 9 },
+  { code: "MA", name: "Maroc", dial: "+212", flag: "🇲🇦", len: 9 },
+  { code: "FR", name: "France", dial: "+33", flag: "🇫🇷", len: 9 },
+  { code: "IT", name: "Italie", dial: "+39", flag: "🇮🇹", len: 10 },
+  { code: "DE", name: "Allemagne", dial: "+49", flag: "🇩🇪", len: 10 },
+  { code: "BE", name: "Belgique", dial: "+32", flag: "🇧🇪", len: 9 },
+  { code: "CH", name: "Suisse", dial: "+41", flag: "🇨🇭", len: 9 },
+  { code: "GB", name: "Royaume-Uni", dial: "+44", flag: "🇬🇧", len: 10 },
+  { code: "ES", name: "Espagne", dial: "+34", flag: "🇪🇸", len: 9 },
+  { code: "NL", name: "Pays-Bas", dial: "+31", flag: "🇳🇱", len: 9 },
+  { code: "QA", name: "Qatar", dial: "+974", flag: "🇶🇦", len: 8 },
+  { code: "AE", name: "Émirats arabes unis", dial: "+971", flag: "🇦🇪", len: 9 },
+  { code: "SA", name: "Arabie saoudite", dial: "+966", flag: "🇸🇦", len: 9 },
+  { code: "KW", name: "Koweït", dial: "+965", flag: "🇰🇼", len: 8 },
+  { code: "EG", name: "Égypte", dial: "+20", flag: "🇪🇬", len: 10 },
+  { code: "TR", name: "Turquie", dial: "+90", flag: "🇹🇷", len: 10 },
+  { code: "CA", name: "Canada", dial: "+1", flag: "🇨🇦", len: 10 },
+  { code: "US", name: "États-Unis", dial: "+1", flag: "🇺🇸", len: 10 },
 ] as const;
 
 const DEFAULT_PHONE_COUNTRY = PHONE_COUNTRIES[0].dial; // Tunisia
 
+// Real contact info — shown at Step 4 and in the payment trust signals.
+const CONTACT_PHONE_DISPLAY = "+216 99 802 802";
+const CONTACT_PHONE_TEL = "tel:+21699802802";
+const CONTACT_WHATSAPP = "https://wa.me/21699802802";
+
+function phoneLenForCountry(dial: string): number {
+  return PHONE_COUNTRIES.find((c) => c.dial === dial)?.len ?? 12;
+}
+
 // --- Draft persistence (Step 1 & 2 data only — never card details) -------
 // Uses sessionStorage (not localStorage) so it clears when the tab closes,
 // while still surviving accidental refreshes or back/forward navigation.
-const DRAFT_KEY = "Reve-z-booking-draft-v1";
+const DRAFT_KEY = "zwaraa-booking-draft-v1";
 
 type BookingDraft = {
   date: string | null; // ISO string
@@ -192,9 +187,7 @@ function formatCardNumber(raw: string) {
 
 function formatExpiry(raw: string) {
   const digits = raw.replace(/\D/g, "").slice(0, 4);
-  return digits.length <= 2
-    ? digits
-    : `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return digits.length <= 2 ? digits : `${digits.slice(0, 2)}/${digits.slice(2)}`;
 }
 
 function Field({
@@ -208,13 +201,9 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-xs uppercase tracking-wider text-muted-foreground">
-        {label}
-      </span>
+      <span className="text-xs uppercase tracking-wider text-muted-foreground">{label}</span>
       <div className="mt-1.5">{children}</div>
-      {error ? (
-        <p className="mt-1.5 text-xs text-destructive">{error}</p>
-      ) : null}
+      {error ? <p className="mt-1.5 text-xs text-destructive">{error}</p> : null}
     </label>
   );
 }
@@ -243,16 +232,12 @@ function CountStepper({
   };
   const col = highlight ? colors[highlight] : "";
   return (
-    <div
-      className={`flex items-center justify-between rounded-xl border p-4 ${col || "border-border bg-card"}`}
-    >
-      <div>
+    <div className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4 ${col || "border-border bg-card"}`}>
+      <div className="min-w-0">
         <p className="text-sm font-medium text-foreground">{label}</p>
-        {sublabel && (
-          <p className="text-[11px] text-muted-foreground">{sublabel}</p>
-        )}
+        {sublabel && <p className="text-[11px] text-muted-foreground">{sublabel}</p>}
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-3">
         <button
           type="button"
           aria-label="Diminuer"
@@ -262,9 +247,7 @@ function CountStepper({
         >
           <Minus className="h-3.5 w-3.5" />
         </button>
-        <span className="num w-6 text-center text-lg font-semibold text-primary">
-          {value}
-        </span>
+        <span className="num w-6 text-center text-lg font-semibold text-primary">{value}</span>
         <button
           type="button"
           aria-label="Augmenter"
@@ -281,19 +264,12 @@ function CountStepper({
 
 const inputClass =
   "w-full rounded-xl border border-input bg-card px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all";
-const inputErrorClass =
-  "border-destructive focus:border-destructive focus:ring-destructive/20";
+const inputErrorClass = "border-destructive focus:border-destructive focus:ring-destructive/20";
 
 /** Small hand-drawn wave — the lagoon-edge motif, solid color, no alpha. */
 function WaveDivider({ className = "" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 400 24"
-      className={className}
-      fill="none"
-      aria-hidden="true"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg viewBox="0 0 400 24" className={className} fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M0 12 C 40 0, 80 24, 120 12 S 200 0, 240 12 S 320 24, 360 12 S 400 0, 400 12"
         stroke="currentColor"
@@ -322,8 +298,8 @@ function ConnectedStepper({ step, steps }: { step: number; steps: string[] }) {
                     state === "done"
                       ? "bg-forest text-forest-foreground"
                       : state === "current"
-                        ? "scale-110 bg-coral text-coral-foreground shadow-md"
-                        : "border border-border bg-card text-muted-foreground",
+                      ? "scale-110 bg-coral text-coral-foreground shadow-md"
+                      : "border border-border bg-card text-muted-foreground",
                   ].join(" ")}
                 >
                   {state === "done" ? <Check className="h-4 w-4" /> : n}
@@ -334,9 +310,7 @@ function ConnectedStepper({ step, steps }: { step: number; steps: string[] }) {
                 <span
                   className={[
                     "num text-center text-[10px] leading-tight",
-                    state === "upcoming"
-                      ? "text-muted-foreground"
-                      : "font-medium text-primary",
+                    state === "upcoming" ? "text-muted-foreground" : "font-medium text-primary",
                     state === "current" ? "block" : "hidden sm:block",
                   ].join(" ")}
                 >
@@ -363,7 +337,9 @@ function ConnectedStepper({ step, steps }: { step: number; steps: string[] }) {
   );
 }
 
-/** Persistent booking summary — always visible so date / slot / price stay in view. */
+/** Persistent booking summary — always visible so date / slot / price stay in view.
+ *  Mobile: compact by default (photo + key line + toggle), expands on tap.
+ *  Desktop: always fully expanded (the toggle only exists below the lg breakpoint). */
 function SummaryCard({
   cabin,
   cabinName,
@@ -374,7 +350,6 @@ function SummaryCard({
   adults,
   children6_10,
   childrenUnder5,
-  // price,
   t,
   lang,
 }: {
@@ -387,105 +362,127 @@ function SummaryCard({
   adults: number;
   children6_10: number;
   childrenUnder5: number;
-  // price: number;
   t: (key: string, vars?: Record<string, string | number>) => string;
   lang: "fr" | "ar" | "en";
 }) {
-  const photo = cabin?.photos?.[0] as string | undefined;
+  const [expanded, setExpanded] = useState(false);
+  const photos = cabin ? cabinGallery(cabin.slug, cabin.photos).filter(Boolean).slice(0, 3) : [];
+  const cover = photos[0];
   const totalGuests = adults + children6_10 + childrenUnder5;
+  const SlotIcon = slot === "half_day" ? Sun : Moon;
+
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card ">
-      <div className="relative h-32 w-full overflow-hidden bg-primary">
-        {photo ? (
-          <img
-            src={photo}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <Home className="h-8 w-8 text-primary-foreground" />
-          </div>
-        )}
-        <div
-          aria-hidden="true"
-          className="absolute left-4 top-3 h-0 w-0 border-x-13 border-b-11 border-x-transparent border-b-coral drop-shadow-sm"
-        />
-      </div>
-
-      <div className="p-5">
-        <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-          Récapitulatif
-        </p>
-        <p className="mt-1 text-base font-semibold text-primary">{cabinName}</p>
-        <p className="mt-0.5 text-[11px] text-muted-foreground">
-          {t("book.anyCabinNote")}
-        </p>
-
-        <div className="mt-4 space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Date</span>
-            <span className="num font-medium text-primary">
-              {dateKey ?? "—"}
-            </span>
-          </div>
-          <div className="flex justify-between gap-3">
-            <span className="text-muted-foreground">Formule</span>
-            <span className="text-end font-medium text-primary">
-              {t(`slot.${slot}`)}
-              <span className="num block text-[11px] font-normal text-muted-foreground">
-                {slot === "half_day" ? t("slot.hoursHalf") : t("slot.hours24")}
-              </span>
-            </span>
-          </div>
-          {slot === "24h" ? (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">{t("book.nights")}</span>
-              <span className="num font-medium text-primary">{nights}</span>
-            </div>
-          ) : null}
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">{t("book.guests")}</span>
-            <span className="num font-medium text-primary">{totalGuests}</span>
-          </div>
-          {children6_10 > 0 && (
-            <div className="flex justify-between text-[11px]">
-              <span className="text-muted-foreground">Enfants 6–10</span>
-              <span className="num text-amber-foreground">
-                {children6_10} × 50 DT
-              </span>
-            </div>
-          )}
-          {childrenUnder5 > 0 && (
-            <div className="flex justify-between text-[11px]">
-              <span className="text-muted-foreground">Enfants ≤5</span>
-              <span className="num text-forest">Gratuit</span>
+    <div className="overflow-hidden rounded-2xl border border-border bg-card">
+      {/* Compact header — always visible, doubles as the mobile toggle */}
+      <button
+        type="button"
+        onClick={() => setExpanded((e) => !e)}
+        className="flex w-full items-center gap-3 p-3 text-start lg:pointer-events-none lg:cursor-default"
+      >
+        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-primary">
+          {cover ? (
+            <img src={cover} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <Home className="h-5 w-5 text-primary-foreground" />
             </div>
           )}
         </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Récapitulatif</p>
+          <p className="truncate text-sm font-semibold text-primary">{cabinName}</p>
+          <p className="num flex items-center gap-1 truncate text-[11px] text-muted-foreground">
+            {dateKey ?? "—"} · {t(`slot.${slot}`)} · {totalGuests} <Users className="h-3 w-3" />
+          </p>
+        </div>
+        <ChevronDown
+          className={[
+            "h-4 w-4 shrink-0 text-muted-foreground transition-transform lg:hidden",
+            expanded ? "rotate-180" : "",
+          ].join(" ")}
+        />
+      </button>
 
-        {included?.length ? (
-          <div className="mt-4 flex flex-wrap gap-1.5">
-            {included.slice(0, 3).map((item) => (
-              <span
-                key={item}
-                className="inline-flex items-center rounded-full bg-forest px-2.5 py-1 text-[11px] font-medium text-forest-foreground"
-              >
-                {item}
-              </span>
+      {/* Full details — hidden on mobile until expanded, always shown on desktop */}
+      <div className={[expanded ? "block" : "hidden", "lg:block"].join(" ")}>
+        {photos.length > 1 && (
+          <div className="grid grid-cols-3 gap-1 px-3">
+            {photos.map((src, i) => (
+              <div key={i} className="aspect-square overflow-hidden rounded-lg">
+                <img src={src} alt="" className="h-full w-full object-cover" />
+              </div>
             ))}
           </div>
-        ) : null}
+        )}
 
-        <div className="mt-5 space-y-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground">
-          <p className="flex items-center gap-1.5">
-            <Lock className="h-3.5 w-3.5" /> Paiement simulé — aucune charge
-            réelle
-          </p>
-          <p className="flex items-center gap-1.5">
-            <CheckCircle2 className="h-3.5 w-3.5" /> Confirmation immédiate
-            après paiement
-          </p>
+        <div className="p-5 pt-4">
+          <p className="mt-0.5 text-[11px] text-muted-foreground">{t("book.anyCabinNote")}</p>
+
+          <div className="mt-4 space-y-2.5 text-sm">
+            <div className="flex items-center justify-between gap-3">
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <CalendarDays className="h-3.5 w-3.5" /> Date
+              </span>
+              <span className="num font-medium text-primary">{dateKey ?? "—"}</span>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <SlotIcon className="h-3.5 w-3.5" /> Formule
+              </span>
+              <span className="text-end font-medium text-primary">
+                {t(`slot.${slot}`)}
+                <span className="num block text-[11px] font-normal text-muted-foreground">
+                  {slot === "half_day" ? t("slot.hoursHalf") : t("slot.hours24")}
+                </span>
+              </span>
+            </div>
+            {slot === "24h" ? (
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-muted-foreground">{t("book.nights")}</span>
+                <span className="num font-medium text-primary">{nights}</span>
+              </div>
+            ) : null}
+            <div className="flex items-center justify-between gap-3">
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <Users className="h-3.5 w-3.5" /> {t("book.guests")}
+              </span>
+              <span className="num font-medium text-primary">{totalGuests}</span>
+            </div>
+            {children6_10 > 0 && (
+              <div className="flex justify-between text-[11px]">
+                <span className="text-muted-foreground">Enfants 6–10</span>
+                <span className="num text-amber-foreground">{children6_10} × 50 DT</span>
+              </div>
+            )}
+            {childrenUnder5 > 0 && (
+              <div className="flex justify-between text-[11px]">
+                <span className="text-muted-foreground">Enfants ≤5</span>
+                <span className="num text-forest">Gratuit</span>
+              </div>
+            )}
+          </div>
+
+          {included?.length ? (
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {included.slice(0, 4).map((item) => (
+                <span
+                  key={item}
+                  className="inline-flex items-center rounded-full bg-forest px-2.5 py-1 text-[11px] font-medium text-forest-foreground"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="mt-5 space-y-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground">
+            <p className="flex items-center gap-1.5">
+              <Lock className="h-3.5 w-3.5" /> Paiement en espèces — à régler sur place
+            </p>
+            <p className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5" /> Confirmation immédiate après réservation
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -511,27 +508,18 @@ function useTurnstile(siteKey: string, disabled: boolean) {
         // Fully invisible unless Cloudflare genuinely can't verify silently
         // — no checkbox, no visible challenge, auto-verifies in background.
         appearance: "interaction-only",
-        callback: (t: string) => {
-          setToken(t);
-        },
-        "expired-callback": () => {
-          setToken("");
-        },
-        "error-callback": () => {
-          setToken("");
-        },
+        callback: (t: string) => { setToken(t); },
+        "expired-callback": () => { setToken(""); },
+        "error-callback": () => { setToken(""); },
       });
       setReady(true);
     };
 
-    const existingScript = document.querySelector(
-      'script[src="https://challenges.cloudflare.com/turnstile/v0/api.js"]',
-    );
+    const existingScript = document.querySelector('script[src="https://challenges.cloudflare.com/turnstile/v0/api.js"]');
     if (existingScript) {
       const win = window as any;
       if (win.turnstile) renderWidget();
-      else
-        existingScript.addEventListener("load", renderWidget, { once: true });
+      else existingScript.addEventListener("load", renderWidget, { once: true });
       return;
     }
 
@@ -539,24 +527,15 @@ function useTurnstile(siteKey: string, disabled: boolean) {
     script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
     script.async = true;
     script.defer = true;
-    script.onload = () => {
-      renderWidget();
-      setLoadError(null);
-    };
-    script.onerror = () => {
-      setLoadError("Impossible de charger la vérification anti-bot.");
-    };
+    script.onload = () => { renderWidget(); setLoadError(null); };
+    script.onerror = () => { setLoadError("Impossible de charger la vérification anti-bot."); };
     document.body.appendChild(script);
-    return () => {
-      script.onload = null;
-      script.onerror = null;
-    };
+    return () => { script.onload = null; script.onerror = null; };
   }, [siteKey, disabled]);
 
   const reset = () => {
     const win = window as any;
-    if (win.turnstile && widgetIdRef.current !== null)
-      win.turnstile.reset(widgetIdRef.current);
+    if (win.turnstile && widgetIdRef.current !== null) win.turnstile.reset(widgetIdRef.current);
     setToken("");
   };
 
@@ -582,9 +561,7 @@ function OfferShowcase({
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   if (!cabin) return null;
 
-  const photos: string[] = cabinGallery(cabin.slug, cabin.photos).filter(
-    Boolean,
-  );
+  const photos: string[] = cabinGallery(cabin.slug, cabin.photos).filter(Boolean);
   if (photos.length === 0) return null;
 
   const [main, ...rest] = photos;
@@ -604,13 +581,9 @@ function OfferShowcase({
           onClick={() => setActiveIndex(0)}
           className="relative col-span-3 h-48 overflow-hidden sm:col-span-2 sm:h-56 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
         >
-          <img
-            src={main}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-          />
+          <img src={main} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 hover:scale-105" />
         </button>
-        <div className="col-span-3 grid grid-cols-3 gap-1 sm:col-span-2 sm:grid-rows-2">
+        <div className="col-span-3 grid grid-cols-2 gap-1 sm:col-span-2 sm:grid-rows-2">
           {thumbs.length > 0 ? (
             thumbs.map((src, i) => (
               <button
@@ -619,11 +592,7 @@ function OfferShowcase({
                 onClick={() => setActiveIndex(i + 1)}
                 className="relative h-16 overflow-hidden sm:h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
               >
-                <img
-                  src={src}
-                  alt=""
-                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-                />
+                <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 hover:scale-105" />
               </button>
             ))
           ) : (
@@ -632,11 +601,7 @@ function OfferShowcase({
               onClick={() => setActiveIndex(0)}
               className="relative col-span-3 h-16 overflow-hidden sm:h-full"
             >
-              <img
-                src={main}
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover"
-              />
+              <img src={main} alt="" className="absolute inset-0 h-full w-full object-cover" />
             </button>
           )}
           <Link
@@ -676,7 +641,8 @@ function BookingFlow() {
   const { t, lang } = useI18n();
   const navigate = useNavigate();
   const siteKey = import.meta.env["VITE_TURNSTILE_SITEKEY"] ?? "";
-  const TURNSTILE_DISABLED = !siteKey;
+  // TEMP: forced off for testing — restore `!siteKey` when ready to re-enable.
+  const TURNSTILE_DISABLED = true;
 
   // Restore a saved draft once (if any) — computed lazily so it only reads
   // sessionStorage a single time, on mount.
@@ -695,13 +661,11 @@ function BookingFlow() {
     if (draft?.date) return new Date(draft.date);
     return undefined;
   });
-  const [slot, setSlot] = useState<"half_day" | "24h">(
-    search.slot ?? draft?.slot ?? "half_day",
-  );
+  const [slot, setSlot] = useState<"half_day" | "24h">(search.slot ?? draft?.slot ?? "half_day");
   const [nights, setNights] = useState(
     Math.min(30, Math.max(1, search.nights ?? draft?.nights ?? 1)),
   );
-  const [payMethod, setPayMethod] = useState<PayMethod>("card");
+  const [payMethod, setPayMethod] = useState<PayMethod>("cash");
 
   const [guest, setGuest] = useState<Guest>(() => ({
     cin: draft?.guest?.cin ?? "",
@@ -713,24 +677,13 @@ function BookingFlow() {
     childrenUnder5: draft?.guest?.childrenUnder5 ?? 0,
   }));
 
-  const [errors, setErrors] = useState<Partial<Record<keyof Guest, string>>>(
-    {},
+  const [errors, setErrors] = useState<Partial<Record<keyof Guest, string>>>({});
+  const [reservation, setReservation] = useState<{ id: string; reference: string; total: number } | null>(
+    null,
   );
-  const [reservation, setReservation] = useState<{
-    id: string;
-    reference: string;
-    total: number;
-  } | null>(null);
-  const [card, setCard] = useState({
-    number: "",
-    name: "",
-    expiry: "",
-    cvv: "",
-  });
+  const [card, setCard] = useState({ number: "", name: "", expiry: "", cvv: "" });
   const [d17Phone, setD17Phone] = useState("");
-  const [phoneCountry, setPhoneCountry] = useState(
-    draft?.phoneCountry ?? DEFAULT_PHONE_COUNTRY,
-  );
+  const [phoneCountry, setPhoneCountry] = useState(draft?.phoneCountry ?? DEFAULT_PHONE_COUNTRY);
   const [processing, setProcessing] = useState(false);
 
   // Turnstile for booking form (Step 2)
@@ -753,23 +706,14 @@ function BookingFlow() {
     },
   });
 
-  const fleetMaxCapacity = Math.max(
-    1,
-    ...(cabins ?? []).map((c) => Number(c.capacity)),
-  );
+  const fleetMaxCapacity = Math.max(1, ...(cabins ?? []).map((c) => Number(c.capacity)));
   const cabin =
-    (cabins ?? []).find(
-      (c) => Number(c.capacity) >= guest.adults + guest.children6_10,
-    ) ??
-    (cabins ?? [])[0] ??
-    null;
+    (cabins ?? []).find((c) => Number(c.capacity) >= (guest.adults + guest.children6_10)) ?? (cabins ?? [])[0] ?? null;
+
 
   const range = useMemo(() => {
     const from = new Date();
-    return {
-      from: format(from, "yyyy-MM-dd"),
-      to: format(addMonths(from, 6), "yyyy-MM-dd"),
-    };
+    return { from: format(from, "yyyy-MM-dd"), to: format(addMonths(from, 6), "yyyy-MM-dd") };
   }, []);
 
   const { data: booked } = useQuery({
@@ -815,18 +759,15 @@ function BookingFlow() {
 
   const dateKey = date ? format(date, "yyyy-MM-dd") : null;
   const effectiveNights = slot === "24h" ? nights : 1;
-  const unitPrice = Number(
-    slot === "half_day" ? cabin.price_half_day : cabin.price_24h,
-  );
-  const adultTotal =
-    slot === "half_day"
-      ? unitPrice * guest.adults
-      : unitPrice * guest.adults * effectiveNights;
-  const childrenTotal =
-    slot === "half_day"
-      ? CHILDREN_6_10_PRICE * guest.children6_10
-      : CHILDREN_6_10_PRICE * guest.children6_10 * effectiveNights;
+  const unitPrice = Number(slot === "half_day" ? cabin.price_half_day : cabin.price_24h);
+  const adultTotal = slot === "half_day"
+    ? unitPrice * guest.adults
+    : unitPrice * guest.adults * effectiveNights;
+  const childrenTotal = slot === "half_day"
+    ? CHILDREN_6_10_PRICE * guest.children6_10
+    : CHILDREN_6_10_PRICE * guest.children6_10 * effectiveNights;
   const price = adultTotal + childrenTotal;
+
 
   const stayDays = (start: string, count: number) => {
     const base = new Date(`${start}T00:00:00Z`).getTime();
@@ -835,20 +776,13 @@ function BookingFlow() {
     );
   };
   // Full exclusivity: any booked slot on any day = taken
-  const isRangeTaken = (
-    start: string | null,
-    _s: "half_day" | "24h",
-    count: number,
-  ) =>
+  const isRangeTaken = (start: string | null, _s: "half_day" | "24h", count: number) =>
     !!start &&
-    stayDays(start, count).some((d) =>
-      (booked ?? []).some((b) => b.date === d),
-    );
+    stayDays(start, count).some((d) => (booked ?? []).some((b) => b.date === d));
 
   const taken = isRangeTaken(dateKey, slot, effectiveNights);
   const cabinName = t("book.anyCabin");
-  const included =
-    lang === "ar" ? cabin.included_package_ar : cabin.included_package;
+  const included = lang === "ar" ? cabin.included_package_ar : cabin.included_package;
 
   function updateGuest<K extends keyof Guest>(key: K, value: Guest[K]) {
     setGuest((g) => ({ ...g, [key]: value }));
@@ -870,11 +804,19 @@ function BookingFlow() {
     }
     const totalCountable = guest.adults + guest.children6_10;
     if (totalCountable > fleetMaxCapacity) {
-      setErrors((prev) => ({
-        ...prev,
-        adults: t("cabin.capacity", { n: fleetMaxCapacity }),
-      }));
+      setErrors((prev) => ({ ...prev, adults: t("cabin.capacity", { n: fleetMaxCapacity }) }));
       toast.error(t("cabin.capacity", { n: fleetMaxCapacity }));
+      return;
+    }
+
+    // Phone length is validated against the SELECTED COUNTRY, not a generic
+    // 8-12 range — e.g. Tunisia expects exactly 8 digits, Italy expects 10.
+    const expectedLen = phoneLenForCountry(phoneCountry);
+    if (guest.phone.length !== expectedLen) {
+      const countryLabel = PHONE_COUNTRIES.find((c) => c.dial === phoneCountry)?.name ?? phoneCountry;
+      const msg = `Le numéro doit contenir ${expectedLen} chiffres pour ${countryLabel} (${phoneCountry}).`;
+      setErrors((prev) => ({ ...prev, phone: msg }));
+      toast.error(msg);
       return;
     }
 
@@ -922,11 +864,7 @@ function BookingFlow() {
       }
       return;
     }
-    setReservation({
-      id: result.id,
-      reference: result.reference,
-      total: result.total,
-    });
+    setReservation({ id: result.id, reference: result.reference, total: result.total });
     setStep(4);
   };
 
@@ -936,35 +874,20 @@ function BookingFlow() {
     setProcessing(true);
     await new Promise((r) => setTimeout(r, 1600));
     try {
-      await pay({
-        data: {
-          reservationId: reservation.id,
-          cardNumber: card.number || d17Phone || "SIMULATED",
-        },
-      });
+      await pay({ data: { reservationId: reservation.id, cardNumber: card.number || d17Phone || "SIMULATED" } });
       clearDraft();
-      navigate({
-        to: "/receipt/$reference",
-        params: { reference: reservation.reference },
-      });
+      navigate({ to: "/receipt/$reference", params: { reference: reservation.reference } });
     } catch {
       setProcessing(false);
       toast.error(t("common.error"));
     }
   };
 
-  const steps = [
-    t("book.step1"),
-    t("book.step2"),
-    t("book.step3"),
-    t("book.step4"),
-  ];
+  const steps = [t("book.step1"), t("book.step2"), t("book.step3"), t("book.step4")];
 
-  const PAY_METHODS: {
-    id: PayMethod;
-    Icon: typeof CreditCard;
-    label: string;
-  }[] = [{ id: "cash", Icon: Banknote, label: t("book.payMethod.cash") }];
+  const PAY_METHODS: { id: PayMethod; Icon: typeof CreditCard; label: string }[] = [
+    { id: "cash", Icon: Banknote, label: t("book.payMethod.cash") },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -976,22 +899,14 @@ function BookingFlow() {
             <div className="flex min-w-0 items-center gap-3">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted">
                 {cabin.photos?.[0] ? (
-                  <img
-                    src={cabin.photos[0]}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
+                  <img src={cabin.photos[0]} alt="" className="h-full w-full object-cover" />
                 ) : (
                   <Home className="h-5 w-5 text-muted-foreground" />
                 )}
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Vous réservez
-                </p>
-                <p className="truncate text-sm font-medium text-primary">
-                  {cabinName}
-                </p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Vous réservez</p>
+                <p className="truncate text-sm font-medium text-primary">{cabinName}</p>
               </div>
             </div>
             <Link
@@ -1002,6 +917,22 @@ function BookingFlow() {
             </Link>
           </div>
           <OfferShowcase cabin={cabin} included={included ?? []} t={t} />
+
+          {/* Turnstile mounts once, on page load — NOT gated to step 2 —
+              so its invisible background verification has the entire time
+              the person spends on Step 1 (picking date/guests) as a head
+              start. By the time they reach Step 2's submit button, the
+              token is very likely already resolved: zero perceived delay.
+              Kept outside the step-conditional blocks so switching steps
+              never unmounts/re-renders the widget. Visually near-invisible
+              (h-0) unless Cloudflare needs an actual interactive challenge,
+              in which case the container naturally expands to show it. */}
+          {!TURNSTILE_DISABLED && (
+            <div ref={turnstile.containerRef} className="h-0 overflow-visible" />
+          )}
+          {turnstile.loadError ? (
+            <p className="mt-1 text-xs text-destructive">{turnstile.loadError}</p>
+          ) : null}
 
           <div className="mt-6 flex items-center gap-3">
             <h1 className="text-3xl text-primary">{t("book.title")}</h1>
@@ -1028,35 +959,15 @@ function BookingFlow() {
             </aside>
 
             <div className="order-1">
-              {/* Invisible Turnstile container — mounted immediately on page load (Step 1)
-                  so Cloudflare auto-verifies silently in the background while the user picks dates & guests.
-                  By the time they submit Step 2, the token is already ready. */}
-              {!TURNSTILE_DISABLED && (
-                <div className="empty:hidden">
-                  <div ref={turnstile.containerRef} />
-                  {turnstile.loadError ? (
-                    <p className="mb-3 text-xs text-destructive">
-                      {turnstile.loadError}
-                    </p>
-                  ) : null}
-                </div>
-              )}
-
               {/* ── STEP 1: Date & slot ── */}
               {step === 1 && (
-                <section
-                  ref={stepRef as React.RefObject<HTMLElement>}
-                  tabIndex={-1}
-                  className="animate-rise outline-none"
-                >
+                <section ref={stepRef as React.RefObject<HTMLElement>} tabIndex={-1} className="animate-rise outline-none">
                   <h2 className="sr-only">{t("book.step1")}</h2>
 
                   <div className="rounded-2xl border border-border bg-card p-3 ">
                     <div className="mb-2 flex items-center gap-2 px-2 pt-1">
                       <CalendarDays className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-medium text-primary">
-                        Choisissez une date
-                      </span>
+                      <span className="text-sm font-medium text-primary">Choisissez une date</span>
                     </div>
                     <Calendar
                       mode="single"
@@ -1070,11 +981,7 @@ function BookingFlow() {
                   <div className="mt-5 grid gap-3 sm:grid-cols-2">
                     {(["half_day", "24h"] as const).map((s) => {
                       const active = slot === s;
-                      const busy = isRangeTaken(
-                        dateKey,
-                        s,
-                        s === "24h" ? nights : 1,
-                      );
+                      const busy = isRangeTaken(dateKey, s, s === "24h" ? nights : 1);
                       const SlotIcon = s === "half_day" ? Sun : Moon;
                       return (
                         <button
@@ -1096,28 +1003,12 @@ function BookingFlow() {
                             </span>
                           )}
                           <SlotIcon className="h-5 w-5" />
-                          <span className="mt-2 block text-sm font-medium">
-                            {t(`slot.${s}`)}
+                          <span className="mt-2 block text-sm font-medium">{t(`slot.${s}`)}</span>
+                          <span className={["num block text-[11px]", active ? "opacity-85" : "text-muted-foreground"].join(" ")}>
+                            {s === "half_day" ? t("slot.hoursHalf") : t("slot.hours24")}
                           </span>
-                          <span
-                            className={[
-                              "num block text-[11px]",
-                              active ? "opacity-85" : "text-muted-foreground",
-                            ].join(" ")}
-                          >
-                            {s === "half_day"
-                              ? t("slot.hoursHalf")
-                              : t("slot.hours24")}
-                          </span>
-                          <span
-                            className={[
-                              "mt-0.5 block text-[11px]",
-                              active ? "" : "text-muted-foreground",
-                            ].join(" ")}
-                          >
-                            {s === "24h"
-                              ? t("cabin.perPerson")
-                              : t("cabin.perPersonHalf")}
+                          <span className={["mt-0.5 block text-[11px]", active ? "" : "text-muted-foreground"].join(" ")}>
+                            {s === "24h" ? t("cabin.perPerson") : t("cabin.perPersonHalf")}
                           </span>
                           {busy ? (
                             <span className="mt-1.5 inline-block rounded-full bg-destructive px-2 py-0.5 text-[11px] font-medium text-destructive-foreground">
@@ -1134,9 +1025,7 @@ function BookingFlow() {
                     <p className="text-sm font-medium text-primary flex items-center gap-2">
                       <Users className="h-4 w-4" /> Composition du groupe
                     </p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {t("book.childrenNote")}
-                    </p>
+                    <p className="text-[11px] text-muted-foreground">{t("book.childrenNote")}</p>
                     <CountStepper
                       label={t("book.adults")}
                       value={guest.adults}
@@ -1158,25 +1047,19 @@ function BookingFlow() {
                       highlight="coral"
                     />
                     {slot === "24h" ? (
-                      <Field label={t("book.nights")}>
-                        <input
-                          type="number"
-                          min={1}
-                          max={30}
-                          className={`${inputClass} num`}
-                          value={nights}
-                          onChange={(e) =>
-                            setNights(clamp(Number(e.target.value), 1, 30))
-                          }
-                        />
-                      </Field>
+                      <CountStepper
+                        label={t("book.nights")}
+                        value={nights}
+                        min={1}
+                        max={30}
+                        onChange={setNights}
+                      />
                     ) : null}
                     {slot === "24h" ? (
-                      <p className="mt-3 text-[11px] text-muted-foreground">
-                        {t("book.nightsNote")}
-                      </p>
+                      <p className="mt-3 text-[11px] text-muted-foreground">{t("book.nightsNote")}</p>
                     ) : null}
                   </div>
+
 
                   <button
                     type="button"
@@ -1199,27 +1082,20 @@ function BookingFlow() {
                   noValidate
                 >
                   <h2 className="sr-only">{t("book.step2")}</h2>
-                  <div className="rounded-2xl border border-border bg-card p-6 ">
+                  <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 ">
                     <div className="mb-5 flex items-center gap-2">
                       <IdCard className="h-4 w-4 text-primary" />
-                      <p className="text-sm font-medium text-primary">
-                        Vos informations
-                      </p>
+                      <p className="text-sm font-medium text-primary">Vos informations</p>
                     </div>
 
                     <div className="space-y-5">
                       <Field label={t("book.fullName")} error={errors.fullName}>
                         <input
-                          className={[
-                            inputClass,
-                            errors.fullName ? inputErrorClass : "",
-                          ].join(" ")}
+                          className={[inputClass, errors.fullName ? inputErrorClass : ""].join(" ")}
                           value={guest.fullName}
                           maxLength={120}
                           autoComplete="name"
-                          onChange={(e) =>
-                            updateGuest("fullName", e.target.value)
-                          }
+                          onChange={(e) => updateGuest("fullName", e.target.value)}
                           aria-invalid={!!errors.fullName}
                           required
                         />
@@ -1228,19 +1104,13 @@ function BookingFlow() {
                       <div className="grid gap-5 sm:grid-cols-2">
                         <Field label={t("book.cin")} error={errors.cin}>
                           <input
-                            className={[
-                              inputClass,
-                              "num",
-                              errors.cin ? inputErrorClass : "",
-                            ].join(" ")}
+                            className={[inputClass, "num", errors.cin ? inputErrorClass : ""].join(" ")}
                             value={guest.cin}
                             inputMode="numeric"
                             autoComplete="off"
                             placeholder="12345678"
                             maxLength={8}
-                            onChange={(e) =>
-                              updateGuest("cin", onlyDigits(e.target.value, 8))
-                            }
+                            onChange={(e) => updateGuest("cin", onlyDigits(e.target.value, 8))}
                             aria-invalid={!!errors.cin}
                             required
                           />
@@ -1257,9 +1127,13 @@ function BookingFlow() {
                             <div className="relative flex shrink-0 items-center border-e border-border">
                               <select
                                 value={phoneCountry}
-                                onChange={(e) =>
-                                  setPhoneCountry(e.target.value)
-                                }
+                                onChange={(e) => {
+                                  const nextDial = e.target.value;
+                                  setPhoneCountry(nextDial);
+                                  // Trim if the previously-typed number is
+                                  // longer than the new country allows.
+                                  updateGuest("phone", guest.phone.slice(0, phoneLenForCountry(nextDial)));
+                                }}
                                 aria-label="Indicatif pays"
                                 className="num h-full appearance-none bg-transparent py-3 ps-3 pe-7 text-sm text-primary outline-none cursor-pointer"
                               >
@@ -1276,13 +1150,10 @@ function BookingFlow() {
                               value={guest.phone}
                               inputMode="tel"
                               autoComplete="tel-national"
-                              placeholder="22334455"
-                              maxLength={12}
+                              placeholder={"0".repeat(phoneLenForCountry(phoneCountry))}
+                              maxLength={phoneLenForCountry(phoneCountry)}
                               onChange={(e) =>
-                                updateGuest(
-                                  "phone",
-                                  onlyDigits(e.target.value, 12),
-                                )
+                                updateGuest("phone", onlyDigits(e.target.value, phoneLenForCountry(phoneCountry)))
                               }
                               aria-invalid={!!errors.phone}
                               required
@@ -1294,17 +1165,11 @@ function BookingFlow() {
                       <Field label={t("book.dob")} error={errors.dateOfBirth}>
                         <input
                           type="date"
-                          className={[
-                            inputClass,
-                            "num",
-                            errors.dateOfBirth ? inputErrorClass : "",
-                          ].join(" ")}
+                          className={[inputClass, "num", errors.dateOfBirth ? inputErrorClass : ""].join(" ")}
                           value={guest.dateOfBirth}
                           max={format(new Date(), "yyyy-MM-dd")}
                           autoComplete="bday"
-                          onChange={(e) =>
-                            updateGuest("dateOfBirth", e.target.value)
-                          }
+                          onChange={(e) => updateGuest("dateOfBirth", e.target.value)}
                           aria-invalid={!!errors.dateOfBirth}
                           required
                         />
@@ -1312,18 +1177,15 @@ function BookingFlow() {
                     </div>
                   </div>
 
+                  {/* Turnstile widget mounts once, on page load — see the
+                      container placed above the stepper, outside the
+                      step-conditional blocks. Nothing needed here. */}
+
                   <div className="mt-6 flex gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setStep(1)}
-                      className="btn-outline-pill flex flex-1 items-center justify-center gap-2"
-                    >
+                    <button type="button" onClick={() => setStep(1)} className="btn-outline-pill flex flex-1 items-center justify-center gap-2">
                       <ArrowLeft className="h-4 w-4" /> {t("book.back")}
                     </button>
-                    <button
-                      type="submit"
-                      className="btn-pill btn-coral flex flex-1 items-center justify-center gap-2"
-                    >
+                    <button type="submit" className="btn-pill btn-coral flex flex-1 items-center justify-center gap-2">
                       {t("book.continue")} <ArrowRight className="h-4 w-4" />
                     </button>
                   </div>
@@ -1332,11 +1194,7 @@ function BookingFlow() {
 
               {/* ── STEP 3: Review ── */}
               {step === 3 && (
-                <section
-                  ref={stepRef as React.RefObject<HTMLElement>}
-                  tabIndex={-1}
-                  className="animate-rise outline-none"
-                >
+                <section ref={stepRef as React.RefObject<HTMLElement>} tabIndex={-1} className="animate-rise outline-none">
                   <h2 className="text-xl text-primary">{t("book.review")}</h2>
 
                   <div className="mt-5 overflow-hidden rounded-xl border border-border bg-card ">
@@ -1346,37 +1204,17 @@ function BookingFlow() {
                       <Row label={t("book.date")} value={dateKey ?? ""} mono />
                       <Row label={t("book.slot")} value={t(`slot.${slot}`)} />
                       {slot === "24h" ? (
-                        <Row
-                          label={t("book.nights")}
-                          value={t("book.nightsValue", { n: nights })}
-                          mono
-                        />
+                        <Row label={t("book.nights")} value={t("book.nightsValue", { n: nights })} mono />
                       ) : null}
                       <Row label={t("book.guest")} value={guest.fullName} />
                       <Row label="CIN" value={guest.cin} mono />
-                      <Row
-                        label={t("book.phone")}
-                        value={`${phoneCountry} ${guest.phone}`}
-                        mono
-                      />
-                      <Row
-                        label={t("book.adults")}
-                        value={String(guest.adults)}
-                        mono
-                      />
+                      <Row label={t("book.phone")} value={`${phoneCountry} ${guest.phone}`} mono />
+                      <Row label={t("book.adults")} value={String(guest.adults)} mono />
                       {guest.children6_10 > 0 && (
-                        <Row
-                          label="Enfants 6–10 ans"
-                          value={`${guest.children6_10} × 50 DT`}
-                          mono
-                        />
+                        <Row label="Enfants 6–10 ans" value={`${guest.children6_10} × 50 DT`} mono />
                       )}
                       {guest.childrenUnder5 > 0 && (
-                        <Row
-                          label="Enfants ≤5 ans"
-                          value={`${guest.childrenUnder5} (gratuit)`}
-                          mono
-                        />
+                        <Row label="Enfants ≤5 ans" value={`${guest.childrenUnder5} (gratuit)`} mono />
                       )}
                     </dl>
                   </div>
@@ -1399,18 +1237,10 @@ function BookingFlow() {
                   </div>
 
                   <div className="mt-8 flex gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setStep(2)}
-                      className="btn-outline-pill flex flex-1 items-center justify-center gap-2"
-                    >
+                    <button type="button" onClick={() => setStep(2)} className="btn-outline-pill flex flex-1 items-center justify-center gap-2">
                       <ArrowLeft className="h-4 w-4" /> {t("book.back")}
                     </button>
-                    <button
-                      type="button"
-                      onClick={confirm}
-                      className="btn-pill btn-coral flex-1"
-                    >
+                    <button type="button" onClick={confirm} className="btn-pill btn-coral flex-1">
                       {t("book.confirmPay")}
                     </button>
                   </div>
@@ -1419,22 +1249,12 @@ function BookingFlow() {
 
               {/* ── STEP 4: Payment ── */}
               {step === 4 && reservation && (
-                <section
-                  ref={stepRef as React.RefObject<HTMLElement>}
-                  tabIndex={-1}
-                  className="animate-rise outline-none"
-                >
+                <section ref={stepRef as React.RefObject<HTMLElement>} tabIndex={-1} className="animate-rise outline-none">
                   <h2 className="text-xl text-primary">{t("book.payment")}</h2>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {t("book.paymentNote")}
-                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">{t("book.paymentNote")}</p>
 
                   {processing ? (
-                    <div
-                      className="mt-12 flex flex-col items-center gap-5 py-16"
-                      role="status"
-                      aria-live="polite"
-                    >
+                    <div className="mt-12 flex flex-col items-center gap-5 py-16" role="status" aria-live="polite">
                       <span className="block h-12 w-12 animate-spin rounded-full border-[3px] border-border border-t-coral" />
                       <p className="num text-xs uppercase tracking-widest text-muted-foreground">
                         {t("book.processing")}
@@ -1446,20 +1266,49 @@ function BookingFlow() {
                       <div className="grid gap-3 rounded-xl border border-border bg-muted/50 p-4 sm:grid-cols-3">
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <ShieldCheck className="h-4 w-4 shrink-0 text-forest" />
-                          Paiement sécurisé — données jamais partagées
+                          Aucune donnée bancaire requise
                         </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <CalendarDays className="h-4 w-4 shrink-0 text-primary" />
                           Annulation gratuite jusqu'à 48h avant
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <a
+                          href={CONTACT_WHATSAPP}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-xs text-muted-foreground underline hover:text-foreground"
+                        >
                           <MessageCircle className="h-4 w-4 shrink-0 text-coral" />
-                          <Link
-                            to="/"
-                            className="underline hover:text-foreground"
+                          Besoin d'aide ? WhatsApp
+                        </a>
+                      </div>
+
+                      {/* Cash-payment notice + direct contact — this is the
+                          only payment method, so make it unmissable. */}
+                      <div className="rounded-xl border border-coral/30 bg-coral/5 p-4">
+                        <p className="flex items-center gap-2 text-sm font-medium text-primary">
+                          <Banknote className="h-4 w-4 shrink-0 text-forest" />
+                          Paiement en espèces à l'arrivée
+                        </p>
+                        <p className="mt-1.5 text-xs text-muted-foreground">
+                          Aucun paiement en ligne n'est requis. Pour toute question ou pour
+                          confirmer votre réservation, contactez-nous directement :
+                        </p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <a
+                            href={CONTACT_PHONE_TEL}
+                            className="btn-outline-pill inline-flex items-center gap-2 py-2 px-4 text-xs"
                           >
-                            Besoin d'aide ? Contactez-nous
-                          </Link>
+                            <Phone className="h-3.5 w-3.5" /> {CONTACT_PHONE_DISPLAY}
+                          </a>
+                          <a
+                            href={CONTACT_WHATSAPP}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-2 text-xs font-medium text-white transition-opacity hover:opacity-90"
+                          >
+                            <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+                          </a>
                         </div>
                       </div>
 
@@ -1494,12 +1343,7 @@ function BookingFlow() {
                                 placeholder="4242 4242 4242 4242"
                                 maxLength={23}
                                 value={card.number}
-                                onChange={(e) =>
-                                  setCard({
-                                    ...card,
-                                    number: formatCardNumber(e.target.value),
-                                  })
-                                }
+                                onChange={(e) => setCard({ ...card, number: formatCardNumber(e.target.value) })}
                                 required
                               />
                             </Field>
@@ -1508,9 +1352,7 @@ function BookingFlow() {
                                 className={inputClass}
                                 value={card.name}
                                 autoComplete="cc-name"
-                                onChange={(e) =>
-                                  setCard({ ...card, name: e.target.value })
-                                }
+                                onChange={(e) => setCard({ ...card, name: e.target.value })}
                                 required
                               />
                             </Field>
@@ -1523,12 +1365,7 @@ function BookingFlow() {
                                   placeholder="MM/AA"
                                   maxLength={5}
                                   value={card.expiry}
-                                  onChange={(e) =>
-                                    setCard({
-                                      ...card,
-                                      expiry: formatExpiry(e.target.value),
-                                    })
-                                  }
+                                  onChange={(e) => setCard({ ...card, expiry: formatExpiry(e.target.value) })}
                                   required
                                 />
                               </Field>
@@ -1540,12 +1377,7 @@ function BookingFlow() {
                                   placeholder="123"
                                   maxLength={4}
                                   value={card.cvv}
-                                  onChange={(e) =>
-                                    setCard({
-                                      ...card,
-                                      cvv: onlyDigits(e.target.value, 4),
-                                    })
-                                  }
+                                  onChange={(e) => setCard({ ...card, cvv: onlyDigits(e.target.value, 4) })}
                                   required
                                 />
                               </Field>
@@ -1558,8 +1390,7 @@ function BookingFlow() {
                             <div className="flex items-center gap-3 rounded-xl border border-border border-l-4 border-l-amber bg-muted p-3">
                               <Smartphone className="h-5 w-5 shrink-0 text-amber" />
                               <p className="text-sm text-foreground/80">
-                                Saisissez votre numéro D17 pour confirmer le
-                                paiement simulé.
+                                Saisissez votre numéro D17 pour confirmer le paiement simulé.
                               </p>
                             </div>
                             <Field label={t("book.payMethod.d17Phone")}>
@@ -1570,9 +1401,7 @@ function BookingFlow() {
                                 placeholder="XX XXX XXX"
                                 maxLength={12}
                                 value={d17Phone}
-                                onChange={(e) =>
-                                  setD17Phone(onlyDigits(e.target.value, 12))
-                                }
+                                onChange={(e) => setD17Phone(onlyDigits(e.target.value, 12))}
                                 required
                               />
                             </Field>
@@ -1583,36 +1412,27 @@ function BookingFlow() {
                           <div className="space-y-3">
                             <div className="flex items-center gap-3 rounded-xl border border-border border-l-4 border-l-primary bg-muted p-3">
                               <Landmark className="h-5 w-5 shrink-0 text-primary" />
-                              <p className="text-sm text-foreground/80">
-                                {t("book.payMethod.bankNote")}
-                              </p>
+                              <p className="text-sm text-foreground/80">{t("book.payMethod.bankNote")}</p>
                             </div>
                             <div className="rounded-xl border border-border bg-secondary p-3">
                               <p className="mb-1 text-[11px] uppercase tracking-wider text-muted-foreground">
                                 Référence à indiquer
                               </p>
-                              <p className="num text-sm font-semibold text-primary">
-                                {reservation.reference}
-                              </p>
+                              <p className="num text-sm font-semibold text-primary">{reservation.reference}</p>
                             </div>
                           </div>
                         )}
 
                         {payMethod === "cash" && (
-                          <div className="flex items-center gap-3 rounded-xl border border-border border-l-4 border-l-forest bg-muted p-4">
-                            <Banknote className="h-6 w-6 shrink-0 text-forest" />
-                            <p className="text-sm text-foreground/80">
-                              {t("book.payMethod.cashNote")}
-                            </p>
-                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            {t("book.payMethod.cashNote")}
+                          </p>
                         )}
                       </div>
 
-                      <button
-                        type="submit"
-                        className="mt-6 flex w-full items-center justify-center gap-2 btn-pill btn-coral py-4 text-base"
-                      >
+                      <button type="submit" className="mt-6 flex w-full items-center justify-center gap-2 btn-pill btn-coral py-4 text-base">
                         <Lock className="h-4 w-4" />
+                        Confirmer la réservation
                       </button>
                     </form>
                   )}
@@ -1622,66 +1442,15 @@ function BookingFlow() {
           </div>
         </div>
       </div>
-
-      {/* Mobile sticky navigation action bar (without price) */}
-      <div className="fixed bottom-0 inset-x-0 z-40 flex items-center justify-between gap-3 border-t border-border/80 bg-card/95 px-4 py-3 backdrop-blur-xl sm:hidden shadow-lg">
-        <div className="flex flex-col min-w-0">
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            Étape {step}/4
-          </span>
-          <span className="truncate text-xs font-semibold text-primary">
-            {steps[step - 1]}
-          </span>
-        </div>
-        {step === 1 && (
-          <button
-            type="button"
-            disabled={!dateKey || taken}
-            onClick={() => setStep(2)}
-            className="btn-pill btn-coral px-5 py-2.5 text-xs font-medium shrink-0 flex items-center gap-1.5 disabled:opacity-50"
-          >
-            {t("book.continue")} <ArrowRight className="h-3.5 w-3.5" />
-          </button>
-        )}
-        {step === 2 && (
-          <button
-            type="button"
-            onClick={(e) => submitGuest(e as any)}
-            className="btn-pill btn-coral px-5 py-2.5 text-xs font-medium shrink-0 flex items-center gap-1.5"
-          >
-            {t("book.continue")} <ArrowRight className="h-3.5 w-3.5" />
-          </button>
-        )}
-        {step === 3 && (
-          <button
-            type="button"
-            onClick={confirm}
-            className="btn-pill btn-coral px-5 py-2.5 text-xs font-medium shrink-0 flex items-center gap-1.5"
-          >
-            {t("book.confirmPay")} <ArrowRight className="h-3.5 w-3.5" />
-          </button>
-        )}
-      </div>
-
       <SiteFooter />
     </div>
   );
 }
 
-function Row({
-  label,
-  value,
-  mono,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-}) {
+function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="flex items-baseline justify-between gap-4 px-4 py-3">
-      <dt className="text-xs uppercase tracking-wider text-muted-foreground">
-        {label}
-      </dt>
+      <dt className="text-xs uppercase tracking-wider text-muted-foreground">{label}</dt>
       <dd className={mono ? "num text-sm" : "text-sm"}>{value}</dd>
     </div>
   );
