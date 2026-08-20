@@ -128,6 +128,8 @@ const fr: Dict = {
   "book.nightsValue": "{n} × 24 h",
   "book.priceDetail": "{price} × {guests} pers. × {nights} j.",
 
+  "book.seeGallery": "voir plus",
+
   "book.title": "Réservation",
   "book.step1": "Date et créneau",
   "book.step2": "Vos informations",
@@ -293,6 +295,7 @@ const en: Dict = {
   "cabin.viewPhotos": "View photos",
   "slot.hoursHalf": "10 AM – 5 PM",
   "slot.hours24": "check-in 2 PM · check-out 12 PM",
+  "book.seeGallery": "see more",
   "book.anyCabin": "A bungalow on the lagoon",
   "book.anyCabinNote": "Automatically assigned upon confirmation",
   "admin.deleteConfirm": "Permanently delete this booking?",
@@ -628,6 +631,8 @@ const ar: Dict = {
   "book.nightsNote": "تحب تقعد أكثر من 24 ساعة؟ اختار عدد الأيام.",
   "book.nightsValue": "{n} × 24 ساعة",
   "book.priceDetail": "{price} × {guests} أشخاص × {nights} أيام",
+
+  "book.seeGallery": "شوف اكثر",
 
   "book.title": "الحجز",
   "book.step1": "التاريخ والمدّة",

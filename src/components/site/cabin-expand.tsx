@@ -159,7 +159,7 @@ export function CabinExpand({
               {/* Pricing + CTA */}
               <div className="mt-3 pt-10 flex flex-wrap items-end justify-between gap-6 rounded-xl border border-primary/20 bg-primary/5 px-6 py-5">
                 <dl className="flex gap-10">
-                  <div>
+                  {/* <div>
                     <dt className="text-[11px] uppercase tracking-wider text-muted-foreground">
                       {t("slot.half_day")}
                     </dt>
@@ -172,7 +172,7 @@ export function CabinExpand({
                     </dt>
                     <dd className="num mt-1 text-xl font-semibold">{formatPrice(cabin.price_24h, lang)}</dd>
                     <dd className="mt-0.5 text-[11px] text-muted-foreground">{t("cabin.perPerson")}</dd>
-                  </div>
+                  </div> */}
                 <div className="flex w-full flex-col gap-3 sm:w-auto sm:items-end">
                   <Link
                     to="/"
