@@ -481,22 +481,23 @@ function Home() {
                     <div className="cabin-body">
                       <h3>{lang === "ar" ? cabin.name_ar : cabin.name}</h3>
                       <div className="cabin-meta">
-                        <span>
+                        {/* <span>
                           <Users size={14} />{" "}
                           {t("cabin.capacity", { n: cabin.capacity })}
-                        </span>
+                        </span> */}
                         <span>
                           <Sparkles size={14} /> Vue sur l'eau
                         </span>
                       </div>
                       <div className="cabin-prices">
-                        <div className="price-block">
-                          <div className="price-label">{t("slot.24h")}</div>
+                        <div className="price-label">{t("slot.24h")}</div>
+                        <div className="price-label">{t("slot.half_day")}</div>
+                        {/* <div className="price-block">
                           <div className="price-val num">
                             {formatPrice(cabin.price_24h, lang)}{" "}
                             <span>/pers.</span>
                           </div>
-                        </div>
+                        </div> */}
                         <div className="cabin-details-btn inline-flex items-center gap-1.5">
                           {t("cabin.viewPhotos")} <ArrowRight size={14} />
                         </div>
