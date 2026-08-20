@@ -232,14 +232,14 @@ function Receipt() {
                 </dl>
 
                 {/* Total */}
-                <div className="mt-5 flex items-baseline justify-between rounded-xl bg-primary/5 border border-primary/15 px-4 py-3">
+                {/* <div className="mt-5 flex items-baseline justify-between rounded-xl bg-primary/5 border border-primary/15 px-4 py-3">
                   <span className="text-sm uppercase tracking-wider text-muted-foreground">
                     {t("receipt.amount")}
                   </span>
                   <span className="num text-2xl font-semibold text-primary">
                     {formatPrice(data.total_price, lang)}
                   </span>
-                </div>
+                </div> */}
 
                 {/* Footer watermark */}
                 <p className="mt-5 text-center text-[10px] text-muted-foreground/60">

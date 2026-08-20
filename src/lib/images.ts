@@ -1,4 +1,4 @@
-import heroLagoon from "@/assets/hero-lagoon.jpg";
+import heroLagoon from "@/assets/hero-lagoon.webp";
 import cabinLagune from "@/assets/cabin-lagune.jpg";
 import cabinSable from "@/assets/cabin-sable.jpg";
 import cabinCorail from "@/assets/cabin-corail.jpg";
