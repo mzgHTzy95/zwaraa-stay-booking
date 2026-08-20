@@ -5,8 +5,9 @@ import cabinCorail from "@/assets/cabin-corail.jpg";
 import cabinColline from "@/assets/cabin-colline.jpg";
 import galleryBoat from "@/assets/gallery-boat.jpg";
 import galleryInterior from "@/assets/gallery-interior.jpg";
+import galleryHorse from "@/assets/gallery-horse.jpeg"
 
-export { heroLagoon, galleryBoat, galleryInterior };
+export { heroLagoon, galleryBoat, galleryInterior, galleryHorse };
 
 const bySlug: Record<string, string> = {
   lagune: cabinLagune,
@@ -22,5 +23,5 @@ export function cabinCover(slug: string, photos?: string[] | null) {
 
 export function cabinGallery(slug: string, photos?: string[] | null) {
   if (photos && photos.length > 0) return photos;
-  return [bySlug[slug] ?? cabinLagune, galleryInterior, galleryBoat, heroLagoon];
+  return [bySlug[slug] ?? cabinLagune, galleryInterior, galleryBoat, heroLagoon, galleryHorse];
 }

@@ -374,15 +374,15 @@ function Home() {
             className="hero-img"
               aria-hidden="true"
             />
-            <iframe
-              src={`https://www.youtube-nocookie.com/embed/${YOUTUBE_HERO_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_HERO_VIDEO_ID}&controls=0&showinfo=0&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3&disablekb=1`}
+            {/* <iframe
+              src={`https://www.youtube.com/embed/${YOUTUBE_HERO_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_HERO_VIDEO_ID}&controls=0&showinfo=0&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3&disablekb=1`}
               title=""
               aria-hidden="true"
               tabIndex={-1}
               allow="autoplay; encrypted-media"
               frameBorder={0}
               className="pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2"
-            />
+            /> */}
           </div>
           <div className="hero-overlay" />
           <SiteHeader variant="hero" />
