@@ -973,13 +973,15 @@ function BookingFlow() {
                       <CalendarDays className="h-4 w-4 text-primary" />
                       <span className="text-sm font-medium text-primary">Choisissez une date</span>
                     </div>
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                      disabled={{ before: new Date() }}
-                      className="pointer-events-auto"
-                    />
+                    <div className="flex justify-center">
+                      <Calendar
+                        mode="single"
+                        selected={date}
+                        onSelect={setDate}
+                        disabled={{ before: new Date() }}
+                        className="pointer-events-auto w-full max-w-full"
+                      />
+                    </div>
                   </div>
 
                   <div className="mt-5 grid gap-3 sm:grid-cols-2">
