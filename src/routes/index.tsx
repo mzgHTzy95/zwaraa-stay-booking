@@ -364,12 +364,13 @@ function Home() {
     <div className="min-h-screen">
       <div className="page-frame">
         <div className="hero-card">
-          <img
+          {/* <img
             ref={heroImageRef}
             src={heroLagoon}
             alt="Lagoon"
             className="hero-img"
-          />
+          /> */}
+          <video src="https://www.youtube.com/watch?v=pDkBJsRc12Q" muted autoPlay loop />
           <div className="hero-overlay" />
           <SiteHeader variant="hero" />
 
